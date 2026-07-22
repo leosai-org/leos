@@ -1,0 +1,23 @@
+{
+  "container_daemon_contact_default": false,
+  "contract_version": "leos.installer-bootstrap-config.v1",
+  "default_mode": "offline",
+  "file_modes": {
+    "config/installation.json": "0640",
+    "config/leos.env": "0640",
+    "state/compute-node-capacity.json": "0640",
+    "state/installation-manifest.json": "0640",
+    "state/installation-plan.json": "0640",
+    "state/ownership-intent.json": "0640"
+  },
+  "idempotent": true,
+  "network_contact_default": false,
+  "requires_confirmation": true,
+  "rollback_on_failure": true,
+  "source_release": "0.1.0-dev-preview-rc9",
+  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "supported_modes": [
+    "offline",
+    "connected"
+  ]
+}

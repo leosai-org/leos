@@ -1,0 +1,60 @@
+{
+  "contract_version": "leos.security-observability-config.v1",
+  "diagnostics": {
+    "allowed_suffixes": [
+      ".json",
+      ".log",
+      ".txt"
+    ],
+    "max_bundle_bytes": 1048576,
+    "max_file_bytes": 131072,
+    "max_files": 64,
+    "max_log_lines": 500,
+    "redaction_required": true,
+    "roots": [
+      "logs",
+      "journal"
+    ]
+  },
+  "external_network_contact_default": false,
+  "container_daemon_contact_default": false,
+  "observability": {
+    "minimum_free_storage_gb": 2,
+    "structured_log_levels": [
+      "debug",
+      "info",
+      "warning",
+      "error",
+      "critical"
+    ]
+  },
+  "read_only_default": true,
+  "repair_requires_confirmation": true,
+  "secret_scan": {
+    "allowed_suffixes": [
+      ".json",
+      ".log",
+      ".txt",
+      ".yaml",
+      ".yml"
+    ],
+    "max_file_bytes": 131072,
+    "max_files": 128,
+    "roots": [
+      "config",
+      "state",
+      "journal",
+      "logs"
+    ]
+  },
+  "security": {
+    "private_file_mode_max": "0600",
+    "private_files": [
+      "state/administrator-bootstrap.json",
+      "state/runtime-selection.json",
+      "state/installation-manifest.json"
+    ]
+  },
+  "secret_material_copy_forbidden": true,
+  "source_release": "0.1.0-dev-preview-rc9"
+}

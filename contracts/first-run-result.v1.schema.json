@@ -1,0 +1,95 @@
+{
+  "$id": "https://leosai.org/contracts/first-run-result.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "changed": {
+      "type": "boolean"
+    },
+    "changed_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "command": {
+      "enum": [
+        "plan",
+        "apply"
+      ]
+    },
+    "confirmation_required": {
+      "const": true
+    },
+    "confirmation_token": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.first-run-result.v1"
+    },
+    "documents": {
+      "minProperties": 6,
+      "type": "object"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "idempotent": {
+      "type": "boolean"
+    },
+    "plaintext_secret_persisted": {
+      "const": false
+    },
+    "production_network_attached": {
+      "const": false
+    },
+    "production_state_accessed": {
+      "const": false
+    },
+    "readiness": {
+      "$ref": "first-run-readiness.v1.schema.json"
+    },
+    "session_id": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "planned",
+        "complete"
+      ]
+    },
+    "target_root": {
+      "minLength": 2,
+      "type": "string"
+    },
+    "unchanged_count": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "contract_version",
+    "command",
+    "state",
+    "session_id",
+    "confirmation_required",
+    "confirmation_token",
+    "target_root",
+    "readiness",
+    "documents",
+    "changed",
+    "changed_count",
+    "unchanged_count",
+    "idempotent",
+    "external_network_contacted",
+    "container_daemon_contacted",
+    "production_state_accessed",
+    "production_network_attached",
+    "plaintext_secret_persisted"
+  ],
+  "title": "LEOS First-Run Result",
+  "type": "object"
+}

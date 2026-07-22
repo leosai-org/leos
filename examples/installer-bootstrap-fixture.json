@@ -1,0 +1,14 @@
+{
+  "contract_version": "leos.installer-bootstrap-fixture.v1",
+  "desired_group": "leos",
+  "desired_owner": "leos",
+  "expected": {
+    "changed_count": 6,
+    "installation_id": "installation-3bafc36b83beaf6f",
+    "second_run_idempotent": true,
+    "transaction_id": "install-tx-c7298fcd2958a6e8"
+  },
+  "installation_plan": "examples/installation-plan.json",
+  "offline_source_manifest": "examples/offline-source-manifest.json",
+  "target_root": "/srv/leos-example"
+}

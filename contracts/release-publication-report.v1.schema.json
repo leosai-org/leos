@@ -1,0 +1,53 @@
+{
+  "$id": "https://leosai.org/contracts/release-publication-report.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authority_promoted": {
+      "type": "boolean"
+    },
+    "contract_version": {
+      "const": "leos.release-publication-report.v1"
+    },
+    "legacy_authority_preserved": {
+      "type": "boolean"
+    },
+    "new_workspace": {
+      "type": "string"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "phase": {
+      "const": "52.4.6"
+    },
+    "release_file_count": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "release_tree_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_release": {
+      "type": "string"
+    },
+    "target_release": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "ok",
+    "contract_version",
+    "phase",
+    "source_release",
+    "target_release",
+    "release_tree_sha256",
+    "release_file_count",
+    "authority_promoted",
+    "legacy_authority_preserved",
+    "new_workspace"
+  ],
+  "title": "LEOS Release Publication Report",
+  "type": "object"
+}

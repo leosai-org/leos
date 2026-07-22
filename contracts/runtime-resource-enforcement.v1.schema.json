@@ -1,0 +1,97 @@
+{
+  "$id": "https://leosai.org/contracts/runtime-resource-enforcement.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "contract_version": {
+      "const": "leos.job-resource-lifecycle.v1"
+    },
+    "employee_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "job_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "job_state": {
+      "type": "string"
+    },
+    "resource_admitted_at": {
+      "format": "date-time",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_decision": {
+      "type": "object"
+    },
+    "resource_error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_gpu_uuid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_node_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_profile_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_release_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_released_at": {
+      "format": "date-time",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_reservation_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resource_state": {
+      "enum": [
+        "pending",
+        "queued",
+        "rejected",
+        "error",
+        "active",
+        "invalid",
+        "release-pending",
+        "released"
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "job_id",
+    "employee_id",
+    "job_state",
+    "resource_state",
+    "resource_decision",
+    "resource_reservation_id"
+  ],
+  "title": "LEOS Runtime Resource Enforcement",
+  "type": "object"
+}

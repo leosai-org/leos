@@ -1,0 +1,605 @@
+{
+  "application_schema": {
+    "indexes": [
+      {
+        "name": "idx_chain_events",
+        "sql": "CREATE INDEX idx_chain_events ON chain_events(chain_id, created_at)",
+        "table": "chain_events"
+      },
+      {
+        "name": "idx_chain_goal",
+        "sql": "CREATE INDEX idx_chain_goal ON execution_chains(goal_id, created_at DESC)",
+        "table": "execution_chains"
+      },
+      {
+        "name": "idx_chain_status",
+        "sql": "CREATE INDEX idx_chain_status ON execution_chains(status, updated_at DESC)",
+        "table": "execution_chains"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "event_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "chain_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "stage",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "request_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "response_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [
+          {
+            "from": "chain_id",
+            "id": 0,
+            "match": "NONE",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "seq": 0,
+            "table": "execution_chains",
+            "to": "chain_id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_chain_events",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_chain_events_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "chain_events",
+        "sql": "CREATE TABLE chain_events ( event_id TEXT PRIMARY KEY, chain_id TEXT NOT NULL, stage TEXT NOT NULL, status TEXT NOT NULL, request_json TEXT, response_json TEXT, error TEXT, created_at TEXT NOT NULL, FOREIGN KEY(chain_id) REFERENCES execution_chains(chain_id) ON DELETE CASCADE )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "chain_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "goal_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "objective_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "vision_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "current_stage",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "mission_proposal_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "planning_mission_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "execution_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "artifact_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "review_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": null,
+            "name": "trace_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 16,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_chain_status",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "idx_chain_goal",
+            "origin": "c",
+            "partial": 0,
+            "seq": 1,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_execution_chains_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 2,
+            "unique": 1
+          }
+        ],
+        "name": "execution_chains",
+        "sql": "CREATE TABLE execution_chains ( chain_id TEXT PRIMARY KEY, goal_id TEXT NOT NULL, objective_id TEXT, vision_id TEXT, status TEXT NOT NULL, current_stage TEXT, mission_proposal_id TEXT, planning_mission_id TEXT, workflow_id TEXT, job_id TEXT, execution_id TEXT, employee_id TEXT, artifact_id TEXT, review_id TEXT, trace_json TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT )"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "application_schema_sha256": "00c96612f3137de4cd6247936c0e8bc3455e5549b3d2ca36d3856fc57b46799d",
+  "authority_service": "autonomous-execution-chain-service",
+  "baseline_contract": "leos.schema-baseline.v2",
+  "captured_at": "2026-07-16T00:47:16.323835+00:00",
+  "database": "/data/autonomous-execution-chain/autonomous-execution-chain.db",
+  "engine": "sqlite",
+  "full_schema": {
+    "indexes": [
+      {
+        "name": "idx_chain_events",
+        "sql": "CREATE INDEX idx_chain_events ON chain_events(chain_id, created_at)",
+        "table": "chain_events"
+      },
+      {
+        "name": "idx_chain_goal",
+        "sql": "CREATE INDEX idx_chain_goal ON execution_chains(goal_id, created_at DESC)",
+        "table": "execution_chains"
+      },
+      {
+        "name": "idx_chain_status",
+        "sql": "CREATE INDEX idx_chain_status ON execution_chains(status, updated_at DESC)",
+        "table": "execution_chains"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "event_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "chain_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "stage",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "request_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "response_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [
+          {
+            "from": "chain_id",
+            "id": 0,
+            "match": "NONE",
+            "on_delete": "CASCADE",
+            "on_update": "NO ACTION",
+            "seq": 0,
+            "table": "execution_chains",
+            "to": "chain_id"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "idx_chain_events",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_chain_events_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "chain_events",
+        "sql": "CREATE TABLE chain_events ( event_id TEXT PRIMARY KEY, chain_id TEXT NOT NULL, stage TEXT NOT NULL, status TEXT NOT NULL, request_json TEXT, response_json TEXT, error TEXT, created_at TEXT NOT NULL, FOREIGN KEY(chain_id) REFERENCES execution_chains(chain_id) ON DELETE CASCADE )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "chain_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "goal_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "objective_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "vision_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "current_stage",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "mission_proposal_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "planning_mission_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "execution_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "artifact_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "review_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": null,
+            "name": "trace_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 16,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_chain_status",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "idx_chain_goal",
+            "origin": "c",
+            "partial": 0,
+            "seq": 1,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_execution_chains_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 2,
+            "unique": 1
+          }
+        ],
+        "name": "execution_chains",
+        "sql": "CREATE TABLE execution_chains ( chain_id TEXT PRIMARY KEY, goal_id TEXT NOT NULL, objective_id TEXT, vision_id TEXT, status TEXT NOT NULL, current_stage TEXT, mission_proposal_id TEXT, planning_mission_id TEXT, workflow_id TEXT, job_id TEXT, execution_id TEXT, employee_id TEXT, artifact_id TEXT, review_id TEXT, trace_json TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT )"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "full_schema_sha256": "00c96612f3137de4cd6247936c0e8bc3455e5549b3d2ca36d3856fc57b46799d",
+  "migration_id": "baseline-1.0.0",
+  "version": "1.0.0"
+}

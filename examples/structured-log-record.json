@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "api_key": "[REDACTED]",
+    "status": 200
+  },
+  "contract_version": "leos.structured-log-record.v1",
+  "correlation_id": "correlation-demo",
+  "level": "info",
+  "message": "request [REDACTED] completed",
+  "plaintext_secret_exposed": false,
+  "record_id": "log-0f0f5c5df96be7f3",
+  "redaction_count": 2,
+  "service_id": "ai-router",
+  "timestamp": "2026-07-21T00:00:00+00:00"
+}

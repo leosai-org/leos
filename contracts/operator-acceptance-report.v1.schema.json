@@ -1,0 +1,73 @@
+{
+  "$id": "https://leosai.org/contracts/operator-acceptance-report.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.operator-acceptance-report.v1"
+    },
+    "flow_count": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "flows": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "flow_id": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "flow_id",
+          "ok",
+          "checks"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "passed_flow_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "phase": {
+      "const": "52.4.6"
+    },
+    "safety": {
+      "type": "object"
+    },
+    "target_release": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "validator_summary": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "ok",
+    "contract_version",
+    "phase",
+    "target_release",
+    "flow_count",
+    "passed_flow_count",
+    "flows",
+    "validator_summary",
+    "safety"
+  ],
+  "title": "LEOS Operator Acceptance Report",
+  "type": "object"
+}

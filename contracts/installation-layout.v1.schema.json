@@ -1,0 +1,48 @@
+{
+  "$id": "https://leosai.org/contracts/installation-layout.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.installation-layout.v1"
+    },
+    "directories": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "pattern": "^0[0-7]{3}$",
+            "type": "string"
+          },
+          "path": {
+            "pattern": "^[A-Za-z0-9._/-]+$",
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "mode",
+          "purpose"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "layout_version": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "layout_version",
+    "directories"
+  ],
+  "title": "LEOS Installation Layout",
+  "type": "object"
+}

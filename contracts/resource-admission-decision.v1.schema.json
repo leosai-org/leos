@@ -1,0 +1,47 @@
+{
+  "$id": "https://leosai.org/contracts/resource-admission-decision.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "contract_version": {
+      "const": "leos.resource-admission-decision.v1"
+    },
+    "decision": {
+      "enum": [
+        "admitted",
+        "queued",
+        "rejected",
+        "preemption-required"
+      ]
+    },
+    "preemption_candidates": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "selected_gpu_uuid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "selected_node_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "decision_id",
+    "employee_id",
+    "job_id",
+    "decision",
+    "priority_weight",
+    "reason"
+  ],
+  "title": "LEOS Resource Admission Decision",
+  "type": "object"
+}

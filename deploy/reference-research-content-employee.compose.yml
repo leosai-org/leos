@@ -1,0 +1,26 @@
+services:
+  reference-research-content-employee:
+    build:
+      context: ../reference-research-content-employee
+    image: leos/reference-research-content-employee:0.1.0
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - ai-cloud-net
+    volumes:
+      - reference-research-content-data:/data/reference-research-content-employee
+    environment:
+      LEOS_REFERENCE_RESEARCH_CONTENT_DATA_DIR: /data/reference-research-content-employee
+
+volumes:
+  reference-research-content-data:
+
+networks:
+  ai-cloud-net:
+    external: true

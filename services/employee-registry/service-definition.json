@@ -1,0 +1,25 @@
+{
+  "service_id": "employee-registry",
+  "name": "Employee Registry and Lifecycle Authority",
+  "version": "1.0.0",
+  "contract_version": "leos.employee-definition.v2",
+  "lifecycle_contract": "leos.employee-lifecycle.v1",
+  "eligibility_contract": "leos.employee-execution-eligibility.v1",
+  "capabilities": [
+    "employees.define",
+    "employees.validate",
+    "employees.lifecycle",
+    "employees.assignments",
+    "employees.eligibility",
+    "employees.history"
+  ],
+  "dependencies": [
+    "employee-resource-profile-service",
+    "event-bus"
+  ],
+  "persistence": {
+    "type": "sqlite",
+    "path": "/data/employee-registry/employee-registry.db",
+    "legacy_import": "/data/employee-registry/employees.json"
+  }
+}

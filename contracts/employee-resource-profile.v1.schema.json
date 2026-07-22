@@ -1,0 +1,61 @@
+{
+  "$id": "https://leosai.org/contracts/employee-resource-profile.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "allowed_execution_windows": {
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "leos.employee-resource-profile.v1"
+    },
+    "employee_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "execution_policy": {
+      "type": "object"
+    },
+    "fallback_profiles": {
+      "type": "array"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "node_affinity": {
+      "type": "object"
+    },
+    "priority_class": {
+      "enum": [
+        "background",
+        "normal",
+        "elevated",
+        "business-critical",
+        "emergency"
+      ]
+    },
+    "priority_weight": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "provider_preferences": {
+      "type": "array"
+    },
+    "resource_profile": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "contract_version",
+    "employee_id",
+    "priority_class",
+    "resource_profile",
+    "execution_policy"
+  ],
+  "title": "LEOS Employee Resource Profile",
+  "type": "object"
+}

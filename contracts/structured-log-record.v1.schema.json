@@ -1,0 +1,62 @@
+{
+  "$id": "https://leosai.org/contracts/structured-log-record.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attributes": {
+      "type": "object"
+    },
+    "contract_version": {
+      "const": "leos.structured-log-record.v1"
+    },
+    "correlation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "level": {
+      "enum": [
+        "debug",
+        "info",
+        "warning",
+        "error",
+        "critical"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "plaintext_secret_exposed": {
+      "const": false
+    },
+    "record_id": {
+      "pattern": "^log-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "redaction_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "service_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "timestamp": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "record_id",
+    "timestamp",
+    "service_id",
+    "level",
+    "message",
+    "attributes",
+    "correlation_id",
+    "redaction_count",
+    "plaintext_secret_exposed"
+  ],
+  "title": "LEOS Structured Log Record",
+  "type": "object"
+}

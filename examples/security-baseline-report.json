@@ -1,0 +1,111 @@
+{
+  "checks": [
+    {
+      "actual_mode": "0o600",
+      "check_id": "private-mode-state-administrator-bootstrap.json",
+      "domain": "filesystem-permissions",
+      "expected_mode_max": "0o600",
+      "message": "Private file exists with bounded permissions.",
+      "path": "state/administrator-bootstrap.json",
+      "remediation": null,
+      "status": "pass"
+    },
+    {
+      "actual_mode": "0o600",
+      "check_id": "private-mode-state-runtime-selection.json",
+      "domain": "filesystem-permissions",
+      "expected_mode_max": "0o600",
+      "message": "Private file exists with bounded permissions.",
+      "path": "state/runtime-selection.json",
+      "remediation": null,
+      "status": "pass"
+    },
+    {
+      "actual_mode": "0o600",
+      "check_id": "private-mode-state-installation-manifest.json",
+      "domain": "filesystem-permissions",
+      "expected_mode_max": "0o600",
+      "message": "Private file exists with bounded permissions.",
+      "path": "state/installation-manifest.json",
+      "remediation": null,
+      "status": "pass"
+    },
+    {
+      "actual_mode": null,
+      "check_id": "release-source",
+      "domain": "release-integrity",
+      "expected_mode_max": null,
+      "message": "Installation source release matches RC9.",
+      "path": "state/installation-manifest.json",
+      "remediation": null,
+      "status": "pass"
+    },
+    {
+      "actual_mode": null,
+      "check_id": "release-tree",
+      "domain": "release-integrity",
+      "expected_mode_max": null,
+      "message": "Installation source tree matches the immutable RC9 tree.",
+      "path": "state/installation-manifest.json",
+      "remediation": null,
+      "status": "pass"
+    },
+    {
+      "actual_mode": null,
+      "check_id": "secret-exposure",
+      "domain": "secret-exposure",
+      "expected_mode_max": null,
+      "message": "No plaintext secret indicators were emitted or persisted.",
+      "path": null,
+      "remediation": null,
+      "status": "pass"
+    },
+    {
+      "actual_mode": null,
+      "check_id": "network-exposure",
+      "domain": "network-exposure",
+      "expected_mode_max": null,
+      "message": "Required services are not publicly bound.",
+      "path": null,
+      "remediation": null,
+      "status": "pass"
+    },
+    {
+      "actual_mode": null,
+      "check_id": "runtime-hardening",
+      "domain": "runtime-hardening",
+      "expected_mode_max": null,
+      "message": "No privileged runtime mode is declared.",
+      "path": null,
+      "remediation": null,
+      "status": "pass"
+    }
+  ],
+  "component_reports": {
+    "network_exposure_report_id": "network-report-b0c27836649d03d4",
+    "secret_exposure_report_id": "secret-report-663e5502ba1f6eee"
+  },
+  "contract_version": "leos.security-baseline-report.v1",
+  "counts": {
+    "fail": 0,
+    "pass": 8,
+    "total": 8,
+    "warn": 0
+  },
+  "generated_at": "2026-07-21T00:00:00+00:00",
+  "repair_requires_confirmation": true,
+  "report_id": "security-d2ce0b0332ba162e",
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "read_only": true,
+    "secret_material_copied": false
+  },
+  "source_release": "0.1.0-dev-preview-rc9",
+  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "status": "pass",
+  "target_root": "leos-installation"
+}

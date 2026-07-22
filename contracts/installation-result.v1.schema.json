@@ -1,0 +1,79 @@
+{
+  "$id": "https://leosai.org/contracts/installation-result.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "changed": {
+      "type": "boolean"
+    },
+    "changed_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.installation-result.v1"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "idempotent": {
+      "type": "boolean"
+    },
+    "journal": {
+      "$ref": "installation-execution-journal.v1.schema.json"
+    },
+    "journal_path": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "manifest": {
+      "$ref": "installation-manifest.v1.schema.json"
+    },
+    "manifest_path": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "ok": {
+      "const": true
+    },
+    "production_network_attached": {
+      "const": false
+    },
+    "production_state_accessed": {
+      "const": false
+    },
+    "state": {
+      "const": "complete"
+    },
+    "transaction": {
+      "$ref": "installation-transaction.v1.schema.json"
+    },
+    "unchanged_count": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "ok",
+    "contract_version",
+    "state",
+    "changed",
+    "changed_count",
+    "unchanged_count",
+    "idempotent",
+    "transaction",
+    "journal",
+    "journal_path",
+    "manifest",
+    "manifest_path",
+    "external_network_contacted",
+    "container_daemon_contacted",
+    "production_state_accessed",
+    "production_network_attached"
+  ],
+  "title": "LEOS Installation Result",
+  "type": "object"
+}

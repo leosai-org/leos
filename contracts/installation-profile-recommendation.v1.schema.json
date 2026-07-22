@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "finding": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://leosai.org/contracts/installation-profile-recommendation.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "$ref": "#/$defs/finding"
+      },
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "leos.installation-profile-recommendation.v1"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "inventory_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "profile_evaluations": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "readiness": {
+      "enum": [
+        "ready",
+        "action-required",
+        "unsupported"
+      ]
+    },
+    "recommendation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "resource_budget": {
+      "properties": {
+        "max_concurrent_employees": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_concurrent_employees"
+      ],
+      "type": "object"
+    },
+    "runtime": {
+      "type": "object"
+    },
+    "selected_profile": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "selected_profile_evaluation": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "suitability": {
+      "enum": [
+        "supported",
+        "degraded",
+        "unsupported"
+      ]
+    },
+    "warnings": {
+      "items": {
+        "$ref": "#/$defs/finding"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "contract_version",
+    "recommendation_id",
+    "generated_at",
+    "inventory_id",
+    "node_id",
+    "selected_profile",
+    "suitability",
+    "readiness",
+    "blockers",
+    "warnings",
+    "profile_evaluations",
+    "selected_profile_evaluation",
+    "runtime",
+    "resource_budget"
+  ],
+  "title": "LEOS Installation Profile Recommendation",
+  "type": "object"
+}

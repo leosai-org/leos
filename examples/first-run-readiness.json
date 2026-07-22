@@ -1,0 +1,52 @@
+{
+  "blockers": [],
+  "checks": [
+    {
+      "check_id": "installation-manifest-present",
+      "ok": true,
+      "required": true
+    },
+    {
+      "check_id": "installation-plan-matches",
+      "ok": true,
+      "required": true
+    },
+    {
+      "check_id": "administrator-activation-deferred",
+      "ok": true,
+      "required": true
+    },
+    {
+      "check_id": "plaintext-secret-not-persisted",
+      "ok": true,
+      "required": true
+    },
+    {
+      "check_id": "node-registration-planned",
+      "ok": true,
+      "required": true
+    },
+    {
+      "check_id": "runtime-selected",
+      "ok": true,
+      "required": true
+    },
+    {
+      "check_id": "network-permission-consistent",
+      "ok": true,
+      "required": true
+    }
+  ],
+  "container_daemon_contacted": false,
+  "contract_version": "leos.first-run-readiness.v1",
+  "external_network_contacted": false,
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "installer_handoff": {
+    "confirmation_required": true,
+    "installation_id": "installation-3bafc36b83beaf6f",
+    "manifest_status": "installed",
+    "plan_id": "plan-4ae24502f43546e5"
+  },
+  "session_id": "first-run-7a0168a004401f40",
+  "status": "ready"
+}

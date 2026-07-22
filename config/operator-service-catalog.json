@@ -1,0 +1,47 @@
+{
+  "contract_version": "leos.operator-service-catalog.v1",
+  "services": [
+    {
+      "default_port": 8000,
+      "display_name": "AI Router",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "ai-router"
+    },
+    {
+      "default_port": 8010,
+      "display_name": "Profile Service",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "profile-service"
+    },
+    {
+      "default_port": 8011,
+      "display_name": "Persistence Service",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "leos-persistence-service"
+    },
+    {
+      "default_port": 8012,
+      "display_name": "Execution Scheduler",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "execution-scheduler-service"
+    },
+    {
+      "default_port": 8013,
+      "display_name": "Runtime Coordinator",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "runtime-execution-coordinator-service"
+    },
+    {
+      "default_port": 8090,
+      "display_name": "Reference Research Employee",
+      "health_path": "/health",
+      "required": false,
+      "service_id": "reference-research-content-employee"
+    }
+  ]
+}

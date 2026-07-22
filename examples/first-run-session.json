@@ -1,0 +1,48 @@
+{
+  "confirmation_token": "first-run-7a0168a004401f40",
+  "container_daemon_contacted": false,
+  "contract_version": "leos.first-run-session.v1",
+  "created_at": "2026-07-20T00:00:00+00:00",
+  "current_stage": "complete",
+  "external_network_contacted": false,
+  "installation_id": "installation-3bafc36b83beaf6f",
+  "node_id": "node-example",
+  "plan_id": "plan-4ae24502f43546e5",
+  "requires_confirmation": true,
+  "resume_safe": true,
+  "session_id": "first-run-7a0168a004401f40",
+  "stages": [
+    {
+      "sequence": 1,
+      "stage_id": "installation",
+      "state": "complete"
+    },
+    {
+      "sequence": 2,
+      "stage_id": "administrator",
+      "state": "complete"
+    },
+    {
+      "sequence": 3,
+      "stage_id": "node",
+      "state": "complete"
+    },
+    {
+      "sequence": 4,
+      "stage_id": "runtime",
+      "state": "complete"
+    },
+    {
+      "sequence": 5,
+      "stage_id": "readiness",
+      "state": "complete"
+    },
+    {
+      "sequence": 6,
+      "stage_id": "complete",
+      "state": "complete"
+    }
+  ],
+  "state": "complete",
+  "updated_at": "2026-07-20T00:00:00+00:00"
+}

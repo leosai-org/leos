@@ -1,0 +1,67 @@
+{
+  "$id": "https://leosai.org/contracts/first-run-configuration.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "administrator_username": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.first-run-configuration.v1"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "first_run_complete": {
+      "type": "boolean"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "installation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "runtime_profile": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "selected_profile": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "session_id": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "session_id",
+    "installation_id",
+    "plan_id",
+    "node_id",
+    "selected_profile",
+    "administrator_username",
+    "runtime_profile",
+    "first_run_complete",
+    "external_network_contacted",
+    "container_daemon_contacted",
+    "generated_at"
+  ],
+  "title": "LEOS First-Run Configuration",
+  "type": "object"
+}

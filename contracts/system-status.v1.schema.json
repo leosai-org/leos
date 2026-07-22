@@ -1,0 +1,63 @@
+{
+  "$id": "https://leosai.org/contracts/system-status.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "checks": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "leos.system-status.v1"
+    },
+    "first_run": {
+      "type": "object"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "installation": {
+      "type": "object"
+    },
+    "resources": {
+      "type": "object"
+    },
+    "services": {
+      "type": "object"
+    },
+    "source_release": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "ready",
+        "degraded",
+        "not-ready"
+      ]
+    },
+    "target_root": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "status",
+    "target_root",
+    "source_release",
+    "installation",
+    "first_run",
+    "services",
+    "resources",
+    "checks",
+    "generated_at"
+  ],
+  "title": "LEOS System Status",
+  "type": "object"
+}

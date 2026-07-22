@@ -1,0 +1,56 @@
+{
+  "$id": "https://leosai.org/contracts/backup-plan.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "backup_id": {
+      "pattern": "^backup-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "confirmation_token": {
+      "pattern": "^backup-confirm-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "leos.backup-plan.v1"
+    },
+    "destination": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "includes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "requires_confirmation": {
+      "const": true
+    },
+    "target_root": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "backup_id",
+    "target_root",
+    "destination",
+    "includes",
+    "requires_confirmation",
+    "confirmation_token",
+    "execution_authorized",
+    "generated_at"
+  ],
+  "title": "LEOS Backup Plan",
+  "type": "object"
+}

@@ -1,0 +1,64 @@
+{
+  "$id": "https://leosai.org/contracts/administrator-bootstrap.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activation_required": {
+      "const": true
+    },
+    "contract_version": {
+      "const": "leos.administrator-bootstrap.v1"
+    },
+    "created_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "credential_mode": {
+      "const": "deferred-activation"
+    },
+    "credential_reference": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "display_name": {
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string"
+    },
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "plaintext_secret_persisted": {
+      "const": false
+    },
+    "role": {
+      "const": "administrator"
+    },
+    "session_id": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "username": {
+      "pattern": "^[a-z][a-z0-9_.-]{2,31}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "session_id",
+    "username",
+    "display_name",
+    "email",
+    "role",
+    "credential_mode",
+    "credential_reference",
+    "activation_required",
+    "plaintext_secret_persisted",
+    "created_at"
+  ],
+  "title": "LEOS Administrator Bootstrap",
+  "type": "object"
+}

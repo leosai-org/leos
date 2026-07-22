@@ -1,0 +1,46 @@
+{
+  "backup_includes": [
+    "config",
+    "state",
+    "journal"
+  ],
+  "commands": [
+    "status",
+    "doctor",
+    "services",
+    "logs",
+    "backup",
+    "update",
+    "install",
+    "first-run",
+    "version",
+    "security",
+    "observe",
+    "diagnostics"
+  ],
+  "container_daemon_contact_default": false,
+  "contract_version": "leos.operator-cli-config.v1",
+  "default_target_relative": "leos-installation",
+  "doctor": {
+    "backup_directory_mode": "0700",
+    "minimum_free_storage_gb": 20,
+    "private_file_mode_max": "0640"
+  },
+  "external_network_contact_default": false,
+  "log_roots": [
+    "logs"
+  ],
+  "plaintext_secret_output": false,
+  "read_only_default": true,
+  "security_observability_config": "config/security-observability.json",
+  "source_release": "0.1.0-dev-preview-rc9",
+  "state_files": {
+    "administrator_bootstrap": "state/administrator-bootstrap.json",
+    "first_run_configuration": "config/first-run.json",
+    "first_run_readiness": "state/first-run-readiness.json",
+    "installation_manifest": "state/installation-manifest.json",
+    "installation_plan": "state/installation-plan.json",
+    "runtime_selection": "state/runtime-selection.json"
+  },
+  "update_channel_default": "development"
+}

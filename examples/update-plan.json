@@ -1,0 +1,35 @@
+{
+  "channel": "development",
+  "confirmation_token": "update-confirm-8b4fb7dac0eea328",
+  "contract_version": "leos.update-plan.v1",
+  "current_release": "0.1.0-dev-preview-rc9",
+  "execution_authorized": false,
+  "external_network_contacted": false,
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "network_authorized": false,
+  "requires_confirmation": true,
+  "steps": [
+    {
+      "action": "verify-source-authority",
+      "sequence": 1
+    },
+    {
+      "action": "create-backup",
+      "sequence": 2
+    },
+    {
+      "action": "stage-update",
+      "sequence": 3
+    },
+    {
+      "action": "run-acceptance",
+      "sequence": 4
+    },
+    {
+      "action": "promote-after-confirmation",
+      "sequence": 5
+    }
+  ],
+  "target_release": "0.1.0-dev-preview-rc10",
+  "update_id": "update-8b4fb7dac0eea328"
+}

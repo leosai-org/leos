@@ -1,0 +1,21 @@
+{
+  "canonical_module": "app.runtime_reconciliation",
+  "compatibility_module": "app.phase492_lease_recovery",
+  "contracts": [
+    "leos.runtime-reconciliation.v3.1",
+    "leos.employee-runtime-resource-lifecycle.v1"
+  ],
+  "dependencies": [
+    "execution-scheduler-service",
+    "employee-resource-profile-service"
+  ],
+  "ownership": {
+    "assignment_execution": true,
+    "lease_reconciliation": true,
+    "resource_completion_release": true,
+    "resource_start_validation": true,
+    "scheduler_assignment_import": true
+  },
+  "schema_version": "1.1.0",
+  "service": "persistent-employee-runtime-service"
+}

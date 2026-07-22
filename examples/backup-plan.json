@@ -1,0 +1,15 @@
+{
+  "backup_id": "backup-45b819eb01fa4133",
+  "confirmation_token": "backup-confirm-45b819eb01fa4133",
+  "contract_version": "leos.backup-plan.v1",
+  "destination": "backups/operator-snapshot.tar.gz",
+  "execution_authorized": false,
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "includes": [
+    "config",
+    "state",
+    "journal"
+  ],
+  "requires_confirmation": true,
+  "target_root": "leos-example"
+}

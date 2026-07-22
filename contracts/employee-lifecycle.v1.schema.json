@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leosai.org/contracts/employee-lifecycle.v1.schema.json",
+  "title": "LEOS Employee Lifecycle v1",
+  "type": "object",
+  "required": ["employee_id", "lifecycle_status", "revision", "validation_state"],
+  "properties": {
+    "lifecycle_contract": {"const": "leos.employee-lifecycle.v1"},
+    "employee_id": {"type": "string"},
+    "lifecycle_status": {"enum": ["draft", "validated", "active", "paused", "disabled", "archived"]},
+    "operational_status": {"type": "string"},
+    "revision": {"type": "integer", "minimum": 1},
+    "validation_state": {"enum": ["pending", "valid", "invalid"]},
+    "created_at": {"type": "string"},
+    "updated_at": {"type": "string"}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,39 @@
+template_version: "1.0"
+template_id: generic-employee
+name: Generic Employee
+description: Blank template for a custom LEOS Employee.
+category: custom
+defaults:
+  identity:
+    display_name: Alex
+    role: Custom Specialist
+    department: operations
+    description: Custom LEOS Employee.
+    timezone: America/Denver
+    languages: [English]
+  responsibilities: {}
+  integrations: {}
+  knowledge:
+    company_wide: false
+    categories: [company-handbook]
+    denied_categories: []
+  provider_policy:
+    mode: automatic
+    prefer_local: true
+    allow_cloud: false
+    preferred_model: null
+    required_privacy: {company_data_stays_local: true}
+  memory: {read: true, write: true, retention_days: 90}
+  approval_policy: {default: required, actions: {}}
+  schedule:
+    timezone: America/Denver
+    days: [monday, tuesday, wednesday, thursday, friday]
+    start_time: "08:00"
+    end_time: "17:00"
+    after_hours: queue
+  advanced:
+    max_parallel_jobs: 1
+    max_runtime_seconds: 300
+    max_retries: 1
+    internet: false
+    filesystem_write: false

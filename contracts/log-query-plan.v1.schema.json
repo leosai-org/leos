@@ -1,0 +1,58 @@
+{
+  "$id": "https://leosai.org/contracts/log-query-plan.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_paths": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "leos.log-query-plan.v1"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "limit": {
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "query_id": {
+      "pattern": "^log-query-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "read_only": {
+      "const": true
+    },
+    "service_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "since": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "query_id",
+    "service_id",
+    "since",
+    "limit",
+    "candidate_paths",
+    "execution_authorized",
+    "read_only",
+    "generated_at"
+  ],
+  "title": "LEOS Log Query Plan",
+  "type": "object"
+}

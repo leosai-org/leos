@@ -1,0 +1,473 @@
+{
+  "catalog_id": "leos.dev-preview.service-catalog",
+  "catalog_version": "1.0.0",
+  "contract_version": "leos.registration.catalog.v1",
+  "services": [
+    {
+      "base_url": "http://leos-kernel-service:8000",
+      "capabilities": [
+        "platform.readiness",
+        "subsystems.register",
+        "subsystems.list"
+      ],
+      "category": "kernel",
+      "health_url": "http://leos-kernel-service:8000/health",
+      "name": "LEOS Kernel",
+      "required": true,
+      "service_id": "leos-kernel-service"
+    },
+    {
+      "base_url": "http://leos-persistence-service:8000",
+      "capabilities": [
+        "documents.read",
+        "documents.write",
+        "events.append",
+        "kv.read",
+        "kv.write"
+      ],
+      "category": "persistence",
+      "dependencies": [
+        "leos-postgres"
+      ],
+      "health_url": "http://leos-persistence-service:8000/health",
+      "name": "LEOS Persistence",
+      "required": true,
+      "service_id": "leos-persistence-service"
+    },
+    {
+      "base_url": "http://unified-state-manager-service:8000",
+      "capabilities": [
+        "state.create",
+        "state.read",
+        "state.transition",
+        "state.audit"
+      ],
+      "category": "state",
+      "dependencies": [
+        "leos-persistence-service"
+      ],
+      "health_url": "http://unified-state-manager-service:8000/health",
+      "name": "Unified State Manager",
+      "required": true,
+      "service_id": "unified-state-manager-service"
+    },
+    {
+      "base_url": "http://canonical-contract-service:8000",
+      "capabilities": [
+        "contracts.list",
+        "priority.translate",
+        "status.translate"
+      ],
+      "category": "contracts",
+      "health_url": "http://canonical-contract-service:8000/health",
+      "name": "Canonical Contract Service",
+      "required": true,
+      "service_id": "canonical-contract-service"
+    },
+    {
+      "base_url": "http://strategic-objective-engine-service:8000",
+      "capabilities": [
+        "visions.create",
+        "objectives.create",
+        "objectives.materialize"
+      ],
+      "category": "strategy",
+      "dependencies": [
+        "goal-engine-service",
+        "canonical-contract-service"
+      ],
+      "health_url": "http://strategic-objective-engine-service:8000/health",
+      "name": "Strategic Objective Engine",
+      "required": true,
+      "service_id": "strategic-objective-engine-service"
+    },
+    {
+      "base_url": "http://goal-engine-service:8000",
+      "capabilities": [
+        "goals.create",
+        "goals.transition",
+        "goals.measure"
+      ],
+      "category": "goals",
+      "dependencies": [
+        "unified-state-manager-service"
+      ],
+      "health_url": "http://goal-engine-service:8000/health",
+      "name": "Goal Engine",
+      "required": true,
+      "service_id": "goal-engine-service"
+    },
+    {
+      "base_url": "http://goal-mission-orchestrator-service:8000",
+      "capabilities": [
+        "missions.propose",
+        "missions.approve",
+        "missions.materialize"
+      ],
+      "category": "orchestration",
+      "dependencies": [
+        "goal-engine-service",
+        "planning-engine-service"
+      ],
+      "health_url": "http://goal-mission-orchestrator-service:8000/health",
+      "name": "Goal Mission Orchestrator",
+      "required": true,
+      "service_id": "goal-mission-orchestrator-service"
+    },
+    {
+      "base_url": "http://goal-portfolio-supervisor-service:8000",
+      "capabilities": [
+        "portfolio.monitor",
+        "portfolio.synchronize"
+      ],
+      "category": "supervision",
+      "health_url": "http://goal-portfolio-supervisor-service:8000/health",
+      "name": "Goal Portfolio Supervisor",
+      "required": true,
+      "service_id": "goal-portfolio-supervisor-service"
+    },
+    {
+      "base_url": "http://planning-engine-service:8000",
+      "capabilities": [
+        "missions.create",
+        "plans.create",
+        "plans.approve",
+        "plans.materialize"
+      ],
+      "category": "planning",
+      "dependencies": [
+        "capability-manager-service",
+        "workflow-engine-service"
+      ],
+      "health_url": "http://planning-engine-service:8000/health",
+      "name": "Planning Engine",
+      "required": true,
+      "service_id": "planning-engine-service"
+    },
+    {
+      "base_url": "http://workflow-engine-service:8000",
+      "capabilities": [
+        "workflows.create",
+        "workflows.execute",
+        "workflows.resume"
+      ],
+      "category": "workflow",
+      "health_url": "http://workflow-engine-service:8000/health",
+      "name": "Workflow Engine",
+      "required": true,
+      "service_id": "workflow-engine-service"
+    },
+    {
+      "base_url": "http://employee-resource-profile-service:8000",
+      "capabilities": [
+        "employee-resource-profile.read",
+        "employee-resource-profile.write",
+        "compute-node-capacity.register",
+        "resource-admission.evaluate",
+        "resource-reservation.create",
+        "resource-reservation.release",
+        "resource-reservation.expire"
+      ],
+      "category": "resources",
+      "contract_version": "leos.employee-resource-scheduling.v1",
+      "dependencies": [],
+      "health_url": "http://employee-resource-profile-service:8000/health",
+      "name": "Employee Resource Profile Service",
+      "required": true,
+      "service_id": "employee-resource-profile-service"
+    },
+    {
+      "base_url": "http://employee-registry:8000",
+      "capabilities": [
+        "employees.define",
+        "employees.validate",
+        "employees.lifecycle",
+        "employees.assignments",
+        "employees.eligibility",
+        "employees.history"
+      ],
+      "category": "employees",
+      "contract_version": "leos.employee-definition.v2",
+      "dependencies": [
+        "employee-resource-profile-service",
+        "capability-manager-service"
+      ],
+      "health_url": "http://employee-registry:8000/health",
+      "name": "Employee Registry and Lifecycle Authority",
+      "required": true,
+      "service_id": "employee-registry"
+    },
+    {
+      "base_url": "http://execution-scheduler-service:8000",
+      "capabilities": [
+        "jobs.schedule",
+        "leases.create",
+        "resource-admission.enforce",
+        "resource-reservation.coordinate",
+        "resource-lifecycle.audit",
+        "employee-lifecycle.enforce",
+        "employee-eligibility.recheck"
+      ],
+      "category": "execution",
+      "contract_version": "leos.employee-runtime-governance.v1",
+      "dependencies": [
+        "employee-resource-profile-service",
+        "employee-registry"
+      ],
+      "health_url": "http://execution-scheduler-service:8000/health",
+      "name": "Execution Scheduler",
+      "required": true,
+      "service_id": "execution-scheduler-service"
+    },
+    {
+      "base_url": "http://execution-dispatcher-service:8000",
+      "capabilities": [
+        "jobs.dispatch",
+        "executions.route"
+      ],
+      "category": "execution",
+      "health_url": "http://execution-dispatcher-service:8000/health",
+      "name": "Execution Dispatcher",
+      "required": true,
+      "service_id": "execution-dispatcher-service"
+    },
+    {
+      "base_url": "http://persistent-employee-runtime-service:8000",
+      "capabilities": [
+        "employees.run",
+        "employees.persist",
+        "employees.resume"
+      ],
+      "category": "employees",
+      "contract_version": "leos.employee-runtime-resource-lifecycle.v1",
+      "dependencies": [
+        "execution-scheduler-service",
+        "employee-resource-profile-service",
+        "employee-registry"
+      ],
+      "health_url": "http://persistent-employee-runtime-service:8000/health",
+      "name": "Persistent Employee Runtime",
+      "required": true,
+      "service_id": "persistent-employee-runtime-service"
+    },
+    {
+      "base_url": "http://employee-cognitive-service:8000",
+      "capabilities": [
+        "cognition.loop",
+        "cognition.reflect"
+      ],
+      "category": "employees",
+      "health_url": "http://employee-cognitive-service:8000/health",
+      "name": "Employee Cognitive Service",
+      "required": true,
+      "service_id": "employee-cognitive-service"
+    },
+    {
+      "base_url": "http://capability-manager-service:8000",
+      "capabilities": [
+        "capabilities.list",
+        "capabilities.resolve",
+        "capabilities.execute"
+      ],
+      "category": "capabilities",
+      "health_url": "http://capability-manager-service:8000/health",
+      "name": "Capability Manager",
+      "required": true,
+      "service_id": "capability-manager-service"
+    },
+    {
+      "base_url": "http://content-review-service:8000",
+      "capabilities": [
+        "content.review"
+      ],
+      "category": "review",
+      "health_url": "http://content-review-service:8000/health",
+      "name": "Content Review Service",
+      "required": true,
+      "service_id": "content-review-service"
+    },
+    {
+      "base_url": "http://system-registry-service:8000",
+      "capabilities": [
+        "system.sync",
+        "system.inventory"
+      ],
+      "category": "registry",
+      "health_url": "http://system-registry-service:8000/health",
+      "name": "System Registry",
+      "required": true,
+      "service_id": "system-registry-service"
+    },
+    {
+      "base_url": "http://plugin-registry-service:8000",
+      "capabilities": [
+        "plugins.list",
+        "plugins.resolve"
+      ],
+      "category": "registry",
+      "health_url": "http://plugin-registry-service:8000/health",
+      "name": "Plugin Registry",
+      "required": true,
+      "service_id": "plugin-registry-service"
+    },
+    {
+      "base_url": "http://model-registry:8000",
+      "capabilities": [
+        "models.list",
+        "models.resolve"
+      ],
+      "category": "registry",
+      "health_url": "http://model-registry:8000/health",
+      "name": "Model Registry",
+      "required": true,
+      "service_id": "model-registry"
+    },
+    {
+      "base_url": "http://schema-manager-service:8000",
+      "capabilities": [
+        "migrations.register",
+        "migrations.apply",
+        "migrations.audit"
+      ],
+      "category": "schema",
+      "health_url": "http://schema-manager-service:8000/health",
+      "name": "Schema Manager",
+      "required": true,
+      "service_id": "schema-manager-service"
+    },
+    {
+      "base_url": "http://dev-preview-release-gate-service:8000",
+      "capabilities": [
+        "release.evaluate",
+        "release.policy.read"
+      ],
+      "category": "release",
+      "health_url": "http://dev-preview-release-gate-service:8000/health",
+      "name": "Developer Preview Release Gate",
+      "required": true,
+      "service_id": "dev-preview-release-gate-service"
+    },
+    {
+      "base_url": "http://kernel-registration-authority-service:8000",
+      "capabilities": [
+        "services.register",
+        "services.discover",
+        "services.health",
+        "capabilities.discover"
+      ],
+      "category": "kernel",
+      "dependencies": [
+        "leos-kernel-service"
+      ],
+      "health_url": "http://kernel-registration-authority-service:8000/health",
+      "name": "Kernel Registration Authority",
+      "required": true,
+      "service_id": "kernel-registration-authority-service"
+    },
+    {
+      "base_url": "http://kernel-variable-resolution-service:8000",
+      "capabilities": [
+        "variables.resolve",
+        "variables.validate",
+        "templates.resolve"
+      ],
+      "category": "kernel",
+      "dependencies": [],
+      "health_url": "http://kernel-variable-resolution-service:8000/health",
+      "name": "Kernel Variable Resolution Service",
+      "required": true,
+      "service_id": "kernel-variable-resolution-service"
+    },
+    {
+      "base_url": "http://execution-envelope-resolver-service:8000",
+      "capabilities": [
+        "execution-envelope.resolve",
+        "execution-envelope.hydrate",
+        "execution-envelope.audit"
+      ],
+      "category": "execution",
+      "dependencies": [
+        "execution-scheduler-service"
+      ],
+      "health_url": "http://execution-envelope-resolver-service:8000/health",
+      "name": "Execution Envelope Resolver Service",
+      "required": true,
+      "service_id": "execution-envelope-resolver-service"
+    },
+    {
+      "base_url": "http://runtime-execution-coordinator-service:8000",
+      "capabilities": [
+        "runtime-assignment.poll",
+        "runtime-coordinate.await",
+        "runtime-coordinate.execute",
+        "runtime-coordinate.submit",
+        "runtime-lease.reconcile",
+        "runtime-result.extract",
+        "runtime-watchdog.recover",
+        "scheduler-lease.coordinate"
+      ],
+      "category": "execution",
+      "contract_version": "leos.runtime-coordination.v2.2",
+      "dependencies": [
+        "execution-scheduler-service",
+        "persistent-employee-runtime-service"
+      ],
+      "health_url": "http://runtime-execution-coordinator-service:8000/health",
+      "name": "Runtime Execution Coordinator Service",
+      "required": true,
+      "service_id": "runtime-execution-coordinator-service"
+    },
+    {
+      "base_url": "http://review-revision-loop-service:8000",
+      "capabilities": [
+        "review.create",
+        "review.revise",
+        "revision-job.schedule",
+        "artifact.version",
+        "artifact.approve",
+        "goal.finalize"
+      ],
+      "category": "governance",
+      "contract_version": "leos.review-revision-loop.v1",
+      "dependencies": [
+        "execution-scheduler-service",
+        "runtime-execution-coordinator-service",
+        "content-review-service",
+        "leos-persistence-service",
+        "goal-engine-service"
+      ],
+      "health_url": "http://review-revision-loop-service:8000/health",
+      "name": "Review Revision Loop Service",
+      "required": true,
+      "service_id": "review-revision-loop-service"
+    },
+    {
+      "base_url": "http://reference-research-content-employee:8000",
+      "capabilities": [
+        "research.plan",
+        "research.sources",
+        "research.extract",
+        "content.outline",
+        "content.draft",
+        "content.review.request",
+        "content.revise",
+        "artifact.persist",
+        "artifact.history",
+        "execution.history"
+      ],
+      "category": "employees",
+      "contract_version": "leos.reference-research-content-run.v1",
+      "dependencies": [
+        "employee-registry",
+        "execution-scheduler-service",
+        "employee-resource-profile-service",
+        "leos-persistence-service",
+        "content-review-service"
+      ],
+      "health_url": "http://reference-research-content-employee:8000/health",
+      "name": "LEOS Reference Research and Content Employee",
+      "required": false,
+      "service_id": "reference-research-content-employee"
+    }
+  ]
+}

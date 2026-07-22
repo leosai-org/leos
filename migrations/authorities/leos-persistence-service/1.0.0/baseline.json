@@ -1,0 +1,50 @@
+{
+  "application_schema_sha256": "80031f882e91d00a126974ebf31de6e13ff6397b32f6069a4ceac853a0a3e127",
+  "authority_contract": "leos.postgresql-authority.v1",
+  "authority_service": "leos-persistence-service",
+  "baseline_contract": "leos.schema-baseline.v2",
+  "captured_at": "2026-07-16T02:23:00.096114+00:00",
+  "data_fingerprint_sha256": "7f66f4993b671ceee16e2cf6ba60514698bbb1215e65e5b1dcedfcf65f8c3ff2",
+  "database": "leos",
+  "engine": "postgresql",
+  "migration_id": "baseline-1.0.0",
+  "owned_tables": [
+    {
+      "estimated_rows": 3,
+      "owner": "leos",
+      "relkind": "r",
+      "schema": "public",
+      "table": "persistence_documents"
+    },
+    {
+      "estimated_rows": 6,
+      "owner": "leos",
+      "relkind": "r",
+      "schema": "public",
+      "table": "persistence_events"
+    },
+    {
+      "estimated_rows": 3,
+      "owner": "leos",
+      "relkind": "r",
+      "schema": "public",
+      "table": "persistence_kv"
+    },
+    {
+      "estimated_rows": -1,
+      "owner": "leos",
+      "relkind": "r",
+      "schema": "public",
+      "table": "persistence_migrations"
+    }
+  ],
+  "schema_fingerprint_contract": "leos.postgresql-schema-fingerprint.v1",
+  "schema_normalization_rules": {
+    "collapse_whitespace": true,
+    "ignore_comments": true,
+    "ignore_psql_meta_commands": true,
+    "ignore_search_path_session_setup": true,
+    "ignore_set_statements": true
+  },
+  "version": "1.0.0"
+}

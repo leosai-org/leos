@@ -1,0 +1,295 @@
+{
+  "application_schema": {
+    "indexes": [
+      {
+        "name": "idx_coordination_job",
+        "sql": "CREATE INDEX idx_coordination_job ON coordination_runs(job_id, created_at DESC)",
+        "table": "coordination_runs"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "coordination_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "assignment_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "execution_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "request_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "result_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "started_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_coordination_job",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_coordination_runs_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "coordination_runs",
+        "sql": "CREATE TABLE coordination_runs ( coordination_id TEXT PRIMARY KEY, job_id TEXT NOT NULL, worker_id TEXT NOT NULL, state TEXT NOT NULL, assignment_id TEXT, execution_id TEXT, request_json TEXT NOT NULL, result_json TEXT, error TEXT, created_at TEXT NOT NULL, completed_at TEXT , started_at TEXT, updated_at TEXT)"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "application_schema_sha256": "16958b28b0d1579097d0589fe90dc7e92961ef87b775663ba0bb3ec6e16a059b",
+  "authority_service": "runtime-execution-coordinator-service",
+  "baseline_contract": "leos.schema-baseline.v2",
+  "captured_at": "2026-07-16T00:47:16.140688+00:00",
+  "database": "/data/runtime-execution-coordinator/runtime-execution-coordinator.db",
+  "engine": "sqlite",
+  "full_schema": {
+    "indexes": [
+      {
+        "name": "idx_coordination_job",
+        "sql": "CREATE INDEX idx_coordination_job ON coordination_runs(job_id, created_at DESC)",
+        "table": "coordination_runs"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "coordination_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "assignment_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "execution_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "request_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "result_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "started_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_coordination_job",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_coordination_runs_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "coordination_runs",
+        "sql": "CREATE TABLE coordination_runs ( coordination_id TEXT PRIMARY KEY, job_id TEXT NOT NULL, worker_id TEXT NOT NULL, state TEXT NOT NULL, assignment_id TEXT, execution_id TEXT, request_json TEXT NOT NULL, result_json TEXT, error TEXT, created_at TEXT NOT NULL, completed_at TEXT , started_at TEXT, updated_at TEXT)"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "full_schema_sha256": "16958b28b0d1579097d0589fe90dc7e92961ef87b775663ba0bb3ec6e16a059b",
+  "migration_id": "baseline-1.0.0",
+  "version": "1.0.0"
+}

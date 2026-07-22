@@ -1,0 +1,159 @@
+{
+  "authorization": {
+    "daemon": false,
+    "network": false
+  },
+  "checks": [
+    {
+      "check_id": "installation-manifest",
+      "domain": "installation",
+      "message": "Installation manifest is installed.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "installation-plan",
+      "domain": "installation",
+      "message": "Installation plan is present.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "source-release",
+      "domain": "release-integrity",
+      "message": "Installation source release matches RC9.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "source-tree",
+      "domain": "release-integrity",
+      "message": "Installation source tree matches RC9.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "manifest-drift",
+      "domain": "configuration-drift",
+      "message": "Installed files match the manifest.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "first-run-config",
+      "domain": "first-run",
+      "message": "First-run configuration is complete.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "first-run-readiness",
+      "domain": "first-run",
+      "message": "First-run readiness is ready.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "admin-activation",
+      "domain": "security",
+      "message": "Administrator credential activation remains explicit.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "plaintext-secrets",
+      "domain": "security",
+      "message": "No plaintext secret fields are persisted.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "private-file-modes",
+      "domain": "permissions",
+      "message": "Private state files use restricted modes.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "backup-directory-mode",
+      "domain": "permissions",
+      "message": "Backup directory uses mode 0700.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "container-runtime",
+      "domain": "container-runtime",
+      "message": "A container runtime is available.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "nvidia-runtime",
+      "domain": "nvidia-runtime",
+      "message": "NVIDIA runtime matches the selected profile.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "network-exposure",
+      "domain": "network-exposure",
+      "message": "No service fixture exposes a public wildcard binding.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "required-services",
+      "domain": "service-health",
+      "message": "Required services are healthy in the available inventory.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    },
+    {
+      "check_id": "storage-capacity",
+      "domain": "resource-capacity",
+      "message": "Free storage meets the operator threshold.",
+      "ok": true,
+      "remediation": null,
+      "severity": "pass"
+    }
+  ],
+  "contract_version": "leos.doctor-report.v1",
+  "counts": {
+    "fail": 0,
+    "pass": 16,
+    "total": 16,
+    "warn": 0
+  },
+  "details": {
+    "drift": [],
+    "public_bindings": []
+  },
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "repair_requires_confirmation": true,
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "read_only": true
+  },
+  "status": "pass",
+  "target_root": "leos-example"
+}

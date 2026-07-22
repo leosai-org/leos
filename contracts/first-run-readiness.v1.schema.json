@@ -1,0 +1,100 @@
+{
+  "$id": "https://leosai.org/contracts/first-run-readiness.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "check_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "check_id",
+          "ok",
+          "required"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.first-run-readiness.v1"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "installer_handoff": {
+      "additionalProperties": false,
+      "properties": {
+        "confirmation_required": {
+          "const": true
+        },
+        "installation_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "manifest_status": {
+          "const": "installed"
+        },
+        "plan_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "installation_id",
+        "plan_id",
+        "manifest_status",
+        "confirmation_required"
+      ],
+      "type": "object"
+    },
+    "session_id": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ready",
+        "blocked"
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "session_id",
+    "status",
+    "checks",
+    "blockers",
+    "installer_handoff",
+    "external_network_contacted",
+    "container_daemon_contacted",
+    "generated_at"
+  ],
+  "title": "LEOS First-Run Readiness",
+  "type": "object"
+}

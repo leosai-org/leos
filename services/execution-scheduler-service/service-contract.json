@@ -1,0 +1,46 @@
+{
+  "capabilities": [
+    "jobs.schedule",
+    "leases.create",
+    "resource-admission.enforce",
+    "resource-reservation.coordinate",
+    "resource-lifecycle.audit",
+    "resource-reconciliation.run",
+    "employee-lifecycle.enforce",
+    "employee-eligibility.recheck"
+  ],
+  "contract_version": "leos.employee-runtime-governance.v1",
+  "dependencies": [
+    "employee-resource-profile-service",
+    "leos-kernel-service",
+    "employee-registry"
+  ],
+  "employee_lifecycle": {
+    "authority": "employee-registry",
+    "eligibility_contract": "leos.employee-execution-eligibility.v1",
+    "fail_closed": true,
+    "mandatory_before_resource_admission": true,
+    "mandatory_before_running": true
+  },
+  "isolation": {
+    "docker_socket_required": false,
+    "privileged": false,
+    "production_network_required": false
+  },
+  "resource_enforcement": {
+    "fail_closed": true,
+    "mandatory": true,
+    "release_on_complete": true,
+    "release_on_failure": true,
+    "release_on_lease_expiration": true,
+    "reservation_required_before_lease": true,
+    "reservation_required_before_running": true,
+    "restart_reconciliation": true
+  },
+  "service_id": "execution-scheduler-service",
+  "state": {
+    "path": "/data/execution-scheduler/execution-scheduler.db",
+    "type": "sqlite"
+  },
+  "version": "0.2.0"
+}

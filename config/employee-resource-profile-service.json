@@ -1,0 +1,24 @@
+{
+  "base_url": "http://employee-resource-profile-service:8000",
+  "contract_version": "leos.employee-resource-profile.v1",
+  "enabled": true,
+  "health_url": "http://employee-resource-profile-service:8000/health",
+  "ready_url": "http://employee-resource-profile-service:8000/ready",
+  "registry": {
+    "capabilities": [
+      "employee.resource-profile",
+      "compute-node.capacity",
+      "resource.admission",
+      "resource.reservation",
+      "resource.preemption-plan"
+    ],
+    "service_type": "resource-policy-authority"
+  },
+  "scheduler_policy": {
+    "admission_endpoint": "/admission/evaluate",
+    "fail_closed": true,
+    "queue_on_unavailable": true,
+    "reservation_endpoint": "/reservations"
+  },
+  "service_id": "employee-resource-profile-service"
+}

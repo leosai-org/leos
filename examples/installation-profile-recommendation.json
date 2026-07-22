@@ -1,0 +1,204 @@
+{
+  "blockers": [],
+  "contract_version": "leos.installation-profile-recommendation.v1",
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "inventory_id": "inventory-c92bfb1e699725a9",
+  "node_id": "node-example",
+  "profile_evaluations": [
+    {
+      "criteria": {
+        "architecture_supported": true,
+        "cpu_cores": true,
+        "gpu_memory_mb": false,
+        "memory_mb": true,
+        "storage_free_gb": true,
+        "system_supported": true
+      },
+      "eligible": false,
+      "observed": {
+        "architecture": "x86_64",
+        "cpu_cores": 16,
+        "largest_gpu_memory_mb": 12288,
+        "memory_mb": 32768,
+        "storage_free_gb": 240,
+        "system": "linux"
+      },
+      "priority": 400,
+      "profile_id": "leos-standard-large-nvidia",
+      "required": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 8,
+        "gpu_memory_mb_min": 24576,
+        "memory_mb_min": 32768,
+        "storage_free_gb_min": 100,
+        "systems": [
+          "linux"
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "architecture_supported": true,
+        "cpu_cores": true,
+        "gpu_memory_mb": true,
+        "memory_mb": true,
+        "storage_free_gb": true,
+        "system_supported": true
+      },
+      "eligible": true,
+      "observed": {
+        "architecture": "x86_64",
+        "cpu_cores": 16,
+        "largest_gpu_memory_mb": 12288,
+        "memory_mb": 32768,
+        "storage_free_gb": 240,
+        "system": "linux"
+      },
+      "priority": 300,
+      "profile_id": "leos-standard-nvidia",
+      "required": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 4,
+        "gpu_memory_mb_min": 8192,
+        "memory_mb_min": 8192,
+        "storage_free_gb_min": 40,
+        "systems": [
+          "linux"
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "architecture_supported": true,
+        "cpu_cores": true,
+        "gpu_memory_mb": true,
+        "memory_mb": true,
+        "storage_free_gb": true,
+        "system_supported": true
+      },
+      "eligible": true,
+      "observed": {
+        "architecture": "x86_64",
+        "cpu_cores": 16,
+        "largest_gpu_memory_mb": 12288,
+        "memory_mb": 32768,
+        "storage_free_gb": 240,
+        "system": "linux"
+      },
+      "priority": 200,
+      "profile_id": "leos-standard-cpu",
+      "required": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 4,
+        "gpu_memory_mb_min": 0,
+        "memory_mb_min": 8192,
+        "storage_free_gb_min": 40,
+        "systems": [
+          "linux"
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "architecture_supported": true,
+        "cpu_cores": true,
+        "gpu_memory_mb": true,
+        "memory_mb": true,
+        "storage_free_gb": true,
+        "system_supported": true
+      },
+      "eligible": true,
+      "observed": {
+        "architecture": "x86_64",
+        "cpu_cores": 16,
+        "largest_gpu_memory_mb": 12288,
+        "memory_mb": 32768,
+        "storage_free_gb": 240,
+        "system": "linux"
+      },
+      "priority": 100,
+      "profile_id": "leos-standard-minimum",
+      "required": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 2,
+        "gpu_memory_mb_min": 0,
+        "memory_mb_min": 4096,
+        "storage_free_gb_min": 20,
+        "systems": [
+          "linux"
+        ]
+      }
+    }
+  ],
+  "readiness": "ready",
+  "recommendation_id": "recommendation-d93172d3719721ce",
+  "resource_budget": {
+    "cpu_cores_reserved": 2,
+    "cpu_cores_total": 16,
+    "employee_cpu_cores_default": 2,
+    "employee_memory_mb_default": 2048,
+    "max_concurrent_employees": 7,
+    "memory_mb_reserved": 4096,
+    "memory_mb_total": 32768
+  },
+  "runtime": {
+    "container_runtime": {
+      "daemon_accessible": true,
+      "daemon_probe_performed": true,
+      "present": true,
+      "selected": "docker"
+    },
+    "embedding_runtime": "nvidia",
+    "gpu_mode": "nvidia",
+    "model_runtime": "local-nvidia"
+  },
+  "selected_profile": "leos-standard-nvidia",
+  "selected_profile_evaluation": {
+    "criteria": {
+      "architecture_supported": true,
+      "cpu_cores": true,
+      "gpu_memory_mb": true,
+      "memory_mb": true,
+      "storage_free_gb": true,
+      "system_supported": true
+    },
+    "eligible": true,
+    "observed": {
+      "architecture": "x86_64",
+      "cpu_cores": 16,
+      "largest_gpu_memory_mb": 12288,
+      "memory_mb": 32768,
+      "storage_free_gb": 240,
+      "system": "linux"
+    },
+    "priority": 300,
+    "profile_id": "leos-standard-nvidia",
+    "required": {
+      "architectures": [
+        "x86_64",
+        "aarch64"
+      ],
+      "cpu_cores_min": 4,
+      "gpu_memory_mb_min": 8192,
+      "memory_mb_min": 8192,
+      "storage_free_gb_min": 40,
+      "systems": [
+        "linux"
+      ]
+    }
+  },
+  "suitability": "supported",
+  "warnings": []
+}

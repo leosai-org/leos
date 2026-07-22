@@ -1,0 +1,13 @@
+{
+  "candidate_paths": [
+    "logs/ai-router.log"
+  ],
+  "contract_version": "leos.log-query-plan.v1",
+  "execution_authorized": false,
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "limit": 200,
+  "query_id": "log-query-13018fa862c772d1",
+  "read_only": true,
+  "service_id": "ai-router",
+  "since": "1h"
+}

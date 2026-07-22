@@ -1,0 +1,80 @@
+{
+  "aggregate_id": "health-c5f39fb3a06bbf12",
+  "container_daemon_contacted": false,
+  "contract_version": "leos.health-aggregate.v1",
+  "external_network_contacted": false,
+  "generated_at": "2026-07-21T00:00:00+00:00",
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "read_only": true,
+    "secret_material_copied": false
+  },
+  "services": [
+    {
+      "display_name": "AI Router",
+      "health": "healthy",
+      "latency_ms": 8,
+      "required": true,
+      "service_id": "ai-router",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "display_name": "Profile Service",
+      "health": "healthy",
+      "latency_ms": 7,
+      "required": true,
+      "service_id": "profile-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "display_name": "Persistence Service",
+      "health": "healthy",
+      "latency_ms": 9,
+      "required": true,
+      "service_id": "leos-persistence-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "display_name": "Execution Scheduler",
+      "health": "healthy",
+      "latency_ms": 11,
+      "required": true,
+      "service_id": "execution-scheduler-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "display_name": "Runtime Coordinator",
+      "health": "healthy",
+      "latency_ms": 10,
+      "required": true,
+      "service_id": "runtime-execution-coordinator-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "display_name": "Reference Research Employee",
+      "health": "healthy",
+      "latency_ms": 15,
+      "required": false,
+      "service_id": "reference-research-content-employee",
+      "source": "fixture",
+      "state": "running"
+    }
+  ],
+  "status": "pass",
+  "summary": {
+    "healthy": 6,
+    "required_unhealthy": 0,
+    "total": 6,
+    "unhealthy": 0,
+    "unknown": 0
+  }
+}

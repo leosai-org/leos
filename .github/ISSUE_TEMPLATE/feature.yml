@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose a public LEOS capability
+title: "[Feature]: "
+labels: ["type:feature", "needs:triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the concrete user problem.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: boundary
+    attributes:
+      label: Expected product boundary
+      options:
+        - Community/Core
+        - Plugin or adapter
+        - Documentation or example
+        - Enterprise or commercial
+        - Unsure
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility considerations
+      description: APIs, contracts, migrations, hardware, and existing employees/plugins.

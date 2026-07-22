@@ -1,0 +1,1303 @@
+{
+  "application_schema": {
+    "indexes": [
+      {
+        "name": "idx_employee_assignment_job",
+        "sql": "CREATE UNIQUE INDEX idx_employee_assignment_job ON employee_assignments(job_id)",
+        "table": "employee_assignments"
+      },
+      {
+        "name": "idx_employee_department",
+        "sql": "CREATE INDEX idx_employee_department ON employees(department)",
+        "table": "employees"
+      },
+      {
+        "name": "idx_employee_memory_lookup",
+        "sql": "CREATE INDEX idx_employee_memory_lookup ON employee_memory(employee_id, namespace, memory_key)",
+        "table": "employee_memory"
+      },
+      {
+        "name": "idx_employee_message_inbox",
+        "sql": "CREATE INDEX idx_employee_message_inbox ON employee_messages(employee_id, direction, state, created_at)",
+        "table": "employee_messages"
+      },
+      {
+        "name": "idx_employee_status",
+        "sql": "CREATE INDEX idx_employee_status ON employees(status, runtime_state)",
+        "table": "employees"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "assignment_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "step_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "capability_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "lease_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "'assigned'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "'{}'",
+            "name": "payload_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "result_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "assigned_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "started_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_assignment_job",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_employee_assignments_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "employee_assignments",
+        "sql": "CREATE TABLE employee_assignments ( assignment_id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, job_id TEXT NOT NULL, workflow_id TEXT, step_id TEXT, capability_id TEXT, lease_id TEXT, state TEXT NOT NULL DEFAULT 'assigned', payload_json TEXT NOT NULL DEFAULT '{}', result_json TEXT, error TEXT, assigned_at TEXT NOT NULL, started_at TEXT, completed_at TEXT, updated_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "event_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "event_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": "'info'",
+            "name": "severity",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "'{}'",
+            "name": "details_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_employee_events_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          }
+        ],
+        "name": "employee_events",
+        "sql": "CREATE TABLE employee_events ( event_id TEXT PRIMARY KEY, employee_id TEXT, event_type TEXT NOT NULL, severity TEXT NOT NULL DEFAULT 'info', details_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "memory_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": "'working'",
+            "name": "namespace",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "memory_key",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "content_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "0.5",
+            "name": "importance",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "expires_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_memory_lookup",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_employee_memory_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "employee_memory",
+        "sql": "CREATE TABLE employee_memory ( memory_id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, namespace TEXT NOT NULL DEFAULT 'working', memory_key TEXT, content_json TEXT NOT NULL, importance REAL NOT NULL DEFAULT 0.5, expires_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "message_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "direction",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "message_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "subject",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "'{}'",
+            "name": "body_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "related_employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "mission_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "'unread'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "read_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "acknowledged_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_message_inbox",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_employee_messages_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "employee_messages",
+        "sql": "CREATE TABLE employee_messages ( message_id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, direction TEXT NOT NULL, message_type TEXT NOT NULL, subject TEXT, body_json TEXT NOT NULL DEFAULT '{}', related_employee_id TEXT, mission_id TEXT, workflow_id TEXT, job_id TEXT, state TEXT NOT NULL DEFAULT 'unread', created_at TEXT NOT NULL, read_at TEXT, acknowledged_at TEXT )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "name",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "role",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "department",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "manager_employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "'offline'",
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": "'idle'",
+            "name": "runtime_state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "model_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "'{}'",
+            "name": "profile_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": "'{}'",
+            "name": "permissions_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "'[]'",
+            "name": "capabilities_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": "'{}'",
+            "name": "metadata_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "current_job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "current_workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": null,
+            "name": "current_step_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": null,
+            "name": "last_heartbeat_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 16,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_department",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "idx_employee_status",
+            "origin": "c",
+            "partial": 0,
+            "seq": 1,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_employees_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 2,
+            "unique": 1
+          }
+        ],
+        "name": "employees",
+        "sql": "CREATE TABLE employees ( employee_id TEXT PRIMARY KEY, name TEXT NOT NULL, role TEXT NOT NULL, department TEXT, manager_employee_id TEXT, status TEXT NOT NULL DEFAULT 'offline', runtime_state TEXT NOT NULL DEFAULT 'idle', model_id TEXT, profile_json TEXT NOT NULL DEFAULT '{}', permissions_json TEXT NOT NULL DEFAULT '{}', capabilities_json TEXT NOT NULL DEFAULT '[]', metadata_json TEXT NOT NULL DEFAULT '{}', current_job_id TEXT, current_workflow_id TEXT, current_step_id TEXT, last_heartbeat_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL )"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "application_schema_sha256": "d13abc3f393fc78db48409ddf67eb1fa597818d6ea2f7a67002527c63eeed14a",
+  "authority_service": "persistent-employee-runtime-service",
+  "baseline_contract": "leos.schema-baseline.v2",
+  "captured_at": "2026-07-16T00:47:15.943104+00:00",
+  "database": "/data/persistent-employee-runtime/persistent-employee-runtime.db",
+  "engine": "sqlite",
+  "full_schema": {
+    "indexes": [
+      {
+        "name": "idx_employee_assignment_job",
+        "sql": "CREATE UNIQUE INDEX idx_employee_assignment_job ON employee_assignments(job_id)",
+        "table": "employee_assignments"
+      },
+      {
+        "name": "idx_employee_department",
+        "sql": "CREATE INDEX idx_employee_department ON employees(department)",
+        "table": "employees"
+      },
+      {
+        "name": "idx_employee_memory_lookup",
+        "sql": "CREATE INDEX idx_employee_memory_lookup ON employee_memory(employee_id, namespace, memory_key)",
+        "table": "employee_memory"
+      },
+      {
+        "name": "idx_employee_message_inbox",
+        "sql": "CREATE INDEX idx_employee_message_inbox ON employee_messages(employee_id, direction, state, created_at)",
+        "table": "employee_messages"
+      },
+      {
+        "name": "idx_employee_status",
+        "sql": "CREATE INDEX idx_employee_status ON employees(status, runtime_state)",
+        "table": "employees"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "assignment_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "step_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "capability_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "lease_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "'assigned'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "'{}'",
+            "name": "payload_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "result_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "assigned_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "started_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_assignment_job",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          },
+          {
+            "name": "sqlite_autoindex_employee_assignments_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "employee_assignments",
+        "sql": "CREATE TABLE employee_assignments ( assignment_id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, job_id TEXT NOT NULL, workflow_id TEXT, step_id TEXT, capability_id TEXT, lease_id TEXT, state TEXT NOT NULL DEFAULT 'assigned', payload_json TEXT NOT NULL DEFAULT '{}', result_json TEXT, error TEXT, assigned_at TEXT NOT NULL, started_at TEXT, completed_at TEXT, updated_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "event_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "event_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": "'info'",
+            "name": "severity",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "'{}'",
+            "name": "details_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_employee_events_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          }
+        ],
+        "name": "employee_events",
+        "sql": "CREATE TABLE employee_events ( event_id TEXT PRIMARY KEY, employee_id TEXT, event_type TEXT NOT NULL, severity TEXT NOT NULL DEFAULT 'info', details_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "memory_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": "'working'",
+            "name": "namespace",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "memory_key",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "content_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "0.5",
+            "name": "importance",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "expires_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_memory_lookup",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_employee_memory_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "employee_memory",
+        "sql": "CREATE TABLE employee_memory ( memory_id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, namespace TEXT NOT NULL DEFAULT 'working', memory_key TEXT, content_json TEXT NOT NULL, importance REAL NOT NULL DEFAULT 0.5, expires_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "message_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "direction",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "message_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "subject",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "'{}'",
+            "name": "body_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "related_employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "mission_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "'unread'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "read_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "acknowledged_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_message_inbox",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_employee_messages_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "employee_messages",
+        "sql": "CREATE TABLE employee_messages ( message_id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, direction TEXT NOT NULL, message_type TEXT NOT NULL, subject TEXT, body_json TEXT NOT NULL DEFAULT '{}', related_employee_id TEXT, mission_id TEXT, workflow_id TEXT, job_id TEXT, state TEXT NOT NULL DEFAULT 'unread', created_at TEXT NOT NULL, read_at TEXT, acknowledged_at TEXT )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "name",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "role",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "department",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "manager_employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "'offline'",
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": "'idle'",
+            "name": "runtime_state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": null,
+            "name": "model_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "'{}'",
+            "name": "profile_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": "'{}'",
+            "name": "permissions_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "'[]'",
+            "name": "capabilities_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": "'{}'",
+            "name": "metadata_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 12,
+            "dflt_value": null,
+            "name": "current_job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 13,
+            "dflt_value": null,
+            "name": "current_workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": null,
+            "name": "current_step_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": null,
+            "name": "last_heartbeat_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 16,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_employee_department",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "idx_employee_status",
+            "origin": "c",
+            "partial": 0,
+            "seq": 1,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_employees_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 2,
+            "unique": 1
+          }
+        ],
+        "name": "employees",
+        "sql": "CREATE TABLE employees ( employee_id TEXT PRIMARY KEY, name TEXT NOT NULL, role TEXT NOT NULL, department TEXT, manager_employee_id TEXT, status TEXT NOT NULL DEFAULT 'offline', runtime_state TEXT NOT NULL DEFAULT 'idle', model_id TEXT, profile_json TEXT NOT NULL DEFAULT '{}', permissions_json TEXT NOT NULL DEFAULT '{}', capabilities_json TEXT NOT NULL DEFAULT '[]', metadata_json TEXT NOT NULL DEFAULT '{}', current_job_id TEXT, current_workflow_id TEXT, current_step_id TEXT, last_heartbeat_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL )"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "full_schema_sha256": "d13abc3f393fc78db48409ddf67eb1fa597818d6ea2f7a67002527c63eeed14a",
+  "migration_id": "baseline-1.0.0",
+  "version": "1.0.0"
+}

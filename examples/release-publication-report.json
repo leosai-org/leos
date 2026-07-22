@@ -1,0 +1,12 @@
+{
+  "authority_promoted": true,
+  "contract_version": "leos.release-publication-report.v1",
+  "legacy_authority_preserved": true,
+  "new_workspace": "development-workspaces/phase52.4.6-example-rc10-baseline",
+  "ok": true,
+  "phase": "52.4.6",
+  "release_file_count": 1,
+  "release_tree_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "source_release": "0.1.0-dev-preview-rc9",
+  "target_release": "0.1.0-dev-preview-rc10"
+}

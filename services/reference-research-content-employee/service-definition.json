@@ -1,0 +1,36 @@
+{
+  "service_id": "reference-research-content-employee",
+  "name": "LEOS Reference Research and Content Employee",
+  "version": "0.1.0",
+  "contract_version": "leos.reference-research-content-run.v1",
+  "employee_id": "research-content-employee",
+  "category": "employees",
+  "capabilities": [
+    "research.plan",
+    "research.sources",
+    "research.extract",
+    "content.outline",
+    "content.draft",
+    "content.review.request",
+    "content.revise",
+    "artifact.persist",
+    "artifact.history",
+    "execution.history"
+  ],
+  "dependencies": [
+    "employee-registry",
+    "execution-scheduler-service",
+    "employee-resource-profile-service",
+    "leos-persistence-service",
+    "content-review-service"
+  ],
+  "health_url": "http://reference-research-content-employee:8000/health",
+  "execute_url": "http://reference-research-content-employee:8000/execute",
+  "security": {
+    "internet_required": false,
+    "docker_socket_required": false,
+    "privileged": false,
+    "approved_adapter_only": true,
+    "production_state_write_required_for_acceptance": false
+  }
+}

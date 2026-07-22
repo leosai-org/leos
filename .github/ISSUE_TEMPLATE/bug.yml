@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible LEOS defect
+title: "[Bug]: "
+labels: ["type:bug", "needs:triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security vulnerabilities in a public issue.
+  - type: input
+    id: version
+    attributes:
+      label: LEOS version
+      placeholder: 0.1.0-dev-preview-rc10
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, architecture, container runtime, CPU/GPU, and relevant versions.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs
+      description: Remove secrets, tokens, personal data, customer data, and private endpoints.

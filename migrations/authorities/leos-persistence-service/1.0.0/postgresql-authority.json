@@ -1,0 +1,166 @@
+{
+  "authority_contract": "leos.postgresql-authority.v1",
+  "authority_service": "leos-persistence-service",
+  "authority_state": "managed",
+  "baseline_version": "1.0.0",
+  "connection": {
+    "admin_user": "leos",
+    "application_user": "leos",
+    "database": "leos",
+    "host_hint": null,
+    "port_hint": null,
+    "postgres_container": "leos-postgres",
+    "source": "container-environment",
+    "url_key_present": false
+  },
+  "data": {
+    "fingerprint_sha256": "7f66f4993b671ceee16e2cf6ba60514698bbb1215e65e5b1dcedfcf65f8c3ff2",
+    "tables": [
+      {
+        "content_md5": "9d96f86f354462a74f62e77351085049",
+        "row_count": 14,
+        "schema": "public",
+        "table": "persistence_documents"
+      },
+      {
+        "content_md5": "22267ef44b03e3d0661e74ff61f34889",
+        "row_count": 33,
+        "schema": "public",
+        "table": "persistence_events"
+      },
+      {
+        "content_md5": "cfbfb76429e849ef053eb7ed32a3c268",
+        "row_count": 6,
+        "schema": "public",
+        "table": "persistence_kv"
+      },
+      {
+        "content_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "row_count": 0,
+        "schema": "public",
+        "table": "persistence_migrations"
+      }
+    ]
+  },
+  "discovered_at": "2026-07-16T02:23:00.095057+00:00",
+  "engine": "postgresql",
+  "migration_contract": "leos.database-migration.v1",
+  "migration_state": {
+    "rows": [
+      {
+        "applied_at": "2026-07-16T01:53:17.656687+00:00",
+        "authority_service": "leos-persistence-service",
+        "checksum": "80031f882e91d00a126974ebf31de6e13ff6397b32f6069a4ceac853a0a3e127",
+        "metadata": {
+          "baseline": true,
+          "contract_version": "leos.database-migration.v1",
+          "data_fingerprint_sha256": "7f66f4993b671ceee16e2cf6ba60514698bbb1215e65e5b1dcedfcf65f8c3ff2"
+        },
+        "migration_id": "baseline-1.0.0",
+        "version": "1.0.0"
+      }
+    ],
+    "schema_exists": true,
+    "table_exists": true
+  },
+  "ownership": {
+    "all_table_count": 5,
+    "all_tables": [
+      {
+        "estimated_rows": -1,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "leos_schema_migrations"
+      },
+      {
+        "estimated_rows": 3,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_documents"
+      },
+      {
+        "estimated_rows": 6,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_events"
+      },
+      {
+        "estimated_rows": 3,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_kv"
+      },
+      {
+        "estimated_rows": -1,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_migrations"
+      }
+    ],
+    "ambiguous": false,
+    "dedicated_database": false,
+    "dedicated_schemas": [],
+    "foreign_key_dependency_additions": [],
+    "matched_source_table_count": 4,
+    "owned_table_count": 4,
+    "owned_tables": [
+      {
+        "estimated_rows": 3,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_documents"
+      },
+      {
+        "estimated_rows": 6,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_events"
+      },
+      {
+        "estimated_rows": 3,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_kv"
+      },
+      {
+        "estimated_rows": -1,
+        "owner": "leos",
+        "relkind": "r",
+        "schema": "public",
+        "table": "persistence_migrations"
+      }
+    ],
+    "ownership_strategy": "service-source-table-hints",
+    "source_table_hints": [
+      "__future__",
+      "fastapi",
+      "persistence_documents",
+      "persistence_events",
+      "persistence_kv",
+      "persistence_migrations",
+      "pydantic",
+      "typing"
+    ]
+  },
+  "registry_contract": "leos.schema-authority.registry.v1",
+  "schema": {
+    "fingerprint_contract": "leos.postgresql-schema-fingerprint.v1",
+    "normalization_rules": {
+      "collapse_whitespace": true,
+      "ignore_comments": true,
+      "ignore_psql_meta_commands": true,
+      "ignore_search_path_session_setup": true,
+      "ignore_set_statements": true
+    },
+    "schema_sha256": "80031f882e91d00a126974ebf31de6e13ff6397b32f6069a4ceac853a0a3e127",
+    "statement_line_count": 53
+  }
+}

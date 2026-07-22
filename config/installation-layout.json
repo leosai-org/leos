@@ -1,0 +1,36 @@
+{
+  "contract_version": "leos.installation-layout.v1",
+  "directories": [
+    {
+      "mode": "0750",
+      "path": "config",
+      "purpose": "generated configuration"
+    },
+    {
+      "mode": "0750",
+      "path": "state",
+      "purpose": "persistent installation state"
+    },
+    {
+      "mode": "0750",
+      "path": "logs",
+      "purpose": "service and operator logs"
+    },
+    {
+      "mode": "0750",
+      "path": "runtime",
+      "purpose": "ephemeral runtime coordination"
+    },
+    {
+      "mode": "0750",
+      "path": "journal",
+      "purpose": "transaction journals"
+    },
+    {
+      "mode": "0700",
+      "path": "backups",
+      "purpose": "rollback backups"
+    }
+  ],
+  "layout_version": "1"
+}

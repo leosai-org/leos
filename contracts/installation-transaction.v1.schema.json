@@ -1,0 +1,184 @@
+{
+  "$id": "https://leosai.org/contracts/installation-transaction.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "action_type": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reversible": {
+            "type": "boolean"
+          },
+          "sequence": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sequence",
+          "action_id",
+          "action_type",
+          "reversible"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "confirmation": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "const": true
+        },
+        "token": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "required",
+        "token"
+      ],
+      "type": "object"
+    },
+    "contract_version": {
+      "const": "leos.installation-transaction.v1"
+    },
+    "mode": {
+      "enum": [
+        "offline",
+        "connected"
+      ]
+    },
+    "network": {
+      "additionalProperties": false,
+      "properties": {
+        "acquisition_status": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "external_network_contacted": {
+          "const": false
+        },
+        "permission_granted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "permission_granted",
+        "external_network_contacted",
+        "acquisition_status"
+      ],
+      "type": "object"
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "ownership": {
+      "additionalProperties": false,
+      "properties": {
+        "apply_ownership": {
+          "const": false
+        },
+        "desired_group": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "desired_owner": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "desired_owner",
+        "desired_group",
+        "apply_ownership"
+      ],
+      "type": "object"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "rollback": {
+      "additionalProperties": false,
+      "properties": {
+        "automatic_on_failure": {
+          "const": true
+        },
+        "backup_directory": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "enabled": {
+          "const": true
+        }
+      },
+      "required": [
+        "enabled",
+        "automatic_on_failure",
+        "backup_directory"
+      ],
+      "type": "object"
+    },
+    "selected_profile": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_release": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_tree_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "planned",
+        "running",
+        "complete",
+        "rolled-back",
+        "failed"
+      ]
+    },
+    "target_root": {
+      "minLength": 2,
+      "type": "string"
+    },
+    "transaction_id": {
+      "pattern": "^install-tx-[a-f0-9]{16}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "transaction_id",
+    "plan_id",
+    "node_id",
+    "selected_profile",
+    "source_release",
+    "source_tree_sha256",
+    "target_root",
+    "mode",
+    "state",
+    "confirmation",
+    "network",
+    "ownership",
+    "rollback",
+    "actions"
+  ],
+  "title": "LEOS Installation Transaction",
+  "type": "object"
+}

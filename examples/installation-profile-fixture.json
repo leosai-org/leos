@@ -1,0 +1,85 @@
+{
+  "collected_at": "2026-07-20T00:00:00+00:00",
+  "cpu": {
+    "flags": [
+      "avx2",
+      "sse4_2"
+    ],
+    "logical_cores": 16,
+    "model": "Fixture 16-Core CPU",
+    "physical_cores": 8
+  },
+  "memory": {
+    "available_mb": 24576,
+    "total_mb": 32768
+  },
+  "network": {
+    "default_route_present": true,
+    "hostname": "leos-fixture",
+    "interfaces": [
+      {
+        "loopback": true,
+        "name": "lo",
+        "state": "unknown"
+      },
+      {
+        "loopback": false,
+        "name": "eth0",
+        "state": "up"
+      }
+    ]
+  },
+  "nvidia": {
+    "cuda_version": "12.9",
+    "driver_present": true,
+    "driver_version": "575.64",
+    "gpus": [
+      {
+        "compute_capability": "8.6",
+        "index": 0,
+        "memory_mb": 12288,
+        "name": "NVIDIA RTX 3060",
+        "uuid": "GPU-FIXTURE-3060"
+      }
+    ],
+    "nvidia_container_runtime_present": true
+  },
+  "platform": {
+    "architecture": "x86_64",
+    "machine": "x86_64",
+    "release": "6.8.0",
+    "system": "Linux"
+  },
+  "privileges": {
+    "effective_uid": 1000,
+    "groups": [
+      "docker",
+      "users"
+    ],
+    "is_root": false
+  },
+  "runtime": {
+    "docker": {
+      "binary": "docker",
+      "daemon_accessible": true,
+      "daemon_probe_performed": true,
+      "present": true,
+      "version": "Docker version 28.0.0"
+    },
+    "podman": {
+      "binary": null,
+      "daemon_accessible": false,
+      "daemon_probe_performed": false,
+      "present": false,
+      "version": null
+    },
+    "python_version": "3.12.3",
+    "systemd_present": true,
+    "virtualization": null
+  },
+  "storage": {
+    "free_gb": 240,
+    "path": "/fixture/leos",
+    "total_gb": 500
+  }
+}

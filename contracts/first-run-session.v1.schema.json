@@ -1,0 +1,108 @@
+{
+  "$id": "https://leosai.org/contracts/first-run-session.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confirmation_token": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.first-run-session.v1"
+    },
+    "created_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "current_stage": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "installation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requires_confirmation": {
+      "const": true
+    },
+    "resume_safe": {
+      "const": true
+    },
+    "session_id": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "stages": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "sequence": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "stage_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "complete"
+            ]
+          }
+        },
+        "required": [
+          "sequence",
+          "stage_id",
+          "state"
+        ],
+        "type": "object"
+      },
+      "minItems": 6,
+      "type": "array"
+    },
+    "state": {
+      "enum": [
+        "planned",
+        "complete"
+      ]
+    },
+    "updated_at": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "session_id",
+    "installation_id",
+    "plan_id",
+    "node_id",
+    "state",
+    "current_stage",
+    "stages",
+    "resume_safe",
+    "requires_confirmation",
+    "confirmation_token",
+    "external_network_contacted",
+    "container_daemon_contacted",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "LEOS First-Run Session",
+  "type": "object"
+}

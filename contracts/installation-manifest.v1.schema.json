@@ -1,0 +1,112 @@
+{
+  "$id": "https://leosai.org/contracts/installation-manifest.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.installation-manifest.v1"
+    },
+    "directories": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "files": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "pattern": "^0o[0-7]{3}$",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "size_bytes": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sha256",
+          "size_bytes",
+          "mode"
+        ],
+        "type": "object"
+      },
+      "type": "object"
+    },
+    "installation_id": {
+      "pattern": "^installation-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "installed_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "layout_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "offline",
+        "connected"
+      ]
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "ownership": {
+      "type": "object"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "selected_profile": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_release": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_tree_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "status": {
+      "const": "installed"
+    },
+    "target_root": {
+      "minLength": 2,
+      "type": "string"
+    },
+    "transaction_id": {
+      "pattern": "^install-tx-[a-f0-9]{16}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "installation_id",
+    "transaction_id",
+    "plan_id",
+    "node_id",
+    "selected_profile",
+    "source_release",
+    "source_tree_sha256",
+    "target_root",
+    "mode",
+    "installed_at",
+    "layout_version",
+    "directories",
+    "files",
+    "ownership",
+    "status"
+  ],
+  "title": "LEOS Installation Manifest",
+  "type": "object"
+}

@@ -1,0 +1,111 @@
+{
+  "$id": "https://leosai.org/contracts/installation-execution-journal.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "changed_paths": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.installation-execution-journal.v1"
+    },
+    "entries": {
+      "items": {
+        "properties": {
+          "action_id": {
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence",
+          "action_id",
+          "status"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "plan_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "rollback": {
+      "properties": {
+        "backup_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "backup_root": {
+          "type": "string"
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "performed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "performed",
+        "backup_root",
+        "backup_count"
+      ],
+      "type": "object"
+    },
+    "state": {
+      "enum": [
+        "complete",
+        "rolled-back",
+        "failed"
+      ]
+    },
+    "target_root": {
+      "minLength": 2,
+      "type": "string"
+    },
+    "transaction_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "unchanged_paths": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "contract_version",
+    "transaction_id",
+    "plan_id",
+    "target_root",
+    "state",
+    "entries",
+    "changed_paths",
+    "unchanged_paths",
+    "rollback",
+    "external_network_contacted",
+    "container_daemon_contacted"
+  ],
+  "title": "LEOS Installation Execution Journal",
+  "type": "object"
+}

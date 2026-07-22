@@ -1,0 +1,55 @@
+{
+  "contract_version": "leos.operator-fixture.v1",
+  "resources": {
+    "cpu_cores": 32,
+    "memory_available_mb": 98304,
+    "nvidia_gpu_count": 2,
+    "storage_free_gb": 500
+  },
+  "runtime": {
+    "container_runtime_available": true,
+    "nvidia_runtime_available": true
+  },
+  "services": {
+    "ai-router": {
+      "bindings": [
+        "127.0.0.1:8000"
+      ],
+      "health": "healthy",
+      "state": "running"
+    },
+    "execution-scheduler-service": {
+      "bindings": [
+        "127.0.0.1:8012"
+      ],
+      "health": "healthy",
+      "state": "running"
+    },
+    "leos-persistence-service": {
+      "bindings": [
+        "127.0.0.1:8011"
+      ],
+      "health": "healthy",
+      "state": "running"
+    },
+    "profile-service": {
+      "bindings": [
+        "127.0.0.1:8010"
+      ],
+      "health": "healthy",
+      "state": "running"
+    },
+    "reference-research-content-employee": {
+      "bindings": [],
+      "health": "unknown",
+      "state": "stopped"
+    },
+    "runtime-execution-coordinator-service": {
+      "bindings": [
+        "127.0.0.1:8013"
+      ],
+      "health": "healthy",
+      "state": "running"
+    }
+  }
+}

@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEOS Employee Builder</title>
+<style>
+:root{font-family:system-ui;color-scheme:dark;background:#111827;color:#e5e7eb}
+body{margin:0}header{display:flex;justify-content:space-between;padding:18px 24px;background:#1f2937;border-bottom:1px solid #374151}
+main{max-width:1100px;margin:auto;padding:24px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+button,select,input,textarea{font:inherit}button{border:1px solid #4b5563;background:#1f2937;color:#fff;padding:10px 14px;border-radius:8px;cursor:pointer}
+.primary{background:#2563eb}.success{background:#15803d}section{background:#1f2937;border:1px solid #374151;border-radius:12px;padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}label{display:flex;flex-direction:column;gap:6px}
+input,select,textarea{background:#111827;color:#fff;border:1px solid #4b5563;border-radius:8px;padding:10px}
+textarea{width:100%;box-sizing:border-box;font-family:ui-monospace,monospace}.hidden{display:none}.status{padding:12px;background:#111827;border:1px solid #374151;border-radius:8px;margin-bottom:14px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<header><strong>LEOS Employee Builder</strong><span id="modeLabel">Visual Editor</span></header>
+<main>
+<div class="toolbar">
+<select id="templateSelect"></select>
+<button id="loadTemplate">Load Template</button>
+<button id="toggleMode">Edit YAML</button>
+<button id="validateBtn">Validate</button>
+<button id="saveBtn" class="primary">Save Draft</button>
+<button id="hireBtn" class="success">Hire Employee</button>
+</div>
+<div id="status" class="status">Ready.</div>
+
+<div id="visualEditor">
+<section><h2>Identity</h2><div class="grid">
+<label>Name<input id="displayName"></label>
+<label>Role<input id="role"></label>
+<label>Department<input id="department"></label>
+<label>Timezone<input id="timezone"></label>
+</div><label>Description<textarea id="description" style="min-height:80px"></textarea></label></section>
+
+<section><h2>Provider Policy</h2><div class="grid">
+<label>Mode<select id="providerMode"><option>automatic</option><option>manual</option></select></label>
+<label>Preferred Model<input id="preferredModel"></label>
+<label>Prefer Local<select id="preferLocal"><option value="true">Yes</option><option value="false">No</option></select></label>
+<label>Allow Cloud<select id="allowCloud"><option value="false">No</option><option value="true">Yes</option></select></label>
+</div></section>
+
+<section><h2>Company Knowledge</h2><div class="grid">
+<label>Company-wide<select id="companyWide"><option value="true">Yes</option><option value="false">No</option></select></label>
+<label>Allowed Categories<input id="knowledgeCategories"></label>
+<label>Denied Categories<input id="deniedCategories"></label>
+</div></section>
+
+<section><h2>Memory and Schedule</h2><div class="grid">
+<label>Retention Days<input id="retentionDays" type="number"></label>
+<label>Start Time<input id="startTime" type="time"></label>
+<label>End Time<input id="endTime" type="time"></label>
+<label>After Hours<select id="afterHours"><option>queue</option><option>notify</option><option>ignore</option></select></label>
+</div></section>
+
+<section><h2>Responsibilities / Approval</h2>
+<p>One per line: <code>capability = automatic|required|disabled</code></p>
+<textarea id="responsibilities" style="min-height:220px"></textarea></section>
+
+<section><h2>Integrations</h2>
+<p>One per line: <code>integration = enabled|disabled</code></p>
+<textarea id="integrations" style="min-height:150px"></textarea></section>
+</div>
+
+<div id="yamlEditor" class="hidden"><textarea id="yamlText" style="min-height:600px"></textarea></div>
+</main>
+
+<script>
+let current={},yamlMode=false,currentDraftId=null;
+const $=id=>document.getElementById(id);
+const csv=v=>v.split(",").map(x=>x.trim()).filter(Boolean);
+function pairs(text){const o={};text.split("\n").forEach(l=>{if(!l.trim()||l.trim().startsWith("#"))return;const p=l.split("=");if(p.length>1)o[p[0].trim()]=p.slice(1).join("=").trim()});return o}
+function pairText(o){return Object.entries(o||{}).map(([k,v])=>`${k} = ${v}`).join("\n")}
+function formToObject(){const o=structuredClone(current||{});o.identity=o.identity||{};o.identity.display_name=$("displayName").value;o.identity.role=$("role").value;o.identity.department=$("department").value;o.identity.description=$("description").value;o.identity.timezone=$("timezone").value;
+o.provider_policy=o.provider_policy||{};o.provider_policy.mode=$("providerMode").value;o.provider_policy.preferred_model=$("preferredModel").value||null;o.provider_policy.prefer_local=$("preferLocal").value==="true";o.provider_policy.allow_cloud=$("allowCloud").value==="true";
+o.knowledge=o.knowledge||{};o.knowledge.company_wide=$("companyWide").value==="true";o.knowledge.categories=csv($("knowledgeCategories").value);o.knowledge.denied_categories=csv($("deniedCategories").value);
+o.memory=o.memory||{};o.memory.retention_days=Number($("retentionDays").value||90);o.schedule=o.schedule||{};o.schedule.timezone=$("timezone").value;o.schedule.start_time=$("startTime").value;o.schedule.end_time=$("endTime").value;o.schedule.after_hours=$("afterHours").value;
+o.responsibilities=pairs($("responsibilities").value);o.approval_policy=o.approval_policy||{};o.approval_policy.actions={...o.responsibilities};
+const ints=pairs($("integrations").value);o.integrations={};Object.entries(ints).forEach(([n,s])=>o.integrations[n]={enabled:s==="enabled",connection_id:null});return o}
+function objectToForm(o){current=structuredClone(o);const i=o.identity||{};$("displayName").value=i.display_name||"";$("role").value=i.role||"";$("department").value=i.department||"";$("description").value=i.description||"";$("timezone").value=i.timezone||"America/Denver";
+const p=o.provider_policy||{};$("providerMode").value=p.mode||"automatic";$("preferredModel").value=p.preferred_model||"";$("preferLocal").value=String(p.prefer_local!==false);$("allowCloud").value=String(p.allow_cloud===true);
+const k=o.knowledge||{};$("companyWide").value=String(k.company_wide===true);$("knowledgeCategories").value=(k.categories||[]).join(", ");$("deniedCategories").value=(k.denied_categories||[]).join(", ");
+$("retentionDays").value=(o.memory||{}).retention_days||90;const s=o.schedule||{};$("startTime").value=s.start_time||"08:00";$("endTime").value=s.end_time||"17:00";$("afterHours").value=s.after_hours||"queue";
+$("responsibilities").value=pairText(o.responsibilities||{});const ints={};Object.entries(o.integrations||{}).forEach(([n,c])=>ints[n]=c.enabled?"enabled":"disabled");$("integrations").value=pairText(ints)}
+async function api(path,opt={}){const r=await fetch(path,{headers:{"Content-Type":"application/json",...(opt.headers||{})},...opt});const d=await r.json();if(!r.ok)throw new Error(JSON.stringify(d,null,2));return d}
+async function loadTemplates(){const t=await api("/templates");$("templateSelect").innerHTML=t.map(x=>`<option value="${x.template_id}">${x.name}</option>`).join("")}
+async function loadTemplate(){const t=await api(`/templates/${$("templateSelect").value}`);current={spec_version:"1.0",kind:"EmployeeInstance",template_id:t.template_id,...structuredClone(t.defaults)};objectToForm(current);$("status").textContent=`Loaded ${t.name}`}
+$("loadTemplate").onclick=loadTemplate;
+$("toggleMode").onclick=async()=>{try{if(!yamlMode){current=formToObject();const r=await api("/yaml/render",{method:"POST",body:JSON.stringify({definition:current})});$("yamlText").value=r.yaml;$("visualEditor").classList.add("hidden");$("yamlEditor").classList.remove("hidden");$("toggleMode").textContent="Visual Editor";$("modeLabel").textContent="YAML Editor";yamlMode=true}else{const r=await api("/yaml/parse",{method:"POST",body:JSON.stringify({yaml:$("yamlText").value})});current=r.definition;objectToForm(current);$("yamlEditor").classList.add("hidden");$("visualEditor").classList.remove("hidden");$("toggleMode").textContent="Edit YAML";$("modeLabel").textContent="Visual Editor";yamlMode=false}$("status").textContent="Editor synchronized."}catch(e){$("status").textContent=e.message}};
+$("validateBtn").onclick=async()=>{try{const d=yamlMode?(await api("/yaml/parse",{method:"POST",body:JSON.stringify({yaml:$("yamlText").value})})).definition:formToObject();const r=await api("/validate",{method:"POST",body:JSON.stringify({definition:d})});$("status").textContent=r.valid?"Valid Employee definition.":JSON.stringify(r.errors,null,2)}catch(e){$("status").textContent=e.message}};
+$("saveBtn").onclick=async()=>{try{const d=yamlMode?(await api("/yaml/parse",{method:"POST",body:JSON.stringify({yaml:$("yamlText").value})})).definition:formToObject();const r=await api("/instances",{method:"POST",body:JSON.stringify({definition:d,status:"draft"})});currentDraftId=r.instance.instance_id;$("status").textContent=`Draft saved: ${currentDraftId}`}catch(e){$("status").textContent=e.message}};
+$("hireBtn").onclick=async()=>{try{if(!currentDraftId)throw new Error("Save the draft first.");const r=await api(`/instances/${currentDraftId}/hire`,{method:"POST",body:JSON.stringify({requested_by:"admin"})});$("status").textContent=`Hired ${r.employee.name} (${r.employee.employee_id})`}catch(e){$("status").textContent=e.message}};
+loadTemplates().then(loadTemplate);
+</script>
+</body>
+</html>

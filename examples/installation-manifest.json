@@ -1,0 +1,79 @@
+{
+  "contract_version": "leos.installation-manifest.v1",
+  "directories": [
+    {
+      "mode": "0750",
+      "path": "leos-example/config",
+      "relative_path": "config"
+    },
+    {
+      "mode": "0750",
+      "path": "leos-example/state",
+      "relative_path": "state"
+    },
+    {
+      "mode": "0750",
+      "path": "leos-example/logs",
+      "relative_path": "logs"
+    },
+    {
+      "mode": "0750",
+      "path": "leos-example/runtime",
+      "relative_path": "runtime"
+    },
+    {
+      "mode": "0750",
+      "path": "leos-example/journal",
+      "relative_path": "journal"
+    },
+    {
+      "mode": "0700",
+      "path": "leos-example/backups",
+      "relative_path": "backups"
+    }
+  ],
+  "files": {
+    "config/installation.json": {
+      "mode": "0o640",
+      "sha256": "1ad30f7842fcbe6a3ac248799bb8a02b8cc7e930ffdf827e247732ae7e532474",
+      "size_bytes": 1436
+    },
+    "config/leos.env": {
+      "mode": "0o640",
+      "sha256": "25fda5dc0bc53ad7516bceef11eb785f20f69671a35053b5bbf43f10fcff7c6e",
+      "size_bytes": 318
+    },
+    "state/compute-node-capacity.json": {
+      "mode": "0o640",
+      "sha256": "f5708488db07170c92c526c02b96e60ff1bb602a145ba5e4bd39b99a72e15907",
+      "size_bytes": 485
+    },
+    "state/installation-plan.json": {
+      "mode": "0o640",
+      "sha256": "e30cfbb7c22bef8538af81c9e341eb54a78ab4e6b5610da14bcb549bb1bebc7d",
+      "size_bytes": 3362
+    },
+    "state/ownership-intent.json": {
+      "mode": "0o640",
+      "sha256": "37fd67a313f333bdd700146881fd42e9dddacc6302eae5b3a8007bb243c46651",
+      "size_bytes": 286
+    }
+  },
+  "installation_id": "installation-3bafc36b83beaf6f",
+  "installed_at": "2026-07-20T00:00:00+00:00",
+  "layout_version": "1",
+  "mode": "offline",
+  "node_id": "node-example",
+  "ownership": {
+    "apply_ownership": false,
+    "desired_group": "leos",
+    "desired_owner": "leos"
+  },
+  "plan_id": "plan-4ae24502f43546e5",
+  "selected_profile": "leos-standard-nvidia",
+  "source_release": "0.1.0-dev-preview-rc9",
+  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "status": "installed",
+  "target_root": "leos-example",
+  "transaction_id": "install-tx-c7298fcd2958a6e8"
+}

@@ -1,0 +1,43 @@
+{
+  "blockers": [],
+  "checks": [
+    {
+      "check_id": "security-baseline",
+      "ok": true,
+      "status": "pass"
+    },
+    {
+      "check_id": "required-service-health",
+      "ok": true,
+      "status": "pass"
+    },
+    {
+      "check_id": "diagnostic-storage",
+      "ok": true,
+      "status": "pass"
+    },
+    {
+      "check_id": "bounded-diagnostics",
+      "ok": true,
+      "status": "pass"
+    },
+    {
+      "check_id": "secret-redaction",
+      "ok": true,
+      "status": "pass"
+    }
+  ],
+  "contract_version": "leos.observability-readiness.v1",
+  "generated_at": "2026-07-21T00:00:00+00:00",
+  "readiness_id": "observability-b1d28a66fe5623d6",
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "read_only": true,
+    "secret_material_copied": false
+  },
+  "status": "ready"
+}

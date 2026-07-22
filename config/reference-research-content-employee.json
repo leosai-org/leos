@@ -1,0 +1,114 @@
+{
+  "contract_version": "leos.employee-definition.v2",
+  "employee_id": "research-content-employee",
+  "name": "LEOS Research and Content Employee",
+  "version": "0.1.0",
+  "description": "Plans research, accepts approved sources, extracts evidence, drafts content, revises rejected output, and persists reviewed artifacts with full execution lineage.",
+  "vendor": "Bad Tech Labs LLC",
+  "license": "Open Source",
+  "role": "Research and Content Specialist",
+  "department": "research-content",
+  "manager": null,
+  "capabilities": [
+    "research.plan",
+    "research.sources",
+    "research.extract",
+    "content.outline",
+    "content.draft",
+    "content.review.request",
+    "content.revise",
+    "artifact.persist",
+    "artifact.history",
+    "execution.history"
+  ],
+  "resource_profile": {
+    "enabled": true,
+    "priority_weight": 50,
+    "resource_profile": {
+      "cpu_cores_min": 1,
+      "memory_mb_min": 512,
+      "gpu_required": false,
+      "vram_mb_min": 0,
+      "gpu_uuid_preferences": []
+    },
+    "execution_policy": {
+      "max_concurrent_jobs": 1,
+      "preemptible": true,
+      "allow_preemption": false,
+      "queue_when_unavailable": true,
+      "reservation_ttl_seconds": 900
+    },
+    "node_affinity": {
+      "required_labels": {},
+      "preferred_labels": {}
+    },
+    "fallback_profiles": []
+  },
+  "schedule": {
+    "mode": "always",
+    "timezone": "UTC",
+    "windows": []
+  },
+  "priority": "normal",
+  "model_preferences": [
+    {
+      "provider": "local",
+      "model": "qwen2.5:7b-instruct",
+      "priority": 1
+    }
+  ],
+  "runtime": {
+    "type": "http",
+    "service_id": "reference-research-content-employee",
+    "container": "reference-research-content-employee",
+    "endpoint": "http://reference-research-content-employee:8000",
+    "execute_path": "/execute",
+    "health_path": "/health",
+    "timeout_seconds": 600
+  },
+  "limits": {
+    "max_parallel_jobs": 1,
+    "max_runtime_seconds": 600,
+    "max_retries": 2
+  },
+  "permissions": {
+    "network": false,
+    "internet": false,
+    "memory": true,
+    "event_bus": true,
+    "approved_adapters": [
+      "manual-source-input",
+      "company-knowledge-service"
+    ],
+    "filesystem": {
+      "read": [
+        "/data/reference-research-content-employee"
+      ],
+      "write": [
+        "/data/reference-research-content-employee"
+      ]
+    }
+  },
+  "memory": {
+    "namespace": "research-content.reference",
+    "read": true,
+    "write": true,
+    "retention_days": 365
+  },
+  "adapters": {
+    "preferred": [
+      "manual-source-input",
+      "company-knowledge-service"
+    ],
+    "public_internet": false
+  },
+  "metadata": {
+    "reference_implementation": true,
+    "quick_start_example": true,
+    "tutorial_employee": true,
+    "provider_neutral": true,
+    "independent_review_required": true,
+    "human_approval_required_before_external_publication": true,
+    "phase": "52.3"
+  }
+}

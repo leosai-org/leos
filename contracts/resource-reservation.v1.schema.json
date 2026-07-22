@@ -1,0 +1,31 @@
+{
+  "$id": "https://leosai.org/contracts/resource-reservation.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "contract_version": {
+      "const": "leos.resource-reservation.v1"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "released",
+        "expired",
+        "preempted"
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "reservation_id",
+    "employee_id",
+    "job_id",
+    "node_id",
+    "status",
+    "resources",
+    "created_at",
+    "expires_at"
+  ],
+  "title": "LEOS Resource Reservation",
+  "type": "object"
+}

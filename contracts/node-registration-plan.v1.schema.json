@@ -1,0 +1,60 @@
+{
+  "$id": "https://leosai.org/contracts/node-registration-plan.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "compute_node_capacity": {
+      "type": "object"
+    },
+    "contract_version": {
+      "const": "leos.node-registration-plan.v1"
+    },
+    "created_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "external_network_required": {
+      "const": false
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "node_name": {
+      "maxLength": 80,
+      "minLength": 3,
+      "type": "string"
+    },
+    "node_role": {
+      "const": "primary"
+    },
+    "registration_mode": {
+      "const": "local-bootstrap"
+    },
+    "registration_state": {
+      "const": "planned"
+    },
+    "runtime_endpoint": {
+      "const": "local-router"
+    },
+    "session_id": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "session_id",
+    "node_id",
+    "node_name",
+    "node_role",
+    "registration_mode",
+    "registration_state",
+    "runtime_endpoint",
+    "external_network_required",
+    "compute_node_capacity",
+    "created_at"
+  ],
+  "title": "LEOS Node Registration Plan",
+  "type": "object"
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leosai.org/contracts/employee-definition.v2.schema.json",
+  "title": "LEOS Employee Definition v2",
+  "type": "object",
+  "required": ["employee_id", "name", "role", "department", "capabilities", "resource_profile", "schedule", "priority", "model_preferences"],
+  "properties": {
+    "contract_version": {"const": "leos.employee-definition.v2"},
+    "employee_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "name": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "role": {"type": "string", "minLength": 1},
+    "department": {"type": "string", "minLength": 1},
+    "manager": {"type": ["string", "null"]},
+    "capabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$"}},
+    "priority": {"enum": ["background", "normal", "elevated", "business-critical", "emergency"]},
+    "schedule": {
+      "type": "object",
+      "required": ["mode", "timezone", "windows"],
+      "properties": {
+        "mode": {"enum": ["always", "windows", "disabled"]},
+        "timezone": {"const": "UTC"},
+        "windows": {"type": "array", "items": {"type": "object", "required": ["weekdays", "start", "end", "timezone"]}}
+      },
+      "additionalProperties": false
+    },
+    "resource_profile": {"type": "object"},
+    "model_preferences": {"type": "array", "items": {"type": "object", "required": ["provider", "model", "priority"]}},
+    "runtime": {"type": "object"},
+    "limits": {"type": "object"},
+    "permissions": {"type": "object"},
+    "memory": {"type": "object"},
+    "adapters": {"type": "object"},
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": true
+}

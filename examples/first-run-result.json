@@ -1,0 +1,249 @@
+{
+  "changed": true,
+  "changed_count": 6,
+  "command": "apply",
+  "confirmation_required": true,
+  "confirmation_token": "first-run-7a0168a004401f40",
+  "container_daemon_contacted": false,
+  "contract_version": "leos.first-run-result.v1",
+  "documents": {
+    "config/first-run.json": {
+      "administrator_username": "admin",
+      "container_daemon_contacted": false,
+      "contract_version": "leos.first-run-configuration.v1",
+      "external_network_contacted": false,
+      "first_run_complete": true,
+      "generated_at": "2026-07-20T00:00:00+00:00",
+      "installation_id": "installation-3bafc36b83beaf6f",
+      "node_id": "node-example",
+      "plan_id": "plan-4ae24502f43546e5",
+      "runtime_profile": "local-standard-nvidia",
+      "selected_profile": "leos-standard-nvidia",
+      "session_id": "first-run-7a0168a004401f40"
+    },
+    "state/administrator-bootstrap.json": {
+      "activation_required": true,
+      "contract_version": "leos.administrator-bootstrap.v1",
+      "created_at": "2026-07-20T00:00:00+00:00",
+      "credential_mode": "deferred-activation",
+      "credential_reference": "operator-activation:admin",
+      "display_name": "LEOS Administrator",
+      "email": "admin@example.invalid",
+      "plaintext_secret_persisted": false,
+      "role": "administrator",
+      "session_id": "first-run-7a0168a004401f40",
+      "username": "admin"
+    },
+    "state/first-run-readiness.json": {
+      "blockers": [],
+      "checks": [
+        {
+          "check_id": "installation-manifest-present",
+          "ok": true,
+          "required": true
+        },
+        {
+          "check_id": "installation-plan-matches",
+          "ok": true,
+          "required": true
+        },
+        {
+          "check_id": "administrator-activation-deferred",
+          "ok": true,
+          "required": true
+        },
+        {
+          "check_id": "plaintext-secret-not-persisted",
+          "ok": true,
+          "required": true
+        },
+        {
+          "check_id": "node-registration-planned",
+          "ok": true,
+          "required": true
+        },
+        {
+          "check_id": "runtime-selected",
+          "ok": true,
+          "required": true
+        },
+        {
+          "check_id": "network-permission-consistent",
+          "ok": true,
+          "required": true
+        }
+      ],
+      "container_daemon_contacted": false,
+      "contract_version": "leos.first-run-readiness.v1",
+      "external_network_contacted": false,
+      "generated_at": "2026-07-20T00:00:00+00:00",
+      "installer_handoff": {
+        "confirmation_required": true,
+        "installation_id": "installation-3bafc36b83beaf6f",
+        "manifest_status": "installed",
+        "plan_id": "plan-4ae24502f43546e5"
+      },
+      "session_id": "first-run-7a0168a004401f40",
+      "status": "ready"
+    },
+    "state/first-run-session.json": {
+      "confirmation_token": "first-run-7a0168a004401f40",
+      "container_daemon_contacted": false,
+      "contract_version": "leos.first-run-session.v1",
+      "created_at": "2026-07-20T00:00:00+00:00",
+      "current_stage": "complete",
+      "external_network_contacted": false,
+      "installation_id": "installation-3bafc36b83beaf6f",
+      "node_id": "node-example",
+      "plan_id": "plan-4ae24502f43546e5",
+      "requires_confirmation": true,
+      "resume_safe": true,
+      "session_id": "first-run-7a0168a004401f40",
+      "stages": [
+        {
+          "sequence": 1,
+          "stage_id": "installation",
+          "state": "complete"
+        },
+        {
+          "sequence": 2,
+          "stage_id": "administrator",
+          "state": "complete"
+        },
+        {
+          "sequence": 3,
+          "stage_id": "node",
+          "state": "complete"
+        },
+        {
+          "sequence": 4,
+          "stage_id": "runtime",
+          "state": "complete"
+        },
+        {
+          "sequence": 5,
+          "stage_id": "readiness",
+          "state": "complete"
+        },
+        {
+          "sequence": 6,
+          "stage_id": "complete",
+          "state": "complete"
+        }
+      ],
+      "state": "complete",
+      "updated_at": "2026-07-20T00:00:00+00:00"
+    },
+    "state/node-registration-plan.json": {
+      "compute_node_capacity": {
+        "contract_version": "leos.compute-node-capacity.v1",
+        "cpu_cores_total": 16,
+        "enabled": true,
+        "gpus": [
+          {
+            "enabled": true,
+            "memory_mb_total": 12288,
+            "name": "NVIDIA RTX 3060",
+            "uuid": "GPU-FIXTURE-3060"
+          }
+        ],
+        "labels": {
+          "architecture": "x86_64",
+          "gpu_mode": "nvidia",
+          "installation_profile": "leos-standard-nvidia"
+        },
+        "max_concurrent_jobs": 7,
+        "memory_mb_total": 32768,
+        "node_id": "node-example",
+        "status": "online"
+      },
+      "contract_version": "leos.node-registration-plan.v1",
+      "created_at": "2026-07-20T00:00:00+00:00",
+      "external_network_required": false,
+      "node_id": "node-example",
+      "node_name": "LEOS Primary Node",
+      "node_role": "primary",
+      "registration_mode": "local-bootstrap",
+      "registration_state": "planned",
+      "runtime_endpoint": "local-router",
+      "session_id": "first-run-7a0168a004401f40"
+    },
+    "state/runtime-selection.json": {
+      "acceleration": "nvidia",
+      "chat_model": "qwen2.5:7b-instruct",
+      "container_daemon_contacted": false,
+      "contract_version": "leos.runtime-selection.v1",
+      "created_at": "2026-07-20T00:00:00+00:00",
+      "embedding_model": "BAAI/bge-small-en-v1.5",
+      "external_network_contacted": false,
+      "model_runtime": "local-openai-compatible",
+      "network_permission_granted": false,
+      "profile_id": "local-standard-nvidia",
+      "provider_type": "local",
+      "session_id": "first-run-7a0168a004401f40",
+      "speech_runtime": "disabled"
+    }
+  },
+  "external_network_contacted": false,
+  "idempotent": false,
+  "ok": true,
+  "plaintext_secret_persisted": false,
+  "production_network_attached": false,
+  "production_state_accessed": false,
+  "readiness": {
+    "blockers": [],
+    "checks": [
+      {
+        "check_id": "installation-manifest-present",
+        "ok": true,
+        "required": true
+      },
+      {
+        "check_id": "installation-plan-matches",
+        "ok": true,
+        "required": true
+      },
+      {
+        "check_id": "administrator-activation-deferred",
+        "ok": true,
+        "required": true
+      },
+      {
+        "check_id": "plaintext-secret-not-persisted",
+        "ok": true,
+        "required": true
+      },
+      {
+        "check_id": "node-registration-planned",
+        "ok": true,
+        "required": true
+      },
+      {
+        "check_id": "runtime-selected",
+        "ok": true,
+        "required": true
+      },
+      {
+        "check_id": "network-permission-consistent",
+        "ok": true,
+        "required": true
+      }
+    ],
+    "container_daemon_contacted": false,
+    "contract_version": "leos.first-run-readiness.v1",
+    "external_network_contacted": false,
+    "generated_at": "2026-07-20T00:00:00+00:00",
+    "installer_handoff": {
+      "confirmation_required": true,
+      "installation_id": "installation-3bafc36b83beaf6f",
+      "manifest_status": "installed",
+      "plan_id": "plan-4ae24502f43546e5"
+    },
+    "session_id": "first-run-7a0168a004401f40",
+    "status": "ready"
+  },
+  "session_id": "first-run-7a0168a004401f40",
+  "state": "complete",
+  "target_root": "leos-first-run-example",
+  "unchanged_count": 0
+}

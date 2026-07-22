@@ -1,0 +1,367 @@
+{
+  "$defs": {
+    "containerRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "binary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "daemon_accessible": {
+          "type": "boolean"
+        },
+        "daemon_probe_performed": {
+          "type": "boolean"
+        },
+        "present": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "present",
+        "binary",
+        "version",
+        "daemon_accessible",
+        "daemon_probe_performed"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://leosai.org/contracts/host-capability-inventory.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "collected_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "leos.host-capability-inventory.v1"
+    },
+    "cpu": {
+      "additionalProperties": false,
+      "properties": {
+        "flags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "logical_cores": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "model": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "physical_cores": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "logical_cores",
+        "physical_cores",
+        "model",
+        "flags"
+      ],
+      "type": "object"
+    },
+    "inventory_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "memory": {
+      "additionalProperties": false,
+      "properties": {
+        "available_mb": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "total_mb": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_mb",
+        "available_mb"
+      ],
+      "type": "object"
+    },
+    "network": {
+      "additionalProperties": false,
+      "properties": {
+        "default_route_present": {
+          "type": "boolean"
+        },
+        "hostname": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "interfaces": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "loopback": {
+                "type": "boolean"
+              },
+              "name": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "state": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "state",
+              "loopback"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "hostname",
+        "interfaces",
+        "default_route_present"
+      ],
+      "type": "object"
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "nvidia": {
+      "additionalProperties": false,
+      "properties": {
+        "cuda_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "driver_present": {
+          "type": "boolean"
+        },
+        "driver_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gpus": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "compute_capability": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "index": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "memory_mb": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "name": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "uuid": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "index",
+              "uuid",
+              "name",
+              "memory_mb",
+              "compute_capability"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "nvidia_container_runtime_present": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "driver_present",
+        "driver_version",
+        "cuda_version",
+        "gpus",
+        "nvidia_container_runtime_present"
+      ],
+      "type": "object"
+    },
+    "platform": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "machine": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "release": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "system": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "system",
+        "release",
+        "architecture",
+        "machine"
+      ],
+      "type": "object"
+    },
+    "privileges": {
+      "additionalProperties": false,
+      "properties": {
+        "effective_uid": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "groups": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "is_root": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "effective_uid",
+        "is_root",
+        "groups"
+      ],
+      "type": "object"
+    },
+    "probe": {
+      "additionalProperties": false,
+      "properties": {
+        "container_daemon_contacted": {
+          "type": "boolean"
+        },
+        "external_network_contacted": {
+          "const": false
+        },
+        "mode": {
+          "enum": [
+            "live",
+            "fixture"
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "container_daemon_contacted",
+        "external_network_contacted"
+      ],
+      "type": "object"
+    },
+    "runtime": {
+      "additionalProperties": true,
+      "properties": {
+        "docker": {
+          "$ref": "#/$defs/containerRuntime"
+        },
+        "podman": {
+          "$ref": "#/$defs/containerRuntime"
+        },
+        "python_version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "systemd_present": {
+          "type": "boolean"
+        },
+        "virtualization": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "python_version",
+        "systemd_present",
+        "docker",
+        "podman"
+      ],
+      "type": "object"
+    },
+    "storage": {
+      "additionalProperties": false,
+      "properties": {
+        "free_gb": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "total_gb": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "total_gb",
+        "free_gb"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "contract_version",
+    "inventory_id",
+    "collected_at",
+    "node_id",
+    "platform",
+    "cpu",
+    "memory",
+    "storage",
+    "runtime",
+    "nvidia",
+    "network",
+    "privileges",
+    "probe"
+  ],
+  "title": "LEOS Host Capability Inventory",
+  "type": "object"
+}

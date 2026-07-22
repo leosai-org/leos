@@ -1,0 +1,52 @@
+{
+  "$id": "https://leosai.org/contracts/compute-node-capacity.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "contract_version": {
+      "const": "leos.compute-node-capacity.v1"
+    },
+    "cpu_cores_total": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "gpus": {
+      "type": "array"
+    },
+    "labels": {
+      "type": "object"
+    },
+    "max_concurrent_jobs": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "memory_mb_total": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "online",
+        "offline",
+        "draining"
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "node_id",
+    "status",
+    "cpu_cores_total",
+    "memory_mb_total",
+    "gpus"
+  ],
+  "title": "LEOS Compute Node Capacity",
+  "type": "object"
+}

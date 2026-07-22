@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leosai.org/contracts/reference-research-content-run.v1.schema.json",
+  "title": "LEOS Reference Research and Content Run",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "run_id",
+    "goal_id",
+    "employee_id",
+    "state",
+    "priority",
+    "request",
+    "governance",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "contract_version": {"const": "leos.reference-research-content-run.v1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "goal_id": {"type": "string", "minLength": 1},
+    "employee_id": {"const": "research-content-employee"},
+    "state": {
+      "enum": [
+        "accepted",
+        "planning",
+        "researching",
+        "drafting",
+        "reviewing",
+        "revising",
+        "persisting",
+        "paused",
+        "interrupted",
+        "complete",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "priority": {
+      "enum": ["background", "normal", "elevated", "business-critical", "emergency"]
+    },
+    "request": {"type": "object"},
+    "governance": {
+      "type": "object",
+      "required": [
+        "employee_eligibility",
+        "resource_admission",
+        "resource_reservation",
+        "execution",
+        "verified"
+      ]
+    },
+    "result": {"type": ["object", "null"]},
+    "revision_count": {"type": "integer", "minimum": 0}
+  },
+  "additionalProperties": true
+}

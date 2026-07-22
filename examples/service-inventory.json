@@ -1,0 +1,92 @@
+{
+  "contract_version": "leos.service-inventory.v1",
+  "daemon_contact_authorized": false,
+  "daemon_contacted": false,
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "services": [
+    {
+      "bindings": [
+        "127.0.0.1:8000"
+      ],
+      "default_port": 8000,
+      "display_name": "AI Router",
+      "health": "healthy",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "ai-router",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8010"
+      ],
+      "default_port": 8010,
+      "display_name": "Profile Service",
+      "health": "healthy",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "profile-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8011"
+      ],
+      "default_port": 8011,
+      "display_name": "Persistence Service",
+      "health": "healthy",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "leos-persistence-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8012"
+      ],
+      "default_port": 8012,
+      "display_name": "Execution Scheduler",
+      "health": "healthy",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "execution-scheduler-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8013"
+      ],
+      "default_port": 8013,
+      "display_name": "Runtime Coordinator",
+      "health": "healthy",
+      "health_path": "/health",
+      "required": true,
+      "service_id": "runtime-execution-coordinator-service",
+      "source": "fixture",
+      "state": "running"
+    },
+    {
+      "bindings": [],
+      "default_port": 8090,
+      "display_name": "Reference Research Employee",
+      "health": "unknown",
+      "health_path": "/health",
+      "required": false,
+      "service_id": "reference-research-content-employee",
+      "source": "fixture",
+      "state": "stopped"
+    }
+  ],
+  "source": "fixture",
+  "summary": {
+    "healthy": 5,
+    "required_unhealthy": 0,
+    "total": 6,
+    "unhealthy": 0,
+    "unknown": 1
+  }
+}

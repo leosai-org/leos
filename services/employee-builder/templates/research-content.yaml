@@ -1,0 +1,67 @@
+template_version: "1.0"
+template_id: research-content-employee
+name: Research and Content Employee
+description: Researches approved source material, drafts content, handles review findings, and persists versioned artifacts.
+category: research-content
+defaults:
+  identity:
+    display_name: Riley
+    role: Research and Content Specialist
+    department: research-content
+    description: Produces evidence-backed, reviewable content from approved source material.
+    timezone: UTC
+    languages: [English]
+  responsibilities:
+    research.plan: automatic
+    research.sources: automatic
+    research.extract: automatic
+    content.outline: automatic
+    content.draft: automatic
+    content.review.request: automatic
+    content.revise: automatic
+    artifact.persist: automatic
+    artifact.history: automatic
+    execution.history: automatic
+  integrations:
+    company_knowledge: {enabled: true, connection_id: null}
+    approved_source_adapter: {enabled: true, connection_id: manual-source-input}
+  knowledge:
+    company_wide: true
+    categories: [company-handbook, products, engineering, research]
+    denied_categories: [payroll, employee-records, banking, legal-private]
+  provider_policy:
+    mode: automatic
+    prefer_local: true
+    allow_cloud: false
+    preferred_model: qwen2.5:7b-instruct
+    required_privacy: {company_data_stays_local: true}
+  memory: {read: true, write: true, retention_days: 365}
+  approval_policy:
+    default: required
+    actions:
+      research.plan: automatic
+      research.sources: automatic
+      research.extract: automatic
+      content.outline: automatic
+      content.draft: automatic
+      content.review.request: automatic
+      content.revise: automatic
+      artifact.persist: automatic
+      artifact.history: automatic
+      execution.history: automatic
+      content.publish: denied
+  schedule:
+    mode: always
+    timezone: UTC
+    windows: []
+  priority: normal
+  advanced:
+    max_parallel_jobs: 1
+    max_runtime_seconds: 600
+    max_retries: 2
+    cpu_cores_min: 1
+    memory_mb_min: 512
+    gpu_required: false
+    vram_mb_min: 0
+    internet: false
+    filesystem_write: true

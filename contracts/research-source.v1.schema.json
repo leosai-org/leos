@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leosai.org/contracts/research-source.v1.schema.json",
+  "title": "LEOS Research Source",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "source_id",
+    "run_id",
+    "title",
+    "content",
+    "content_sha256",
+    "provenance",
+    "created_at"
+  ],
+  "properties": {
+    "contract_version": {"const": "leos.research-source.v1"},
+    "source_id": {"type": "string", "minLength": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "url": {"type": ["string", "null"]},
+    "author": {"type": ["string", "null"]},
+    "published_at": {"type": ["string", "null"]},
+    "content": {"type": "string", "minLength": 1},
+    "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "provenance": {
+      "type": "object",
+      "required": ["adapter_id", "approved", "content_sha256"],
+      "properties": {
+        "adapter_id": {"type": "string", "minLength": 1},
+        "approved": {"const": true},
+        "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      },
+      "additionalProperties": true
+    },
+    "created_at": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": true
+}

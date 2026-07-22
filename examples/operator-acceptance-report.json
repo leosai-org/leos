@@ -1,0 +1,91 @@
+{
+  "acceptance_id": "operator-acceptance-example",
+  "contract_version": "leos.operator-acceptance-report.v1",
+  "flow_count": 9,
+  "flows": [
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "standard-nvidia-clean-install",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "standard-cpu-clean-install",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "minimum-degraded-install",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "unsupported-host-rejection",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "remote-runtime-authorization",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "security-negative-fixtures",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "observability-negative-fixtures",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "rollback-and-resume",
+      "ok": true
+    },
+    {
+      "checks": {
+        "example": true
+      },
+      "flow_id": "diagnostics-safety",
+      "ok": true
+    }
+  ],
+  "generated_at": "2026-07-21T00:00:00+00:00",
+  "ok": true,
+  "passed_flow_count": 9,
+  "phase": "52.4.6",
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "secret_material_copied": false
+  },
+  "source_root": "release-candidate/source",
+  "target_release": "0.1.0-dev-preview-rc10",
+  "validator_summary": {
+    "actual_total_tests": 128,
+    "actual_total_validation_checks": 681,
+    "expected_total_tests": 128,
+    "expected_total_validation_checks": 681,
+    "validators": {}
+  }
+}

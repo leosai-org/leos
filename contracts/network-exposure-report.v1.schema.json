@@ -1,0 +1,96 @@
+{
+  "$id": "https://leosai.org/contracts/network-exposure-report.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.network-exposure-report.v1"
+    },
+    "counts": {
+      "type": "object"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "findings": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "report_id": {
+      "pattern": "^network-report-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "safety": {
+      "additionalProperties": false,
+      "properties": {
+        "container_daemon_contacted": {
+          "const": false
+        },
+        "external_network_contacted": {
+          "const": false
+        },
+        "plaintext_secret_exposed": {
+          "const": false
+        },
+        "production_network_attached": {
+          "const": false
+        },
+        "production_state_accessed": {
+          "const": false
+        },
+        "read_only": {
+          "type": "boolean"
+        },
+        "secret_material_copied": {
+          "const": false
+        }
+      },
+      "required": [
+        "read_only",
+        "external_network_contacted",
+        "container_daemon_contacted",
+        "plaintext_secret_exposed",
+        "secret_material_copied",
+        "production_state_accessed",
+        "production_network_attached"
+      ],
+      "type": "object"
+    },
+    "services": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "warn",
+        "fail"
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "report_id",
+    "status",
+    "services",
+    "findings",
+    "counts",
+    "external_network_contacted",
+    "container_daemon_contacted",
+    "generated_at",
+    "safety"
+  ],
+  "title": "LEOS Network Exposure Report",
+  "type": "object"
+}

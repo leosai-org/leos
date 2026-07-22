@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://leosai.org/security
+    about: Report vulnerabilities privately. Do not open a public issue.
+  - name: Documentation
+    url: https://leosai.org/docs
+    about: Read installation and operating documentation.

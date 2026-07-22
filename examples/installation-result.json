@@ -1,0 +1,220 @@
+{
+  "changed": true,
+  "changed_count": 6,
+  "container_daemon_contacted": false,
+  "contract_version": "leos.installation-result.v1",
+  "external_network_contacted": false,
+  "idempotent": false,
+  "journal": {
+    "changed_paths": [
+      "config/installation.json",
+      "config/leos.env",
+      "state/compute-node-capacity.json",
+      "state/installation-manifest.json",
+      "state/installation-plan.json",
+      "state/ownership-intent.json"
+    ],
+    "container_daemon_contacted": false,
+    "contract_version": "leos.installation-execution-journal.v1",
+    "entries": [
+      {
+        "action_id": "acquire-install-lock",
+        "sequence": 1,
+        "status": "complete"
+      },
+      {
+        "action_id": "prepare-directory-layout",
+        "sequence": 2,
+        "status": "complete"
+      },
+      {
+        "action_id": "write-bootstrap-state",
+        "sequence": 3,
+        "status": "complete"
+      },
+      {
+        "action_id": "write-installation-manifest",
+        "sequence": 4,
+        "status": "complete"
+      }
+    ],
+    "external_network_contacted": false,
+    "plan_id": "plan-4ae24502f43546e5",
+    "rollback": {
+      "backup_count": 0,
+      "backup_root": "leos-example/backups/install-tx-c7298fcd2958a6e8",
+      "performed": false
+    },
+    "state": "complete",
+    "target_root": "leos-example",
+    "transaction_id": "install-tx-c7298fcd2958a6e8",
+    "unchanged_paths": []
+  },
+  "journal_path": "leos-example/journal/install-tx-c7298fcd2958a6e8.json",
+  "manifest": {
+    "contract_version": "leos.installation-manifest.v1",
+    "directories": [
+      {
+        "mode": "0750",
+        "path": "leos-example/config",
+        "relative_path": "config"
+      },
+      {
+        "mode": "0750",
+        "path": "leos-example/state",
+        "relative_path": "state"
+      },
+      {
+        "mode": "0750",
+        "path": "leos-example/logs",
+        "relative_path": "logs"
+      },
+      {
+        "mode": "0750",
+        "path": "leos-example/runtime",
+        "relative_path": "runtime"
+      },
+      {
+        "mode": "0750",
+        "path": "leos-example/journal",
+        "relative_path": "journal"
+      },
+      {
+        "mode": "0700",
+        "path": "leos-example/backups",
+        "relative_path": "backups"
+      }
+    ],
+    "files": {
+      "config/installation.json": {
+        "mode": "0o640",
+        "sha256": "1ad30f7842fcbe6a3ac248799bb8a02b8cc7e930ffdf827e247732ae7e532474",
+        "size_bytes": 1436
+      },
+      "config/leos.env": {
+        "mode": "0o640",
+        "sha256": "25fda5dc0bc53ad7516bceef11eb785f20f69671a35053b5bbf43f10fcff7c6e",
+        "size_bytes": 318
+      },
+      "state/compute-node-capacity.json": {
+        "mode": "0o640",
+        "sha256": "f5708488db07170c92c526c02b96e60ff1bb602a145ba5e4bd39b99a72e15907",
+        "size_bytes": 485
+      },
+      "state/installation-plan.json": {
+        "mode": "0o640",
+        "sha256": "e30cfbb7c22bef8538af81c9e341eb54a78ab4e6b5610da14bcb549bb1bebc7d",
+        "size_bytes": 3362
+      },
+      "state/ownership-intent.json": {
+        "mode": "0o640",
+        "sha256": "37fd67a313f333bdd700146881fd42e9dddacc6302eae5b3a8007bb243c46651",
+        "size_bytes": 286
+      }
+    },
+    "installation_id": "installation-3bafc36b83beaf6f",
+    "installed_at": "2026-07-20T00:00:00+00:00",
+    "layout_version": "1",
+    "mode": "offline",
+    "node_id": "node-example",
+    "ownership": {
+      "apply_ownership": false,
+      "desired_group": "leos",
+      "desired_owner": "leos"
+    },
+    "plan_id": "plan-4ae24502f43546e5",
+    "selected_profile": "leos-standard-nvidia",
+    "source_release": "0.1.0-dev-preview-rc9",
+    "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+    "status": "installed",
+    "target_root": "leos-example",
+    "transaction_id": "install-tx-c7298fcd2958a6e8"
+  },
+  "manifest_path": "leos-example/state/installation-manifest.json",
+  "ok": true,
+  "production_network_attached": false,
+  "production_state_accessed": false,
+  "state": "complete",
+  "transaction": {
+    "actions": [
+      {
+        "action_id": "acquire-install-lock",
+        "action_type": "lock",
+        "reversible": true,
+        "sequence": 1
+      },
+      {
+        "action_id": "prepare-directory-layout",
+        "action_type": "filesystem",
+        "reversible": true,
+        "sequence": 2
+      },
+      {
+        "action_id": "write-installation-plan",
+        "action_type": "configuration",
+        "reversible": true,
+        "sequence": 3
+      },
+      {
+        "action_id": "write-runtime-environment",
+        "action_type": "configuration",
+        "reversible": true,
+        "sequence": 4
+      },
+      {
+        "action_id": "write-compute-node-capacity",
+        "action_type": "configuration",
+        "reversible": true,
+        "sequence": 5
+      },
+      {
+        "action_id": "write-ownership-intent",
+        "action_type": "ownership",
+        "reversible": true,
+        "sequence": 6
+      },
+      {
+        "action_id": "write-installation-manifest",
+        "action_type": "manifest",
+        "reversible": true,
+        "sequence": 7
+      },
+      {
+        "action_id": "finalize-execution-journal",
+        "action_type": "journal",
+        "reversible": false,
+        "sequence": 8
+      }
+    ],
+    "confirmation": {
+      "required": true,
+      "token": "plan-4ae24502f43546e5"
+    },
+    "contract_version": "leos.installation-transaction.v1",
+    "mode": "offline",
+    "network": {
+      "acquisition_status": "local-source-verified",
+      "external_network_contacted": false,
+      "permission_granted": false
+    },
+    "node_id": "node-example",
+    "ownership": {
+      "apply_ownership": false,
+      "desired_group": "leos",
+      "desired_owner": "leos"
+    },
+    "plan_id": "plan-4ae24502f43546e5",
+    "rollback": {
+      "automatic_on_failure": true,
+      "backup_directory": "leos-example/backups/install-tx-c7298fcd2958a6e8",
+      "enabled": true
+    },
+    "selected_profile": "leos-standard-nvidia",
+    "source_release": "0.1.0-dev-preview-rc9",
+    "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+    "state": "complete",
+    "target_root": "leos-example",
+    "transaction_id": "install-tx-c7298fcd2958a6e8"
+  },
+  "unchanged_count": 0
+}

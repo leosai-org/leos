@@ -1,0 +1,69 @@
+template_version: "1.0"
+template_id: communications-employee
+name: Communications Employee
+description: Handles company email, calendar, contacts, summaries, follow-ups, and approved replies.
+category: communications
+defaults:
+  identity:
+    display_name: Sam
+    role: Communications Specialist
+    department: communications
+    description: Handles company communications and scheduling.
+    timezone: America/Denver
+    languages: [English]
+  responsibilities:
+    email.read: automatic
+    email.classify: automatic
+    email.draft: automatic
+    email.send: approval_required
+    calendar.read: automatic
+    calendar.propose: automatic
+    calendar.create: approval_required
+    calendar.cancel: approval_required
+    contacts.read: automatic
+    communications.summarize: automatic
+    communications.escalate: automatic
+  integrations:
+    gmail: {enabled: false, connection_id: null}
+    google_calendar: {enabled: false, connection_id: null}
+    google_contacts: {enabled: false, connection_id: null}
+    microsoft_365: {enabled: false, connection_id: null}
+    sms: {enabled: false, connection_id: null}
+    voicemail: {enabled: false, connection_id: null}
+  knowledge:
+    company_wide: true
+    categories: [company-handbook, communications, products, customer-faq]
+    denied_categories: [payroll, employee-records, banking, legal-private]
+  provider_policy:
+    mode: automatic
+    prefer_local: true
+    allow_cloud: false
+    preferred_model: null
+    required_privacy: {company_data_stays_local: true}
+  memory: {read: true, write: true, retention_days: 90}
+  approval_policy:
+    default: required
+    actions:
+      email.read: automatic
+      email.classify: automatic
+      email.draft: automatic
+      email.send: required
+      calendar.read: automatic
+      calendar.propose: automatic
+      calendar.create: required
+      calendar.cancel: required
+      contacts.read: automatic
+      communications.summarize: automatic
+      communications.escalate: automatic
+  schedule:
+    timezone: America/Denver
+    days: [monday, tuesday, wednesday, thursday, friday]
+    start_time: "08:00"
+    end_time: "17:00"
+    after_hours: queue
+  advanced:
+    max_parallel_jobs: 2
+    max_runtime_seconds: 300
+    max_retries: 2
+    internet: false
+    filesystem_write: false

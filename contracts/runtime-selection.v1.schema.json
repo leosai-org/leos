@@ -1,0 +1,77 @@
+{
+  "$id": "https://leosai.org/contracts/runtime-selection.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "acceleration": {
+      "enum": [
+        "cpu",
+        "nvidia",
+        "remote"
+      ]
+    },
+    "chat_model": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "container_daemon_contacted": {
+      "const": false
+    },
+    "contract_version": {
+      "const": "leos.runtime-selection.v1"
+    },
+    "created_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "embedding_model": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "model_runtime": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "network_permission_granted": {
+      "type": "boolean"
+    },
+    "profile_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "provider_type": {
+      "enum": [
+        "local",
+        "external-api"
+      ]
+    },
+    "session_id": {
+      "pattern": "^first-run-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "speech_runtime": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "session_id",
+    "profile_id",
+    "provider_type",
+    "acceleration",
+    "model_runtime",
+    "chat_model",
+    "embedding_model",
+    "speech_runtime",
+    "network_permission_granted",
+    "external_network_contacted",
+    "container_daemon_contacted",
+    "created_at"
+  ],
+  "title": "LEOS Runtime Selection",
+  "type": "object"
+}

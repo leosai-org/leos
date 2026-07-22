@@ -1,0 +1,30 @@
+{
+  "contract_version": "leos.metrics-snapshot.v1",
+  "generated_at": "2026-07-21T00:00:00+00:00",
+  "metrics": {
+    "cpu_cores": 16,
+    "load_average": [
+      0.25,
+      0.5,
+      0.75
+    ],
+    "memory_available_mb": 24576,
+    "memory_total_mb": 32768,
+    "nvidia_gpu_count": 1,
+    "nvidia_vram_total_mb": 24576,
+    "storage_free_gb": 180,
+    "storage_total_gb": 500
+  },
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "read_only": true,
+    "secret_material_copied": false
+  },
+  "snapshot_id": "metrics-ee609b14bd79bb44",
+  "source": "fixture",
+  "target_root": "leos-installation"
+}

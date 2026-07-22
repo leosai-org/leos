@@ -1,0 +1,1287 @@
+{
+  "application_schema": {
+    "indexes": [
+      {
+        "name": "idx_scheduler_jobs_queue",
+        "sql": "CREATE INDEX idx_scheduler_jobs_queue ON scheduler_jobs(state, priority, queued_at)",
+        "table": "scheduler_jobs"
+      },
+      {
+        "name": "idx_scheduler_jobs_worker",
+        "sql": "CREATE INDEX idx_scheduler_jobs_worker ON scheduler_jobs(assigned_worker_id, state)",
+        "table": "scheduler_jobs"
+      },
+      {
+        "name": "idx_scheduler_leases_active",
+        "sql": "CREATE INDEX idx_scheduler_leases_active ON scheduler_leases(state, expires_at)",
+        "table": "scheduler_leases"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "event_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "event_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "'info'",
+            "name": "severity",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "'{}'",
+            "name": "details_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_scheduler_events_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_events",
+        "sql": "CREATE TABLE scheduler_events ( event_id TEXT PRIMARY KEY, event_type TEXT NOT NULL, job_id TEXT, worker_id TEXT, severity TEXT NOT NULL DEFAULT 'info', details_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "mission_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "step_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "capability_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "job_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "50",
+            "name": "priority",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "'queued'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": "0",
+            "name": "cpu_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "0",
+            "name": "ram_mb_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 11,
+            "dflt_value": "0",
+            "name": "gpu_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 12,
+            "dflt_value": "0",
+            "name": "vram_mb_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 13,
+            "dflt_value": "'{}'",
+            "name": "required_labels_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": "'{}'",
+            "name": "payload_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": "3",
+            "name": "max_attempts",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 16,
+            "dflt_value": "0",
+            "name": "attempt_count",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "not_before",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 18,
+            "dflt_value": null,
+            "name": "assigned_worker_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 19,
+            "dflt_value": null,
+            "name": "lease_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 20,
+            "dflt_value": null,
+            "name": "lease_expires_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 21,
+            "dflt_value": null,
+            "name": "result_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 22,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 23,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 24,
+            "dflt_value": null,
+            "name": "queued_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 25,
+            "dflt_value": null,
+            "name": "started_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 26,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 27,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_scheduler_jobs_worker",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "idx_scheduler_jobs_queue",
+            "origin": "c",
+            "partial": 0,
+            "seq": 1,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_scheduler_jobs_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 2,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_jobs",
+        "sql": "CREATE TABLE scheduler_jobs ( job_id TEXT PRIMARY KEY, mission_id TEXT, workflow_id TEXT, step_id TEXT, employee_id TEXT, capability_id TEXT, job_type TEXT NOT NULL, priority INTEGER NOT NULL DEFAULT 50, state TEXT NOT NULL DEFAULT 'queued', cpu_required REAL NOT NULL DEFAULT 0, ram_mb_required INTEGER NOT NULL DEFAULT 0, gpu_required INTEGER NOT NULL DEFAULT 0, vram_mb_required INTEGER NOT NULL DEFAULT 0, required_labels_json TEXT NOT NULL DEFAULT '{}', payload_json TEXT NOT NULL DEFAULT '{}', max_attempts INTEGER NOT NULL DEFAULT 3, attempt_count INTEGER NOT NULL DEFAULT 0, not_before TEXT, assigned_worker_id TEXT, lease_id TEXT, lease_expires_at TEXT, result_json TEXT, error TEXT, created_at TEXT NOT NULL, queued_at TEXT NOT NULL, started_at TEXT, completed_at TEXT, updated_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "lease_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": "'active'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "0",
+            "name": "cpu_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "0",
+            "name": "ram_mb_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 6,
+            "dflt_value": "0",
+            "name": "gpu_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "0",
+            "name": "vram_mb_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "acquired_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "expires_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "released_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "release_reason",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_scheduler_leases_active",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_scheduler_leases_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_leases",
+        "sql": "CREATE TABLE scheduler_leases ( lease_id TEXT PRIMARY KEY, job_id TEXT NOT NULL, worker_id TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'active', cpu_reserved REAL NOT NULL DEFAULT 0, ram_mb_reserved INTEGER NOT NULL DEFAULT 0, gpu_reserved INTEGER NOT NULL DEFAULT 0, vram_mb_reserved INTEGER NOT NULL DEFAULT 0, acquired_at TEXT NOT NULL, expires_at TEXT NOT NULL, released_at TEXT, release_reason TEXT )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "name",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "worker_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "base_url",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "'online'",
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "0",
+            "name": "cpu_total",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 6,
+            "dflt_value": "0",
+            "name": "cpu_available",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "0",
+            "name": "ram_mb_total",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "0",
+            "name": "ram_mb_available",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 9,
+            "dflt_value": "0",
+            "name": "gpu_count",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "0",
+            "name": "vram_mb_total",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 11,
+            "dflt_value": "0",
+            "name": "vram_mb_available",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 12,
+            "dflt_value": "1",
+            "name": "max_concurrent_jobs",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 13,
+            "dflt_value": "0",
+            "name": "active_jobs",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 14,
+            "dflt_value": "'{}'",
+            "name": "labels_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": "'{}'",
+            "name": "metadata_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 16,
+            "dflt_value": null,
+            "name": "last_heartbeat_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 18,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_scheduler_workers_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_workers",
+        "sql": "CREATE TABLE scheduler_workers ( worker_id TEXT PRIMARY KEY, name TEXT NOT NULL, worker_type TEXT NOT NULL, base_url TEXT, status TEXT NOT NULL DEFAULT 'online', cpu_total REAL NOT NULL DEFAULT 0, cpu_available REAL NOT NULL DEFAULT 0, ram_mb_total INTEGER NOT NULL DEFAULT 0, ram_mb_available INTEGER NOT NULL DEFAULT 0, gpu_count INTEGER NOT NULL DEFAULT 0, vram_mb_total INTEGER NOT NULL DEFAULT 0, vram_mb_available INTEGER NOT NULL DEFAULT 0, max_concurrent_jobs INTEGER NOT NULL DEFAULT 1, active_jobs INTEGER NOT NULL DEFAULT 0, labels_json TEXT NOT NULL DEFAULT '{}', metadata_json TEXT NOT NULL DEFAULT '{}', last_heartbeat_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL )"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "application_schema_sha256": "fabd45f961b745e9ab448749eab18f8bc54fc28e6811bb23734e23dc0bfa0176",
+  "authority_service": "execution-scheduler-service",
+  "baseline_contract": "leos.schema-baseline.v2",
+  "captured_at": "2026-07-16T00:47:16.900970+00:00",
+  "database": "/data/execution-scheduler/execution-scheduler.db",
+  "engine": "sqlite",
+  "full_schema": {
+    "indexes": [
+      {
+        "name": "idx_scheduler_jobs_queue",
+        "sql": "CREATE INDEX idx_scheduler_jobs_queue ON scheduler_jobs(state, priority, queued_at)",
+        "table": "scheduler_jobs"
+      },
+      {
+        "name": "idx_scheduler_jobs_worker",
+        "sql": "CREATE INDEX idx_scheduler_jobs_worker ON scheduler_jobs(assigned_worker_id, state)",
+        "table": "scheduler_jobs"
+      },
+      {
+        "name": "idx_scheduler_leases_active",
+        "sql": "CREATE INDEX idx_scheduler_leases_active ON scheduler_leases(state, expires_at)",
+        "table": "scheduler_leases"
+      }
+    ],
+    "journal_mode": "wal",
+    "tables": [
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "event_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "event_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "'info'",
+            "name": "severity",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "'{}'",
+            "name": "details_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_scheduler_events_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_events",
+        "sql": "CREATE TABLE scheduler_events ( event_id TEXT PRIMARY KEY, event_type TEXT NOT NULL, job_id TEXT, worker_id TEXT, severity TEXT NOT NULL DEFAULT 'info', details_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "mission_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "workflow_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "step_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": null,
+            "name": "employee_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": null,
+            "name": "capability_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 6,
+            "dflt_value": null,
+            "name": "job_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "50",
+            "name": "priority",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "'queued'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": "0",
+            "name": "cpu_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "0",
+            "name": "ram_mb_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 11,
+            "dflt_value": "0",
+            "name": "gpu_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 12,
+            "dflt_value": "0",
+            "name": "vram_mb_required",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 13,
+            "dflt_value": "'{}'",
+            "name": "required_labels_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 14,
+            "dflt_value": "'{}'",
+            "name": "payload_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": "3",
+            "name": "max_attempts",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 16,
+            "dflt_value": "0",
+            "name": "attempt_count",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "not_before",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 18,
+            "dflt_value": null,
+            "name": "assigned_worker_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 19,
+            "dflt_value": null,
+            "name": "lease_id",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 20,
+            "dflt_value": null,
+            "name": "lease_expires_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 21,
+            "dflt_value": null,
+            "name": "result_json",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 22,
+            "dflt_value": null,
+            "name": "error",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 23,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 24,
+            "dflt_value": null,
+            "name": "queued_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 25,
+            "dflt_value": null,
+            "name": "started_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 26,
+            "dflt_value": null,
+            "name": "completed_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 27,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_scheduler_jobs_worker",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "idx_scheduler_jobs_queue",
+            "origin": "c",
+            "partial": 0,
+            "seq": 1,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_scheduler_jobs_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 2,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_jobs",
+        "sql": "CREATE TABLE scheduler_jobs ( job_id TEXT PRIMARY KEY, mission_id TEXT, workflow_id TEXT, step_id TEXT, employee_id TEXT, capability_id TEXT, job_type TEXT NOT NULL, priority INTEGER NOT NULL DEFAULT 50, state TEXT NOT NULL DEFAULT 'queued', cpu_required REAL NOT NULL DEFAULT 0, ram_mb_required INTEGER NOT NULL DEFAULT 0, gpu_required INTEGER NOT NULL DEFAULT 0, vram_mb_required INTEGER NOT NULL DEFAULT 0, required_labels_json TEXT NOT NULL DEFAULT '{}', payload_json TEXT NOT NULL DEFAULT '{}', max_attempts INTEGER NOT NULL DEFAULT 3, attempt_count INTEGER NOT NULL DEFAULT 0, not_before TEXT, assigned_worker_id TEXT, lease_id TEXT, lease_expires_at TEXT, result_json TEXT, error TEXT, created_at TEXT NOT NULL, queued_at TEXT NOT NULL, started_at TEXT, completed_at TEXT, updated_at TEXT NOT NULL )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "lease_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "job_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": "'active'",
+            "name": "state",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "0",
+            "name": "cpu_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "0",
+            "name": "ram_mb_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 6,
+            "dflt_value": "0",
+            "name": "gpu_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "0",
+            "name": "vram_mb_reserved",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 8,
+            "dflt_value": null,
+            "name": "acquired_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 9,
+            "dflt_value": null,
+            "name": "expires_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 10,
+            "dflt_value": null,
+            "name": "released_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 11,
+            "dflt_value": null,
+            "name": "release_reason",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "idx_scheduler_leases_active",
+            "origin": "c",
+            "partial": 0,
+            "seq": 0,
+            "unique": 0
+          },
+          {
+            "name": "sqlite_autoindex_scheduler_leases_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 1,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_leases",
+        "sql": "CREATE TABLE scheduler_leases ( lease_id TEXT PRIMARY KEY, job_id TEXT NOT NULL, worker_id TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'active', cpu_reserved REAL NOT NULL DEFAULT 0, ram_mb_reserved INTEGER NOT NULL DEFAULT 0, gpu_reserved INTEGER NOT NULL DEFAULT 0, vram_mb_reserved INTEGER NOT NULL DEFAULT 0, acquired_at TEXT NOT NULL, expires_at TEXT NOT NULL, released_at TEXT, release_reason TEXT )"
+      },
+      {
+        "columns": [
+          {
+            "cid": 0,
+            "dflt_value": null,
+            "name": "worker_id",
+            "notnull": 0,
+            "pk": 1,
+            "type": "TEXT"
+          },
+          {
+            "cid": 1,
+            "dflt_value": null,
+            "name": "name",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 2,
+            "dflt_value": null,
+            "name": "worker_type",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 3,
+            "dflt_value": null,
+            "name": "base_url",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 4,
+            "dflt_value": "'online'",
+            "name": "status",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 5,
+            "dflt_value": "0",
+            "name": "cpu_total",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 6,
+            "dflt_value": "0",
+            "name": "cpu_available",
+            "notnull": 1,
+            "pk": 0,
+            "type": "REAL"
+          },
+          {
+            "cid": 7,
+            "dflt_value": "0",
+            "name": "ram_mb_total",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 8,
+            "dflt_value": "0",
+            "name": "ram_mb_available",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 9,
+            "dflt_value": "0",
+            "name": "gpu_count",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 10,
+            "dflt_value": "0",
+            "name": "vram_mb_total",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 11,
+            "dflt_value": "0",
+            "name": "vram_mb_available",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 12,
+            "dflt_value": "1",
+            "name": "max_concurrent_jobs",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 13,
+            "dflt_value": "0",
+            "name": "active_jobs",
+            "notnull": 1,
+            "pk": 0,
+            "type": "INTEGER"
+          },
+          {
+            "cid": 14,
+            "dflt_value": "'{}'",
+            "name": "labels_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 15,
+            "dflt_value": "'{}'",
+            "name": "metadata_json",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 16,
+            "dflt_value": null,
+            "name": "last_heartbeat_at",
+            "notnull": 0,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 17,
+            "dflt_value": null,
+            "name": "created_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          },
+          {
+            "cid": 18,
+            "dflt_value": null,
+            "name": "updated_at",
+            "notnull": 1,
+            "pk": 0,
+            "type": "TEXT"
+          }
+        ],
+        "foreign_keys": [],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_scheduler_workers_1",
+            "origin": "pk",
+            "partial": 0,
+            "seq": 0,
+            "unique": 1
+          }
+        ],
+        "name": "scheduler_workers",
+        "sql": "CREATE TABLE scheduler_workers ( worker_id TEXT PRIMARY KEY, name TEXT NOT NULL, worker_type TEXT NOT NULL, base_url TEXT, status TEXT NOT NULL DEFAULT 'online', cpu_total REAL NOT NULL DEFAULT 0, cpu_available REAL NOT NULL DEFAULT 0, ram_mb_total INTEGER NOT NULL DEFAULT 0, ram_mb_available INTEGER NOT NULL DEFAULT 0, gpu_count INTEGER NOT NULL DEFAULT 0, vram_mb_total INTEGER NOT NULL DEFAULT 0, vram_mb_available INTEGER NOT NULL DEFAULT 0, max_concurrent_jobs INTEGER NOT NULL DEFAULT 1, active_jobs INTEGER NOT NULL DEFAULT 0, labels_json TEXT NOT NULL DEFAULT '{}', metadata_json TEXT NOT NULL DEFAULT '{}', last_heartbeat_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL )"
+      }
+    ],
+    "triggers": [],
+    "user_version": 0,
+    "views": []
+  },
+  "full_schema_sha256": "fabd45f961b745e9ab448749eab18f8bc54fc28e6811bb23734e23dc0bfa0176",
+  "migration_id": "baseline-1.0.0",
+  "version": "1.0.0"
+}

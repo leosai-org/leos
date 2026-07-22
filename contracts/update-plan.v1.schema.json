@@ -1,0 +1,69 @@
+{
+  "$id": "https://leosai.org/contracts/update-plan.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "channel": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "confirmation_token": {
+      "pattern": "^update-confirm-[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "leos.update-plan.v1"
+    },
+    "current_release": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "external_network_contacted": {
+      "const": false
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "network_authorized": {
+      "type": "boolean"
+    },
+    "requires_confirmation": {
+      "const": true
+    },
+    "steps": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "target_release": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "update_id": {
+      "pattern": "^update-[a-f0-9]{16}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "update_id",
+    "current_release",
+    "target_release",
+    "channel",
+    "steps",
+    "requires_confirmation",
+    "confirmation_token",
+    "network_authorized",
+    "external_network_contacted",
+    "execution_authorized",
+    "generated_at"
+  ],
+  "title": "LEOS Update Plan",
+  "type": "object"
+}

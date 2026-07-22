@@ -1,0 +1,36 @@
+{
+  "capabilities": [
+    "employee.resource-profile.create",
+    "employee.resource-profile.read",
+    "compute-node.capacity.register",
+    "resource.admission.evaluate",
+    "resource.reservation.create",
+    "resource.reservation.release",
+    "resource.priority.preemption-plan",
+    "resource.reservation.lookup-by-job",
+    "resource.reservation.expire",
+    "runtime.resource-enforcement.authority"
+  ],
+  "contract_version": "leos.employee-resource-scheduling.v1",
+  "dependencies": [
+    "execution-scheduler-service",
+    "profile-service",
+    "system-registry-service"
+  ],
+  "health_url": "http://employee-resource-profile-service:8000/health",
+  "isolation": {
+    "docker_socket_required": false,
+    "privileged": false,
+    "production_network_required": false
+  },
+  "platform": "LEOS",
+  "port": 8000,
+  "ready_url": "http://employee-resource-profile-service:8000/ready",
+  "service_id": "employee-resource-profile-service",
+  "service_type": "resource-policy-authority",
+  "state": {
+    "path": "/data/employee-resource-profile/resource-policy.db",
+    "type": "sqlite"
+  },
+  "version": "0.2.0"
+}

@@ -1,0 +1,21 @@
+{
+  "administrator": {
+    "display_name": "LEOS Administrator",
+    "email": "admin@example.invalid",
+    "username": "admin"
+  },
+  "allow_network": false,
+  "contract_version": "leos.first-run-fixture.v1",
+  "expected": {
+    "changed_count": 6,
+    "plaintext_secret_persisted": false,
+    "readiness": "ready",
+    "second_run_idempotent": true
+  },
+  "generated_at": "2026-07-20T00:00:00+00:00",
+  "installation_manifest": "examples/installation-manifest.json",
+  "installation_plan": "examples/installation-plan.json",
+  "node_name": "LEOS Primary Node",
+  "runtime_profile": "local-standard-nvidia",
+  "target_root": "leos-first-run-example"
+}

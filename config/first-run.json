@@ -1,0 +1,28 @@
+{
+  "administrator_credential_mode": "deferred-activation",
+  "container_daemon_contact_default": false,
+  "contract_version": "leos.first-run-config.v1",
+  "default_admin_username": "admin",
+  "default_node_name": "LEOS Primary Node",
+  "external_network_contact_default": false,
+  "file_modes": {
+    "config/first-run.json": "0640",
+    "state/administrator-bootstrap.json": "0600",
+    "state/first-run-readiness.json": "0640",
+    "state/first-run-session.json": "0640",
+    "state/node-registration-plan.json": "0640",
+    "state/runtime-selection.json": "0640"
+  },
+  "plaintext_secret_persistence": false,
+  "requires_confirmation": true,
+  "source_release": "0.1.0-dev-preview-rc9",
+  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "stage_order": [
+    "installation",
+    "administrator",
+    "node",
+    "runtime",
+    "readiness",
+    "complete"
+  ]
+}

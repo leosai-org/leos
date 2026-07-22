@@ -1,0 +1,45 @@
+{
+  "changed_paths": [
+    "config/installation.json",
+    "config/leos.env",
+    "state/compute-node-capacity.json",
+    "state/installation-manifest.json",
+    "state/installation-plan.json",
+    "state/ownership-intent.json"
+  ],
+  "container_daemon_contacted": false,
+  "contract_version": "leos.installation-execution-journal.v1",
+  "entries": [
+    {
+      "action_id": "acquire-install-lock",
+      "sequence": 1,
+      "status": "complete"
+    },
+    {
+      "action_id": "prepare-directory-layout",
+      "sequence": 2,
+      "status": "complete"
+    },
+    {
+      "action_id": "write-bootstrap-state",
+      "sequence": 3,
+      "status": "complete"
+    },
+    {
+      "action_id": "write-installation-manifest",
+      "sequence": 4,
+      "status": "complete"
+    }
+  ],
+  "external_network_contacted": false,
+  "plan_id": "plan-4ae24502f43546e5",
+  "rollback": {
+    "backup_count": 0,
+    "backup_root": "leos-example/backups/install-tx-c7298fcd2958a6e8",
+    "performed": false
+  },
+  "state": "complete",
+  "target_root": "leos-example",
+  "transaction_id": "install-tx-c7298fcd2958a6e8",
+  "unchanged_paths": []
+}

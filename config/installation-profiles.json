@@ -1,0 +1,119 @@
+{
+  "catalog_id": "leos-standard-installation-profiles",
+  "catalog_version": "1.0.0",
+  "contract_version": "leos.installation-profile-catalog.v1",
+  "profiles": [
+    {
+      "defaults": {
+        "cpu_cores_reserve": 2,
+        "embedding_runtime": "nvidia",
+        "employee_cpu_cores": 2,
+        "employee_memory_mb": 4096,
+        "max_concurrent_employees": 12,
+        "memory_mb_reserve": 8192,
+        "model_runtime": "local-nvidia-large"
+      },
+      "description": "LEOS Standard for large local NVIDIA model workloads.",
+      "priority": 400,
+      "profile_id": "leos-standard-large-nvidia",
+      "requirements": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 8,
+        "gpu_memory_mb_min": 24576,
+        "memory_mb_min": 32768,
+        "storage_free_gb_min": 100,
+        "systems": [
+          "linux"
+        ]
+      },
+      "suitability": "supported"
+    },
+    {
+      "defaults": {
+        "cpu_cores_reserve": 2,
+        "embedding_runtime": "nvidia",
+        "employee_cpu_cores": 2,
+        "employee_memory_mb": 2048,
+        "max_concurrent_employees": 8,
+        "memory_mb_reserve": 4096,
+        "model_runtime": "local-nvidia"
+      },
+      "description": "LEOS Standard with local NVIDIA acceleration.",
+      "priority": 300,
+      "profile_id": "leos-standard-nvidia",
+      "requirements": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 4,
+        "gpu_memory_mb_min": 8192,
+        "memory_mb_min": 8192,
+        "storage_free_gb_min": 40,
+        "systems": [
+          "linux"
+        ]
+      },
+      "suitability": "supported"
+    },
+    {
+      "defaults": {
+        "cpu_cores_reserve": 1,
+        "embedding_runtime": "cpu",
+        "employee_cpu_cores": 2,
+        "employee_memory_mb": 2048,
+        "max_concurrent_employees": 4,
+        "memory_mb_reserve": 3072,
+        "model_runtime": "external-or-cpu"
+      },
+      "description": "LEOS Standard with CPU execution and external or remote model runtimes.",
+      "priority": 200,
+      "profile_id": "leos-standard-cpu",
+      "requirements": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 4,
+        "gpu_memory_mb_min": 0,
+        "memory_mb_min": 8192,
+        "storage_free_gb_min": 40,
+        "systems": [
+          "linux"
+        ]
+      },
+      "suitability": "supported"
+    },
+    {
+      "defaults": {
+        "cpu_cores_reserve": 1,
+        "embedding_runtime": "cpu-small",
+        "employee_cpu_cores": 1,
+        "employee_memory_mb": 1024,
+        "max_concurrent_employees": 2,
+        "memory_mb_reserve": 1536,
+        "model_runtime": "external"
+      },
+      "description": "Minimum LEOS Standard development host. Intended for evaluation, not sustained local model workloads.",
+      "priority": 100,
+      "profile_id": "leos-standard-minimum",
+      "requirements": {
+        "architectures": [
+          "x86_64",
+          "aarch64"
+        ],
+        "cpu_cores_min": 2,
+        "gpu_memory_mb_min": 0,
+        "memory_mb_min": 4096,
+        "storage_free_gb_min": 20,
+        "systems": [
+          "linux"
+        ]
+      },
+      "suitability": "degraded"
+    }
+  ]
+}

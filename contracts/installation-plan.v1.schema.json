@@ -1,0 +1,142 @@
+{
+  "$id": "https://leosai.org/contracts/installation-plan.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "action_type": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "satisfied",
+              "blocked"
+            ]
+          }
+        },
+        "required": [
+          "action_id",
+          "action_type",
+          "required",
+          "status",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "compute_node_capacity": {
+      "properties": {
+        "contract_version": {
+          "const": "leos.compute-node-capacity.v1"
+        }
+      },
+      "required": [
+        "contract_version",
+        "node_id",
+        "status",
+        "cpu_cores_total",
+        "memory_mb_total",
+        "gpus"
+      ],
+      "type": "object"
+    },
+    "contract_version": {
+      "const": "leos.installation-plan.v1"
+    },
+    "created_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "execution": {
+      "additionalProperties": false,
+      "properties": {
+        "external_network_contacted": {
+          "const": false
+        },
+        "mutates_host": {
+          "const": false
+        },
+        "requires_confirmation": {
+          "const": true
+        }
+      },
+      "required": [
+        "mutates_host",
+        "requires_confirmation",
+        "external_network_contacted"
+      ],
+      "type": "object"
+    },
+    "inventory_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "node_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "readiness": {
+      "enum": [
+        "ready",
+        "action-required",
+        "unsupported"
+      ]
+    },
+    "recommendation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "resource_budget": {
+      "type": "object"
+    },
+    "selected_profile": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "plan_id",
+    "created_at",
+    "inventory_id",
+    "recommendation_id",
+    "node_id",
+    "selected_profile",
+    "readiness",
+    "actions",
+    "environment",
+    "resource_budget",
+    "compute_node_capacity",
+    "execution"
+  ],
+  "title": "LEOS Installation Plan",
+  "type": "object"
+}

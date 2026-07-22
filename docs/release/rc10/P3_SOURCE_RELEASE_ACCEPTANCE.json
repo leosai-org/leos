@@ -1,0 +1,77 @@
+{
+  "contract_version": "leos.publication.p3-source-release-acceptance.v1",
+  "ok": true,
+  "status": "accepted_for_publication_assembly",
+  "baseline_release": "0.1.0-dev-preview-rc10",
+  "baseline_tree_sha256": "0f909c1242d31438f36e97876532e466d7904863e7c3e8ad13975d8585a7dfb8",
+  "candidate_id": "leos-0.1.0-dev-preview-rc10-public-source",
+  "public_export_tree_sha256": "f56ef33112c3ec6d6b3ecfefb471a30313ae748eb8217012dd6459d7b3d5af32",
+  "source_release_accepted": true,
+  "oci_release_accepted": false,
+  "rc11_required_for_source": false,
+  "rc11_required_before_oci": true,
+  "asset_counts": {
+    "vendor_directories": 0,
+    "binary_assets": 0,
+    "archive_assets": 0,
+    "model_assets": 0,
+    "dataset_assets": 0,
+    "media_assets": 0,
+    "font_assets": 0
+  },
+  "direct_dependency_summary": {
+    "package_version_count": 9,
+    "resolved_exact_count": 9,
+    "manual_review_count": 0,
+    "unknown_count": 0
+  },
+  "source_spdx_resolution": {
+    "scanner_noassertion_count": 6,
+    "resolved_from_runtime_metadata": 5,
+    "first_party_resolution": {
+      "count": 1,
+      "logical_name": "LEOS",
+      "version": "0.1.0-dev-preview-rc10",
+      "license": "Apache-2.0"
+    }
+  },
+  "historical_drifted_services": [
+    "assignment-service",
+    "employee-builder",
+    "employee-registry"
+  ],
+  "checks": {
+    "required_evidence_present": true,
+    "missing_evidence": [],
+    "candidate_id_matches": true,
+    "release_matches": true,
+    "public_tree_matches": true,
+    "candidate_unmodified": true,
+    "runtime_metadata_offline": true,
+    "image_metadata_failures_zero": true,
+    "direct_package_version_count": true,
+    "direct_resolved_exact_count": true,
+    "direct_manual_review_zero": true,
+    "direct_unknown_zero": true,
+    "source_noassertion_count": true,
+    "source_runtime_resolved_count": true,
+    "source_first_party_count": true,
+    "source_first_party_identity": true,
+    "bundled_asset_counts_zero": true,
+    "source_sbom_report_present": true,
+    "all_audited_images_excluded_from_rc10_oci": true,
+    "historical_drift_recorded": true,
+    "source_release_accepted_by_policy": true,
+    "oci_release_excluded_by_policy": true
+  },
+  "evidence_checksums": {
+    "third-party-discovery.json": "dc8f2681e84af8d0465a13c489b3f275ae7d5d5a3a1043bddb9f45f9ea8c69be",
+    "p3-python-license-resolution.json": "57bfe13a10f2140da4558c03313871ecfed2a41ffbfd49a24b83705a9185fb2a",
+    "image-audit-set.json": "8557091c64b6d8c180d4bc497835725b6e30c65a6ea1b1f8d9c1895ec0d43897",
+    "source-image-provenance-review.json": "ad95948a866d1bea7ff061d074af68b54d6d1fb0686c967aa3ed73565231bc59",
+    "p3-scan-summary.json": "da566636fefab619619516f0ee6430d12047a22b72a14460a69fc8a355aee975",
+    "sboms/source/leos-rc10-source.spdx.json": "d8c91c994454093a3a8c2fc6c39763d620491a23f3d9258dacabbb42dc97b729",
+    "sboms/source/leos-rc10-source.cdx.json": "cbd399e054cb377c450df3b13f09f779ca8c605ad627b2a8c81168e0320744ff",
+    "sbom-checksums.sha256": "dd7927fbd2a98e28bb441d37a1ca1ba981a582c9f6a371986632bf7d53a33200"
+  }
+}

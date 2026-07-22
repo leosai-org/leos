@@ -1,0 +1,73 @@
+{
+  "bundle_id": "diagnostics-40d44d08ed6d0452",
+  "confirmation_token": "diagnostics-confirm-40d44d08ed6d0452",
+  "contract_version": "leos.diagnostics-bundle-manifest.v1",
+  "entries": [
+    {
+      "bundle_path": "logs/logs/ai-router.log",
+      "redaction_required": true,
+      "source_path": "logs/ai-router.log",
+      "source_size_bytes": 116
+    },
+    {
+      "bundle_path": "reports/health-aggregate.json",
+      "redaction_required": false,
+      "source_path": null,
+      "source_size_bytes": 2057
+    },
+    {
+      "bundle_path": "reports/metrics-snapshot.json",
+      "redaction_required": false,
+      "source_path": null,
+      "source_size_bytes": 785
+    },
+    {
+      "bundle_path": "reports/network-exposure.json",
+      "redaction_required": false,
+      "source_path": null,
+      "source_size_bytes": 1499
+    },
+    {
+      "bundle_path": "reports/observability-readiness.json",
+      "redaction_required": false,
+      "source_path": null,
+      "source_size_bytes": 970
+    },
+    {
+      "bundle_path": "reports/secret-exposure.json",
+      "redaction_required": false,
+      "source_path": null,
+      "source_size_bytes": 688
+    },
+    {
+      "bundle_path": "reports/security-baseline.json",
+      "redaction_required": false,
+      "source_path": null,
+      "source_size_bytes": 3479
+    }
+  ],
+  "execution_authorized": false,
+  "generated_at": "2026-07-21T00:00:00+00:00",
+  "limits": {
+    "max_bundle_bytes": 1048576,
+    "max_file_bytes": 131072,
+    "max_files": 64,
+    "max_log_lines": 500
+  },
+  "plaintext_secret_exposed": false,
+  "redaction_required": true,
+  "requires_confirmation": true,
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "read_only": true,
+    "secret_material_copied": false
+  },
+  "secret_material_copied": false,
+  "skipped": [],
+  "status": "planned",
+  "target_root": "leos-installation"
+}

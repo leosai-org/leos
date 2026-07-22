@@ -1,0 +1,20 @@
+{
+  "contract_version": "leos.employee-lifecycle-policy.v1",
+  "definition_contract": "leos.employee-definition.v2",
+  "lifecycle_contract": "leos.employee-lifecycle.v1",
+  "eligibility_contract": "leos.employee-execution-eligibility.v1",
+  "authority_service": "employee-registry",
+  "mandatory_before_resource_admission": true,
+  "mandatory_before_running": true,
+  "fail_closed": true,
+  "soft_delete": "archive",
+  "states": ["draft", "validated", "active", "paused", "disabled", "archived"],
+  "terminal_states": ["archived"],
+  "assignable_states": ["active"],
+  "schedule_timezone": "UTC",
+  "resource_profile_sync_required_for_activation": true,
+  "history_persistence_required": true,
+  "production_state_write_allowed_during_acceptance": false,
+  "docker_socket_mount_allowed": false,
+  "production_network_attachment_allowed": false
+}

@@ -1,0 +1,50 @@
+{
+  "admitted_states": [
+    "admitted"
+  ],
+  "authority_service": "employee-resource-profile-service",
+  "authority_url": "http://employee-resource-profile-service:8000",
+  "contract_version": "leos.runtime-resource-enforcement.v1",
+  "fail_closed": true,
+  "mandatory": true,
+  "non_execution_states": [
+    "queued",
+    "rejected",
+    "preemption-required"
+  ],
+  "phase": "52.1",
+  "reconciliation": {
+    "expire_remote_reservations": true,
+    "recover_invalid_jobs": true,
+    "retry_pending_releases": true,
+    "validate_active_jobs": true
+  },
+  "release_reasons": [
+    "job-complete",
+    "job-failed",
+    "scheduler-lease-expired",
+    "resource-reservation-invalid",
+    "scheduler-lease-commit-failed",
+    "selected-resource-node-unavailable-to-scheduler"
+  ],
+  "required_execution_sequence": [
+    "employee-profile-lookup",
+    "node-capacity-snapshot",
+    "admission-decision",
+    "resource-reservation",
+    "scheduler-lease",
+    "runtime-start-validation",
+    "execution",
+    "scheduler-completion",
+    "resource-release",
+    "lifecycle-history"
+  ],
+  "runtime_service": "persistent-employee-runtime-service",
+  "scheduler_service": "execution-scheduler-service",
+  "security": {
+    "docker_socket_required": false,
+    "privileged_required": false,
+    "production_network_required": false,
+    "production_state_write_required": false
+  }
+}

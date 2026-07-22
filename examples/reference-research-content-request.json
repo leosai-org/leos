@@ -1,0 +1,61 @@
+{
+  "goal_id": "goal-reference-demo",
+  "goal": "Explain how LEOS governs AI employee execution",
+  "title": "How LEOS Governs AI Employee Execution",
+  "requested_by": "developer-preview",
+  "requirements": [
+    "resource admission",
+    "artifact lineage"
+  ],
+  "approved_adapters": [
+    "manual-source-input"
+  ],
+  "sources": [
+    {
+      "source_id": "source-demo-1",
+      "title": "LEOS RC8 Runtime Governance Notes",
+      "content": "LEOS checks employee lifecycle eligibility before resource admission. The scheduler creates an active reservation before execution and rechecks eligibility before marking the job running. The completed artifact retains source provenance and execution history.",
+      "adapter_id": "manual-source-input",
+      "provenance": {
+        "adapter_id": "manual-source-input",
+        "collection_id": "developer-preview-example"
+      }
+    }
+  ],
+  "governance": {
+    "employee_eligibility": {
+      "contract_version": "leos.employee-execution-eligibility.v1",
+      "employee_id": "research-content-employee",
+      "eligible": true,
+      "decision": "eligible",
+      "reasons": [],
+      "priority": "normal"
+    },
+    "resource_admission": {
+      "contract_version": "leos.resource-admission-decision.v1",
+      "decision_id": "decision-reference-demo",
+      "employee_id": "research-content-employee",
+      "job_id": "job-reference-demo",
+      "decision": "admitted",
+      "priority_weight": 50,
+      "reason": "capacity-available"
+    },
+    "resource_reservation": {
+      "contract_version": "leos.resource-reservation.v1",
+      "reservation_id": "reservation-reference-demo",
+      "employee_id": "research-content-employee",
+      "job_id": "job-reference-demo",
+      "node_id": "node-reference-demo",
+      "status": "active",
+      "resources": {"cpu_cores": 1, "memory_mb": 512},
+      "created_at": "2026-07-20T00:00:00+00:00",
+      "expires_at": "2026-07-20T01:00:00+00:00"
+    },
+    "execution": {
+      "job_id": "job-reference-demo",
+      "assignment_id": "assignment-reference-demo",
+      "execution_id": "execution-reference-demo",
+      "priority": "normal"
+    }
+  }
+}

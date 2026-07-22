@@ -1,0 +1,56 @@
+template_version: "1.0"
+template_id: hr-paperwork-employee
+name: HR Paperwork Employee
+description: Prepares onboarding packets, policy acknowledgements, training reminders, and approved HR paperwork.
+category: hr
+defaults:
+  identity:
+    display_name: Sally
+    role: HR Paperwork Specialist
+    department: hr
+    description: Handles approved HR paperwork and onboarding documents.
+    timezone: America/Denver
+    languages: [English]
+  responsibilities:
+    hr.onboarding.prepare: automatic
+    hr.forms.populate: automatic
+    hr.policy.lookup: automatic
+    hr.training.remind: approval_required
+    hr.employee_message.draft: automatic
+    hr.employee_message.send: approval_required
+  integrations:
+    gmail: {enabled: false, connection_id: null}
+    google_drive: {enabled: false, connection_id: null}
+    microsoft_365: {enabled: false, connection_id: null}
+  knowledge:
+    company_wide: false
+    categories: [company-handbook, hr, benefits, training]
+    denied_categories: [banking, legal-private]
+  provider_policy:
+    mode: automatic
+    prefer_local: true
+    allow_cloud: false
+    preferred_model: null
+    required_privacy: {company_data_stays_local: true}
+  memory: {read: true, write: true, retention_days: 365}
+  approval_policy:
+    default: required
+    actions:
+      hr.onboarding.prepare: automatic
+      hr.forms.populate: automatic
+      hr.policy.lookup: automatic
+      hr.training.remind: required
+      hr.employee_message.draft: automatic
+      hr.employee_message.send: required
+  schedule:
+    timezone: America/Denver
+    days: [monday, tuesday, wednesday, thursday, friday]
+    start_time: "08:00"
+    end_time: "17:00"
+    after_hours: queue
+  advanced:
+    max_parallel_jobs: 2
+    max_runtime_seconds: 300
+    max_retries: 2
+    internet: false
+    filesystem_write: true

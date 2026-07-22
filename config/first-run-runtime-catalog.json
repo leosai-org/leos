@@ -1,0 +1,58 @@
+{
+  "contract_version": "leos.first-run-runtime-catalog.v1",
+  "default_runtime_profile": "local-standard-cpu",
+  "profiles": [
+    {
+      "acceleration": "nvidia",
+      "chat_model": "qwen2.5:7b-instruct",
+      "embedding_model": "BAAI/bge-small-en-v1.5",
+      "model_runtime": "local-openai-compatible",
+      "priority": 300,
+      "profile_id": "local-standard-nvidia",
+      "provider_type": "local",
+      "requires_container_daemon": false,
+      "requires_external_network": false,
+      "speech_runtime": "disabled",
+      "supported_installation_profiles": [
+        "leos-standard-large-nvidia",
+        "leos-standard-nvidia"
+      ]
+    },
+    {
+      "acceleration": "cpu",
+      "chat_model": "qwen2.5:3b-instruct",
+      "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+      "model_runtime": "local-openai-compatible",
+      "priority": 200,
+      "profile_id": "local-standard-cpu",
+      "provider_type": "local",
+      "requires_container_daemon": false,
+      "requires_external_network": false,
+      "speech_runtime": "disabled",
+      "supported_installation_profiles": [
+        "leos-standard-cpu",
+        "leos-standard-minimum",
+        "leos-standard-nvidia",
+        "leos-standard-large-nvidia"
+      ]
+    },
+    {
+      "acceleration": "remote",
+      "chat_model": "operator-selected",
+      "embedding_model": "operator-selected",
+      "model_runtime": "openai-compatible",
+      "priority": 100,
+      "profile_id": "external-openai-compatible",
+      "provider_type": "external-api",
+      "requires_container_daemon": false,
+      "requires_external_network": true,
+      "speech_runtime": "operator-selected",
+      "supported_installation_profiles": [
+        "leos-standard-large-nvidia",
+        "leos-standard-nvidia",
+        "leos-standard-cpu",
+        "leos-standard-minimum"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Replace the provisional organization/team handle after the GitHub organization
+# is created. Teams listed here must be visible and have write access.
+
+*                               @leos-ai-platform/maintainers
+/.github/                       @leos-ai-platform/maintainers @leos-ai-platform/security
+/LICENSE                        @leos-ai-platform/maintainers
+/NOTICE                         @leos-ai-platform/maintainers
+/SECURITY.md                    @leos-ai-platform/security
+/docs/                          @leos-ai-platform/docs
+/contracts/                     @leos-ai-platform/maintainers
+/plugins/                       @leos-ai-platform/plugin-reviewers
+/scripts/release/               @leos-ai-platform/release-managers
+/.github/workflows/             @leos-ai-platform/release-managers @leos-ai-platform/security

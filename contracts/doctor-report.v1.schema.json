@@ -1,0 +1,82 @@
+{
+  "$id": "https://leosai.org/contracts/doctor-report.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "checks": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "leos.doctor-report.v1"
+    },
+    "counts": {
+      "type": "object"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "repair_requires_confirmation": {
+      "const": true
+    },
+    "safety": {
+      "additionalProperties": false,
+      "properties": {
+        "container_daemon_contacted": {
+          "const": false
+        },
+        "external_network_contacted": {
+          "const": false
+        },
+        "plaintext_secret_exposed": {
+          "const": false
+        },
+        "production_network_attached": {
+          "const": false
+        },
+        "production_state_accessed": {
+          "const": false
+        },
+        "read_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "read_only",
+        "external_network_contacted",
+        "container_daemon_contacted",
+        "plaintext_secret_exposed",
+        "production_state_accessed",
+        "production_network_attached"
+      ],
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "warn",
+        "fail"
+      ]
+    },
+    "target_root": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "status",
+    "target_root",
+    "checks",
+    "counts",
+    "generated_at",
+    "repair_requires_confirmation",
+    "safety"
+  ],
+  "title": "LEOS Doctor Report",
+  "type": "object"
+}

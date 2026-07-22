@@ -1,0 +1,68 @@
+{
+  "container_daemon_contacted": false,
+  "contract_version": "leos.network-exposure-report.v1",
+  "counts": {
+    "fail": 0,
+    "public_bindings": 0,
+    "services": 6,
+    "warn": 0
+  },
+  "external_network_contacted": false,
+  "findings": [],
+  "generated_at": "2026-07-21T00:00:00+00:00",
+  "report_id": "network-report-b0c27836649d03d4",
+  "safety": {
+    "container_daemon_contacted": false,
+    "external_network_contacted": false,
+    "plaintext_secret_exposed": false,
+    "production_network_attached": false,
+    "production_state_accessed": false,
+    "read_only": true,
+    "secret_material_copied": false
+  },
+  "services": [
+    {
+      "bindings": [
+        "127.0.0.1:8000"
+      ],
+      "required": true,
+      "service_id": "ai-router"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8010"
+      ],
+      "required": true,
+      "service_id": "profile-service"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8011"
+      ],
+      "required": true,
+      "service_id": "leos-persistence-service"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8012"
+      ],
+      "required": true,
+      "service_id": "execution-scheduler-service"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8013"
+      ],
+      "required": true,
+      "service_id": "runtime-execution-coordinator-service"
+    },
+    {
+      "bindings": [
+        "127.0.0.1:8090"
+      ],
+      "required": false,
+      "service_id": "reference-research-content-employee"
+    }
+  ],
+  "status": "pass"
+}

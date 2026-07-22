@@ -1,0 +1,81 @@
+{
+  "actions": [
+    {
+      "action_id": "acquire-install-lock",
+      "action_type": "lock",
+      "reversible": true,
+      "sequence": 1
+    },
+    {
+      "action_id": "prepare-directory-layout",
+      "action_type": "filesystem",
+      "reversible": true,
+      "sequence": 2
+    },
+    {
+      "action_id": "write-installation-plan",
+      "action_type": "configuration",
+      "reversible": true,
+      "sequence": 3
+    },
+    {
+      "action_id": "write-runtime-environment",
+      "action_type": "configuration",
+      "reversible": true,
+      "sequence": 4
+    },
+    {
+      "action_id": "write-compute-node-capacity",
+      "action_type": "configuration",
+      "reversible": true,
+      "sequence": 5
+    },
+    {
+      "action_id": "write-ownership-intent",
+      "action_type": "ownership",
+      "reversible": true,
+      "sequence": 6
+    },
+    {
+      "action_id": "write-installation-manifest",
+      "action_type": "manifest",
+      "reversible": true,
+      "sequence": 7
+    },
+    {
+      "action_id": "finalize-execution-journal",
+      "action_type": "journal",
+      "reversible": false,
+      "sequence": 8
+    }
+  ],
+  "confirmation": {
+    "required": true,
+    "token": "plan-4ae24502f43546e5"
+  },
+  "contract_version": "leos.installation-transaction.v1",
+  "mode": "offline",
+  "network": {
+    "acquisition_status": "local-source-verified",
+    "external_network_contacted": false,
+    "permission_granted": false
+  },
+  "node_id": "node-example",
+  "ownership": {
+    "apply_ownership": false,
+    "desired_group": "leos",
+    "desired_owner": "leos"
+  },
+  "plan_id": "plan-4ae24502f43546e5",
+  "rollback": {
+    "automatic_on_failure": true,
+    "backup_directory": "leos-example/backups/install-tx-c7298fcd2958a6e8",
+    "enabled": true
+  },
+  "selected_profile": "leos-standard-nvidia",
+  "source_release": "0.1.0-dev-preview-rc9",
+  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "state": "planned",
+  "target_root": "leos-example",
+  "transaction_id": "install-tx-c7298fcd2958a6e8"
+}

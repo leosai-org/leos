@@ -1,0 +1,73 @@
+{
+  "contract_version": "leos.security-observability-fixture.v1",
+  "metrics": {
+    "cpu_cores": 16,
+    "load_average": [
+      0.25,
+      0.5,
+      0.75
+    ],
+    "memory_available_mb": 24576,
+    "memory_total_mb": 32768,
+    "nvidia_gpu_count": 1,
+    "nvidia_vram_total_mb": 24576,
+    "storage_free_gb": 180,
+    "storage_total_gb": 500
+  },
+  "runtime": {
+    "container_runtime": "docker",
+    "nvidia_runtime": true,
+    "privileged": false
+  },
+  "secret_findings": [],
+  "services": {
+    "ai-router": {
+      "bindings": [
+        "127.0.0.1:8000"
+      ],
+      "health": "healthy",
+      "latency_ms": 8,
+      "state": "running"
+    },
+    "execution-scheduler-service": {
+      "bindings": [
+        "127.0.0.1:8012"
+      ],
+      "health": "healthy",
+      "latency_ms": 11,
+      "state": "running"
+    },
+    "leos-persistence-service": {
+      "bindings": [
+        "127.0.0.1:8011"
+      ],
+      "health": "healthy",
+      "latency_ms": 9,
+      "state": "running"
+    },
+    "profile-service": {
+      "bindings": [
+        "127.0.0.1:8010"
+      ],
+      "health": "healthy",
+      "latency_ms": 7,
+      "state": "running"
+    },
+    "reference-research-content-employee": {
+      "bindings": [
+        "127.0.0.1:8090"
+      ],
+      "health": "healthy",
+      "latency_ms": 15,
+      "state": "running"
+    },
+    "runtime-execution-coordinator-service": {
+      "bindings": [
+        "127.0.0.1:8013"
+      ],
+      "health": "healthy",
+      "latency_ms": 10,
+      "state": "running"
+    }
+  }
+}
