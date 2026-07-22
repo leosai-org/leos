@@ -1,5 +1,6 @@
 {
-  "contract_version": "leos.offline-source.v1",
-  "release": "0.1.0-dev-preview-rc9",
-  "tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da"
+  "contract_version": "leos.offline-source.v2",
+  "manifest_path": "manifest.json",
+  "release": "0.1.0-dev-preview-rc11",
+  "source_lock_path": "source.lock.json"
 }

@@ -136,6 +136,10 @@ def run_acceptance(root: Path) -> dict[str, Any]:
         (source_root / "source-manifest.json").write_text(
             json.dumps(source_manifest, indent=2, sort_keys=True) + "\n"
         )
+        for authority_name in ("manifest.json", "source.lock.json"):
+            (source_root / authority_name).write_bytes(
+                (root / authority_name).read_bytes()
+            )
 
         target = temp / "leos"
         plan = read_json(root / "examples/installation-plan.json")

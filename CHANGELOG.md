@@ -15,6 +15,29 @@ Preview and release-candidate channels.
 - signed SBOM and provenance publication;
 - expanded installation and operator documentation.
 
+## [0.1.0-dev-preview-rc11] — 2026-07-21
+
+### Corrected
+
+- current-facing release notes and frozen-contract documentation;
+- public repository and CODEOWNERS identity;
+- installer, operator, and security release-authority handling;
+- RC9 identities in active configuration, examples, tests, and validators.
+
+### Added
+
+- deterministic `manifest.json`, `contracts.lock.json`, `source.lock.json`, and
+  `checksums.sha256` authority files;
+- RC11 source-authority and OCI-exclusion documentation;
+- RC11-normalized SPDX and CycloneDX source SBOM metadata.
+
+### Preserved
+
+- immutable RC10 commit, tag, and release evidence;
+- historical phase and fixture references that are not active release
+  identities;
+- source-only distribution policy with OCI artifacts excluded.
+
 ## [0.1.0-dev-preview-rc10] — 2026-07-21
 
 ### Added

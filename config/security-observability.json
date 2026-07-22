@@ -1,4 +1,5 @@
 {
+  "container_daemon_contact_default": false,
   "contract_version": "leos.security-observability-config.v1",
   "diagnostics": {
     "allowed_suffixes": [
@@ -17,7 +18,6 @@
     ]
   },
   "external_network_contact_default": false,
-  "container_daemon_contact_default": false,
   "observability": {
     "minimum_free_storage_gb": 2,
     "structured_log_levels": [
@@ -30,6 +30,7 @@
   },
   "read_only_default": true,
   "repair_requires_confirmation": true,
+  "secret_material_copy_forbidden": true,
   "secret_scan": {
     "allowed_suffixes": [
       ".json",
@@ -55,6 +56,10 @@
       "state/installation-manifest.json"
     ]
   },
-  "secret_material_copy_forbidden": true,
-  "source_release": "0.1.0-dev-preview-rc9"
+  "source_authority": {
+    "contract_version": "leos.source-authority.v1",
+    "manifest": "manifest.json",
+    "source_lock": "source.lock.json"
+  },
+  "source_release": "0.1.0-dev-preview-rc11"
 }

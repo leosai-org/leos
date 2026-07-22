@@ -4,7 +4,7 @@ LEOS is an open-source orchestration platform for defining, coordinating, and
 governing AI employees, services, tools, schedules, approvals, and persistent
 workflows.
 
-This repository contains the **source-only `0.1.0-dev-preview-rc10` Developer Preview**. It
+This repository contains the **source-only `0.1.0-dev-preview-rc11` Developer Preview**. It
 is intended for architecture review, local development, testing, and early
 community contribution.
 
@@ -18,13 +18,26 @@ community contribution.
 - service contracts, schemas, tools, and examples;
 - governance, licensing, security, and contribution policies;
 - SPDX and CycloneDX source SBOMs;
-- release evidence for the RC10 source publication.
+- deterministic public source-authority files;
+- preserved RC10 publication evidence and RC11 successor documentation.
+
+## Source authority
+
+RC11 introduces a non-self-referential public source authority:
+
+- `manifest.json` records release identity and source-only status;
+- `contracts.lock.json` fingerprints every tracked contract;
+- `source.lock.json` fingerprints the governed source payload while excluding
+  the four authority files themselves;
+- `checksums.sha256` fingerprints every tracked release file except itself.
+
+See `docs/release/rc11/SOURCE_AUTHORITY.md`.
 
 ## What is not included
 
-This preview does not publish prebuilt OCI/container images. Historical local
-images did not establish complete RC10 source equivalence and are explicitly
-excluded. See `docs/release/rc10/OCI_EXCLUSION.md`.
+This preview does not publish prebuilt OCI/container images. Historical images
+were not rebuilt from the accepted RC11 source payload and are not release
+artifacts. See `docs/release/rc11/OCI_EXCLUSION.md`.
 
 Models, model weights, private deployment configuration, credentials,
 commercial extensions, hosted infrastructure, and private operational data are
@@ -35,18 +48,19 @@ not part of this source release.
 1. Read `RELEASE_NOTES.md`.
 2. Review `FROZEN_CONTRACTS.md`.
 3. Review `docs/architecture/REPOSITORY_ARCHITECTURE.md`.
-4. Inspect the service directories and their local `requirements.txt` and
-   Dockerfiles.
+4. Inspect `manifest.json`, `source.lock.json`, and `contracts.lock.json`.
 5. Read `CONTRIBUTING.md` before proposing changes.
 
-RC10 dependencies are declared but not yet pinned. Exact observed versions and
-the RC11 remediation plan are documented under `docs/release/rc10/`.
+Dependencies remain declared but not fully pinned in RC11. Exact observed
+versions are documented in `THIRD_PARTY_NOTICES.md` and the source SBOMs.
+Dependency locking and source-equivalent OCI publication remain later work.
 
 ## Release identity
 
 ```text
-Release: 0.1.0-dev-preview-rc10
-Source release: accepted
+Release: 0.1.0-dev-preview-rc11
+Release ordinal: 11
+Source release: governed
 OCI release: excluded
 License: Apache-2.0
 ```
@@ -54,6 +68,7 @@ License: Apache-2.0
 ## Project resources
 
 - Website: `https://leosai.org`
+- Public repository: `https://github.com/leosai-org/leos`
 - Security: `SECURITY.md`
 - Support: `SUPPORT.md`
 - Governance: `GOVERNANCE.md`
@@ -62,9 +77,10 @@ License: Apache-2.0
 
 ## Status and roadmap
 
-RC11 will focus on reproducibility and container publication readiness,
-including exact dependency locks, digest-qualified bases, fresh image builds,
-image/source equivalence, and signed image provenance.
+RC11 corrects public release identity, replaces provisional repository
+ownership, and introduces deterministic source authority. A later successor
+will focus on exact dependency locks, digest-qualified base images, fresh
+source-equivalent OCI builds, image SBOMs, and signed provenance.
 
 LEOS is stewarded by Bad Tech Labs LLC with an open contribution and governance
 model described in this repository.

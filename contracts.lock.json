@@ -1,0 +1,218 @@
+{
+  "algorithm": "sha256",
+  "contract_count": 42,
+  "contract_version": "leos.contracts-lock.v1",
+  "contracts": [
+    {
+      "path": "contracts/administrator-bootstrap.v1.schema.json",
+      "sha256": "5344779b9063534e8b326bd821fc850ed914f1116ae0ced4829717809b61a1ea",
+      "size_bytes": 1357
+    },
+    {
+      "path": "contracts/backup-plan.v1.schema.json",
+      "sha256": "b811ad1a1d114dee8e23e791fd54badce08f5d309bae0656af1f545d68dc1241",
+      "size_bytes": 1180
+    },
+    {
+      "path": "contracts/cli-result.v1.schema.json",
+      "sha256": "f5476efb4224a17c3ffc1da14a2d6e221fab2b2bbccbbcef57cfab95808f9b20",
+      "size_bytes": 1635
+    },
+    {
+      "path": "contracts/compute-node-capacity.v1.schema.json",
+      "sha256": "02c1fd1e824ec66010e42f125bc32c03b91d095af412b1c59796c6ae3b6d718c",
+      "size_bytes": 1008
+    },
+    {
+      "path": "contracts/diagnostics-bundle-manifest.v1.schema.json",
+      "sha256": "c0011a1afe386e5086301fcde033ceb8598cf2bb347fd4e5e02190352d1a902c",
+      "size_bytes": 3008
+    },
+    {
+      "path": "contracts/doctor-report.v1.schema.json",
+      "sha256": "e315e8e2c3bdbe5b9e1adf13315ce46254a01cedffe65a514da909723b7bdbbf",
+      "size_bytes": 1748
+    },
+    {
+      "path": "contracts/employee-definition.v2.schema.json",
+      "sha256": "defcb460e8ffc7c760e46379c6966715d425f5c02873acdf320aceb3c275745a",
+      "size_bytes": 1789
+    },
+    {
+      "path": "contracts/employee-lifecycle.v1.schema.json",
+      "sha256": "7b4a4c19a7f96c2a25f09fd47f6c2900901e5a57b58bb1e2521a2517cf7c7105",
+      "size_bytes": 785
+    },
+    {
+      "path": "contracts/employee-resource-profile.v1.schema.json",
+      "sha256": "b0e04556dffcbeade38e259a4e901688a154b3df0905d150490853852acc2c59",
+      "size_bytes": 1257
+    },
+    {
+      "path": "contracts/first-run-configuration.v1.schema.json",
+      "sha256": "c047cdd8909827f419bbe17d6497fd623b60ba535d462f9934b0adb25c36c95f",
+      "size_bytes": 1460
+    },
+    {
+      "path": "contracts/first-run-readiness.v1.schema.json",
+      "sha256": "d6f890c80c9605e1c82a5063a101bfb4d1002a2a7bb245b9df5730bf7ee35e6e",
+      "size_bytes": 2109
+    },
+    {
+      "path": "contracts/first-run-result.v1.schema.json",
+      "sha256": "9f2bcee41e5625216f4ac87e53011c429737584fabbe57c33b57ac60845eee89",
+      "size_bytes": 1982
+    },
+    {
+      "path": "contracts/first-run-session.v1.schema.json",
+      "sha256": "614accd4250a2e9c4e59beb1bd3d17354516bcb3488d085f4ec145023cc0ff0f",
+      "size_bytes": 2209
+    },
+    {
+      "path": "contracts/health-aggregate.v1.schema.json",
+      "sha256": "1c68794aee2e56135990bc5699c61948a3216f2b032c5c8a82c1f1098eef0f9c",
+      "size_bytes": 1986
+    },
+    {
+      "path": "contracts/host-capability-inventory.v1.schema.json",
+      "sha256": "49f907b250db634b58b2aa362634cf1e5a1f911cb731ae59b6da84657b132b78",
+      "size_bytes": 7738
+    },
+    {
+      "path": "contracts/installation-execution-journal.v1.schema.json",
+      "sha256": "1585ffab43fd864db79875fefc718809cb30779eff8f5cfb6ccd6cbe48c3a2b3",
+      "size_bytes": 2241
+    },
+    {
+      "path": "contracts/installation-layout.v1.schema.json",
+      "sha256": "3eb2d513ffcbd7cc80f3b51d770a553c1272ef68b2c8831a85873509e3865ea9",
+      "size_bytes": 1077
+    },
+    {
+      "path": "contracts/installation-manifest.v1.schema.json",
+      "sha256": "4fc187733342f80385c29753496f2b27ddd00e823882bcb36e3cdd9209e73aaa",
+      "size_bytes": 2309
+    },
+    {
+      "path": "contracts/installation-plan.v1.schema.json",
+      "sha256": "a496868cd4fe45bee7da67d0662df08aa34e8629deb40f152fb09321bf0d3e5a",
+      "size_bytes": 2960
+    },
+    {
+      "path": "contracts/installation-profile-recommendation.v1.schema.json",
+      "sha256": "6d9590dc625237247f451034a2fa7103f3eec2b4a816450dd6f3c1aef55a9a70",
+      "size_bytes": 2383
+    },
+    {
+      "path": "contracts/installation-result.v1.schema.json",
+      "sha256": "21c67b458b89bf0e28c54a40f2d3e9b43815a2fdd2e1a6a6e52452c10c5493fa",
+      "size_bytes": 1692
+    },
+    {
+      "path": "contracts/installation-transaction.v1.schema.json",
+      "sha256": "27ec416cd432f9eafbdb3d24833569e8fc6767d50f785d03b3961342aceff559",
+      "size_bytes": 3815
+    },
+    {
+      "path": "contracts/log-query-plan.v1.schema.json",
+      "sha256": "dc2d6b67bf2790cfedea4d8ea1ec2e089da06e35fc037b692626144cda7276f2",
+      "size_bytes": 1126
+    },
+    {
+      "path": "contracts/metrics-snapshot.v1.schema.json",
+      "sha256": "adc46cb42d5b19a3e576d5e1b9cd5f637df17ec717276669ad654ca1b1158b70",
+      "size_bytes": 1744
+    },
+    {
+      "path": "contracts/network-exposure-report.v1.schema.json",
+      "sha256": "dcc328d637635b0d22656f8b459a8af5185af6822f0154d68d514dd3855b6587",
+      "size_bytes": 2100
+    },
+    {
+      "path": "contracts/node-registration-plan.v1.schema.json",
+      "sha256": "a75467af2572aa9e8353689ace43e585b0a64989b938e083570e53b36f6c382c",
+      "size_bytes": 1302
+    },
+    {
+      "path": "contracts/observability-readiness.v1.schema.json",
+      "sha256": "dbecf5e2e6eb0f1f2a5b3b691699c8596675fe5e1b4c26260ff833f86be5cd04",
+      "size_bytes": 1854
+    },
+    {
+      "path": "contracts/operator-acceptance-report.v1.schema.json",
+      "sha256": "6bd3c773cda7f6225a300b6c000a47e6421c38c48887fa09f95c6784bab10fcc",
+      "size_bytes": 1486
+    },
+    {
+      "path": "contracts/reference-research-content-run.v1.schema.json",
+      "sha256": "84dcc72176786770374ef7fdda43e7b343fc76d2506c7bbe8f4bd1014f5944ac",
+      "size_bytes": 1456
+    },
+    {
+      "path": "contracts/release-publication-report.v1.schema.json",
+      "sha256": "e0df5fcf75b7e062e236808449de6076fb27f4604f68cf96d36efac5558c70ec",
+      "size_bytes": 1147
+    },
+    {
+      "path": "contracts/research-content-artifact.v1.schema.json",
+      "sha256": "cc483efd5a749dd3955a3fe827628e415b54088f4a66084f265c22b07bc04e05",
+      "size_bytes": 1568
+    },
+    {
+      "path": "contracts/research-source.v1.schema.json",
+      "sha256": "68329cc9b7f50415697cfa093428afa11b1d6d41e068be0a857b65cd69242474",
+      "size_bytes": 1281
+    },
+    {
+      "path": "contracts/resource-admission-decision.v1.schema.json",
+      "sha256": "362fb45430ffcc15da874e776289df9a37d8f7c8043bbf3ea51457fcbbabbeed",
+      "size_bytes": 933
+    },
+    {
+      "path": "contracts/resource-reservation.v1.schema.json",
+      "sha256": "bed02a7831e861108df025af5d9e2733faedc90f554f8ef477187ee9c12d9292",
+      "size_bytes": 639
+    },
+    {
+      "path": "contracts/runtime-resource-enforcement.v1.schema.json",
+      "sha256": "ea2d848bbc1de9cd7a6ec055d93c42dd9f54560489ffefd7cf5c334cdffcdc63",
+      "size_bytes": 1787
+    },
+    {
+      "path": "contracts/runtime-selection.v1.schema.json",
+      "sha256": "d09bd7efeed9e1c79cc5baa8370d3ff7555e829a4b7f4adbab99848fb299b2f3",
+      "size_bytes": 1582
+    },
+    {
+      "path": "contracts/secret-exposure-report.v1.schema.json",
+      "sha256": "40f2698fc89fae743ad9a5c4a5a69e68a6b86ac3d73af97a5abaaf557d4af767",
+      "size_bytes": 2274
+    },
+    {
+      "path": "contracts/security-baseline-report.v1.schema.json",
+      "sha256": "f023e3a9695d158bcda104d519579fd004409bf4f77420be7235b9ddba8e0372",
+      "size_bytes": 2291
+    },
+    {
+      "path": "contracts/service-inventory.v1.schema.json",
+      "sha256": "0c96525eedd7510d1d8e0568c51a754776a43a90383d62b087ba156a14d46565",
+      "size_bytes": 933
+    },
+    {
+      "path": "contracts/structured-log-record.v1.schema.json",
+      "sha256": "309c3b95c6fe0f7fddf6b74286d1ed68390dc05620527f967c0c597a191554d0",
+      "size_bytes": 1233
+    },
+    {
+      "path": "contracts/system-status.v1.schema.json",
+      "sha256": "a03b4a30ad4f544ddf19b7b88a97c9c47f57b7a932826395826617979097ea32",
+      "size_bytes": 1150
+    },
+    {
+      "path": "contracts/update-plan.v1.schema.json",
+      "sha256": "04c2f404fc9bc4867f6c8cb56088533e472c2e56533de03b29b6b2b47393b3ad",
+      "size_bytes": 1455
+    }
+  ],
+  "release_version": "0.1.0-dev-preview-rc11"
+}

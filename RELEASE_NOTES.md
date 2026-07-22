@@ -1,87 +1,59 @@
-# LEOS 0.1.0 Developer Preview RC1
+# LEOS 0.1.0 Developer Preview RC11
 
-This release candidate freezes the first verified governed autonomous employee
-execution path after native core consolidation and canonical lineage repair.
+RC11 is the corrected public-source successor to the immutable RC10 root
+publication. It preserves RC10 history while fixing current-facing release
+identity, repository ownership, installer authority, operator diagnostics, and
+source provenance.
 
-## Verified behavior
+## Corrected public release surface
 
-- Goal-to-mission planning and workflow materialization
-- Scheduler and Persistent Employee Runtime execution
-- Capability dispatch through the canonical execution envelope
-- Artifact persistence and versioning
-- Independent content review
-- Autonomous revision after `revision_required`
-- Approved artifact closeout
-- Canonical KPI and success-criterion evidence
-- Goal completion with integrity verification
-- Runtime lease reconciliation
-- Exact lineage correlation across planning, workflow, dispatch, runtime,
-  artifact, review, and goal completion
-- Kernel and Developer Preview release-gate readiness
+- current release documentation now identifies RC11;
+- provisional `leos-ai-platform` CODEOWNERS handles are replaced by the
+  verified maintainer account pending creation of visible organization teams;
+- operator and security tooling load release identity from public authority
+  files instead of compiled RC9 constants;
+- installer bootstrap validates `manifest.json` and `source.lock.json`;
+- installation and diagnostic examples identify RC11 without pretending their
+  fixture hashes are the release payload hash;
+- SPDX and CycloneDX source SBOM metadata identifies RC11;
+- RC10 publication evidence remains byte-identical under `docs/release/rc10/`.
 
-## Consolidation
+## Public source authority
 
-Canonical production modules:
+The RC11 source distribution contains:
 
-- `app.runtime_reconciliation`
-- `app.goal_integrity`
+- `manifest.json` — release identity, channel, predecessor, license, and OCI
+  exclusion;
+- `contracts.lock.json` — SHA-256 records for tracked contracts;
+- `source.lock.json` — deterministic payload-tree hash and file inventory;
+- `checksums.sha256` — release-file checksums excluding the checksum file
+  itself.
 
-Compatibility shims remain for older imports.
+The payload-tree algorithm excludes the four authority files, preventing a
+self-referential hash cycle. See `docs/release/rc11/SOURCE_AUTHORITY.md`.
 
-## Lineage
+## Source-only distribution
 
-The Autonomous Execution Chain now exposes:
+RC11 does not publish prebuilt OCI images or `container-images.lock.json`.
+Historical images are not RC11 artifacts. See
+`docs/release/rc11/OCI_EXCLUSION.md`.
 
-```text
-leos.execution-lineage.v1
-```
+## Compatibility and lineage
 
-The E2E harness uses the chain's exact proposal, mission, workflow, scheduler
-job, dispatcher execution, final runtime job, artifact, and review identifiers.
-It no longer re-correlates records by broad goal-level searches.
+RC11 retains the service contracts and Phase 52 implementation lineage present
+in RC10. Historical RC1-RC10 references remain only where they describe prior
+phases, predecessor evidence, or immutable release history.
 
-## Release state
+## Known limitations
 
-`0.1.0-dev-preview-rc1` is a release candidate for migration formalization,
-isolated clean-install testing, rollback testing, and installer development.
+- direct Python requirements remain unpinned;
+- no source-equivalent OCI images are published;
+- interfaces may change before stable `0.1.0`;
+- the temporary CODEOWNER is `@bd3691` until governed organization teams are
+  created and granted write access.
 
-## Phase 51.1.3 Image Lock
+## Publication state
 
-Every critical RC1 service is now locked to the immutable Docker image ID observed from its running container. The authoritative image inventory is `container-images.lock.json`. Release metadata records Phase 51.1.3 as the final RC1 freeze-cleanup phase.
-
-## Phase 51.2.1 Schema Authority
-
-RC2 introduces a canonical schema-authority registry for eight core services.
-SQLite-backed authorities were backed up before migration history was installed.
-Application schema hashes were unchanged, migration apply/rollback/reapply was
-tested on disposable clones, live drift detection passed, and the governed E2E
-acceptance chain passed 17 of 17 stages.
-
-## Phase 51.2.2 PostgreSQL Authority
-
-RC3 brings `leos-persistence-service` under PostgreSQL migration authority.
-Persistence-owned tables were discovered from the live connection and service
-source, backed up in custom PostgreSQL format, fingerprinted, and registered
-under transactional migration history protected by a PostgreSQL advisory lock.
-Apply, rollback, and reapply passed in a temporary database, production schema
-and data fingerprints remained unchanged, drift remained clean, and governed
-E2E acceptance passed 17 of 17 stages.
-
-## PostgreSQL Drift Semantics
-
-`leos.postgresql-drift.v2` separates release-blocking schema or migration
-authority drift from normal application data activity. Persistence documents,
-events, and key/value records are mutable runtime data. Their fingerprint is
-retained as observational evidence but does not invalidate a release when the
-canonical schema and migration-history authority remain valid.
-
-## Phase 51.3.2 Isolated Acceptance Runtime
-
-RC4 introduces a disposable Docker Compose acceptance runtime built entirely
-from RC3 image locks and Phase 51.3.1 cloned state. The runtime exposes no host
-ports, uses an internal-only project network, mounts no production named
-volumes, restores PostgreSQL into a project-scoped volume, and confines all
-writable SQLite state to the workspace. Governed E2E passed 17 of 17 stages in
-the isolated runtime. Production SQLite and PostgreSQL logical fingerprints
-were identical before and after execution, and all isolated containers,
-networks, and volumes were removed.
+RC11 is a Developer Preview source candidate. A signed RC11 commit and tag,
+remote publication, GitHub Release, and public announcement require the
+remaining governed acceptance gates.

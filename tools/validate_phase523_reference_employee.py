@@ -22,6 +22,13 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def service_root(root: Path, service_id: str) -> Path:
+    direct = root / service_id
+    if direct.is_dir():
+        return direct
+    return root / "services" / service_id
+
+
 def load_json(path: Path) -> Any:
     return json.loads(read(path))
 
@@ -52,20 +59,23 @@ def main() -> int:
     args = parser.parse_args()
     root = Path(args.root).resolve()
 
+    service = service_root(root, SERVICE_ID)
+    builder = service_root(root, "employee-builder")
+
     paths = {
-        "app": root / SERVICE_ID / "app.py",
-        "engine": root / SERVICE_ID / "engine.py",
-        "dockerfile": root / SERVICE_ID / "Dockerfile",
-        "requirements": root / SERVICE_ID / "requirements.txt",
-        "service_definition": root / SERVICE_ID / "service-definition.json",
-        "readme": root / SERVICE_ID / "README.md",
-        "tests": root / SERVICE_ID / "tests" / "test_engine.py",
+        "app": service / "app.py",
+        "engine": service / "engine.py",
+        "dockerfile": service / "Dockerfile",
+        "requirements": service / "requirements.txt",
+        "service_definition": service / "service-definition.json",
+        "readme": service / "README.md",
+        "tests": service / "tests" / "test_engine.py",
         "employee_definition": root / "config" / "reference-research-content-employee.json",
         "catalog": root / "config" / "service-catalog.json",
         "run_contract": root / "contracts" / "reference-research-content-run.v1.schema.json",
         "source_contract": root / "contracts" / "research-source.v1.schema.json",
         "artifact_contract": root / "contracts" / "research-content-artifact.v1.schema.json",
-        "template": root / "employee-builder" / "templates" / "research-content.yaml",
+        "template": builder / "templates" / "research-content.yaml",
         "documentation": root / "docs" / "phase52.3-reference-research-content-employee.md",
         "compose": root / "deploy" / "reference-research-content-employee.compose.yml",
         "release_compose": root / "deploy" / "reference-research-content-employee.release.compose.yml",
@@ -309,7 +319,7 @@ def main() -> int:
     })
 
     # Validate the canonical definition with the installed RC8 lifecycle normalizer.
-    lifecycle_path = root / "employee-registry" / "lifecycle_engine.py"
+    lifecycle_path = service_root(root, "employee-registry") / "lifecycle_engine.py"
     checks["lifecycle_engine_present"] = lifecycle_path.is_file()
     if lifecycle_path.is_file() and employee:
         try:

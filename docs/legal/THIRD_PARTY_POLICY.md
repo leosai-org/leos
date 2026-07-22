@@ -63,4 +63,11 @@ Every marketplace listing must declare:
 
 ## Release gate
 
-Unknown or incompatible licensing is a blocking failure, not a warning. Any correction to RC10 source or dependency selection becomes RC11 or another successor release.
+Unknown or incompatible licensing is a blocking failure, not a warning. Any correction after RC11 publication requires another successor release; published tags and assets are never silently replaced.
+
+
+## RC11 source-only decision
+
+RC11 refreshes source SBOM identity but does not publish OCI artifacts. Image
+SBOMs, base-image digests, and signed image provenance remain blocking
+requirements for a later container-bearing release.

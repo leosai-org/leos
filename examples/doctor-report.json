@@ -23,7 +23,7 @@
     {
       "check_id": "source-release",
       "domain": "release-integrity",
-      "message": "Installation source release matches RC9.",
+      "message": "Installation source release matches the governed RC11 authority.",
       "ok": true,
       "remediation": null,
       "severity": "pass"
@@ -31,7 +31,7 @@
     {
       "check_id": "source-tree",
       "domain": "release-integrity",
-      "message": "Installation source tree matches RC9.",
+      "message": "Installation source payload matches source.lock.json.",
       "ok": true,
       "remediation": null,
       "severity": "pass"

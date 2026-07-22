@@ -16,7 +16,7 @@ class OperatorCliTests(unittest.TestCase):
   (self.target/'state/administrator-bootstrap.json').chmod(0o600)
   (self.target/'state/runtime-selection.json').chmod(0o640)
   plan_path=self.target/'state/installation-plan.json'
-  manifest=json.loads((ROOT/'examples/installation-manifest.json').read_text()); manifest['target_root']=self.target.as_posix()
+  manifest=json.loads((ROOT/'examples/installation-manifest.json').read_text()); manifest['target_root']=self.target.as_posix(); manifest['source_release']=op.SOURCE_RELEASE; manifest['source_tree_sha256']=op.SOURCE_TREE
   manifest['files']={'state/installation-plan.json':{'mode':'0o640','sha256':op.sha256_file(plan_path),'size_bytes':plan_path.stat().st_size}}
   (self.target/'state/installation-manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
   self.config=json.loads((ROOT/'config/operator-cli.json').read_text()); self.catalog=json.loads((ROOT/'config/operator-service-catalog.json').read_text()); self.fixture=json.loads((ROOT/'examples/operator-fixture.json').read_text())
@@ -51,9 +51,9 @@ class OperatorCliTests(unittest.TestCase):
  def test_backup_destination_portable(self):
   with self.assertRaises(op.OperatorError): op.backup_plan(self.target,self.config,str(Path(os.sep)/'tmp'/'a.tar.gz'),NOW)
  def test_backup_not_authorized(self): self.assertFalse(op.backup_plan(self.target,self.config,'backups/a.tar.gz',NOW)['execution_authorized'])
- def test_update_plan_requires_confirmation(self): self.assertTrue(op.update_plan(self.target,'0.1.0-dev-preview-rc10','development',False,NOW)['requires_confirmation'])
- def test_update_network_opt_in_recorded(self): self.assertTrue(op.update_plan(self.target,'0.1.0-dev-preview-rc10','development',True,NOW)['network_authorized'])
- def test_update_no_network_contact(self): self.assertFalse(op.update_plan(self.target,'0.1.0-dev-preview-rc10','development',True,NOW)['external_network_contacted'])
+ def test_update_plan_requires_confirmation(self): self.assertTrue(op.update_plan(self.target,'0.1.0-dev-preview-rc12','development',False,NOW)['requires_confirmation'])
+ def test_update_network_opt_in_recorded(self): self.assertTrue(op.update_plan(self.target,'0.1.0-dev-preview-rc12','development',True,NOW)['network_authorized'])
+ def test_update_no_network_contact(self): self.assertFalse(op.update_plan(self.target,'0.1.0-dev-preview-rc12','development',True,NOW)['external_network_contacted'])
  def test_update_invalid_release(self):
   with self.assertRaises(op.OperatorError): op.update_plan(self.target,'bad release!','development',False,NOW)
  def test_cli_output_file(self):

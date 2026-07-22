@@ -92,6 +92,10 @@ def main() -> int:
         "examples/offline-source-manifest.json",
         "examples/installer-bootstrap-fixture.json",
         "tests/phase5242/test_installer_bootstrap.py",
+        "manifest.json",
+        "source.lock.json",
+        "contracts.lock.json",
+        "checksums.sha256",
     ]
     checks: dict[str, bool] = {}
 
@@ -143,13 +147,16 @@ def main() -> int:
         bootstrap.get("contract_version")
         == "leos.installer-bootstrap-config.v1"
     )
-    checks["bootstrap-source-rc9"] = (
+    authority = bootstrap.get("source_authority", {})
+    checks["bootstrap-source-rc11"] = (
         bootstrap.get("source_release")
-        == "0.1.0-dev-preview-rc9"
+        == "0.1.0-dev-preview-rc11"
     )
-    checks["bootstrap-source-tree"] = (
-        bootstrap.get("source_tree_sha256")
-        == "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da"
+    checks["bootstrap-source-authority"] = (
+        authority.get("contract_version")
+        == "leos.source-authority.v1"
+        and authority.get("manifest") == "manifest.json"
+        and authority.get("source_lock") == "source.lock.json"
     )
     checks["bootstrap-idempotent"] = bootstrap.get("idempotent") is True
     checks["bootstrap-rollback"] = (
@@ -225,7 +232,7 @@ def main() -> int:
         "examples/installation-result.json":
             "leos.installation-result.v1",
         "examples/offline-source-manifest.json":
-            "leos.offline-source.v1",
+            "leos.offline-source.v2",
         "examples/installer-bootstrap-fixture.json":
             "leos.installer-bootstrap-fixture.v1",
     }
@@ -290,9 +297,13 @@ def main() -> int:
     )
     checks["manifest-installed"] = manifest.get("status") == "installed"
     checks["manifest-files-5"] = len(manifest.get("files", {})) == 5
-    checks["manifest-source-rc9"] = (
+    checks["manifest-source-rc11"] = (
         manifest.get("source_release")
-        == "0.1.0-dev-preview-rc9"
+        == "0.1.0-dev-preview-rc11"
+    )
+    checks["manifest-source-tree-fixture"] = (
+        manifest.get("source_tree_sha256")
+        == "bc2a07de0c8eb7cf3312c361c437b4fcef660853a2825654e0561e503ff53d51"
     )
     checks["manifest-ownership-intent"] = (
         manifest.get("ownership", {}).get("apply_ownership")
@@ -341,6 +352,11 @@ def main() -> int:
     checks["source-connected-opt-in"] = (
         "Connected mode requires --allow-network" in source_text
     )
+    checks["source-authority-files"] = (
+        "manifest.json" in source_text
+        and "source.lock.json" in source_text
+        and "rc9-release.json" not in source_text
+    )
 
     unit = subprocess.run(
         [
@@ -374,14 +390,10 @@ def main() -> int:
         temp = Path(temporary)
         source_root = temp / "source"
         source_root.mkdir()
-        source_manifest = read_json(
-            root / "examples/offline-source-manifest.json"
-        )
-        (source_root / "source-manifest.json").write_text(
-            json.dumps(source_manifest, indent=2, sort_keys=True)
-            + "\n",
-            encoding="utf-8",
-        )
+        for authority_name in ("manifest.json", "source.lock.json"):
+            (source_root / authority_name).write_bytes(
+                (root / authority_name).read_bytes()
+            )
         target = temp / "leos"
         plan_path = root / "examples/installation-plan.json"
         common = [

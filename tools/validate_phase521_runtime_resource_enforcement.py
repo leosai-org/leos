@@ -173,7 +173,7 @@ def main() -> int:
         )
         checks["scheduler_contract_current"] = (
             scheduler_entry.get("contract_version")
-            == "leos.runtime-resource-enforcement.v1"
+            == "leos.employee-runtime-governance.v1"
         )
 
     if paths["configuration"].is_file():

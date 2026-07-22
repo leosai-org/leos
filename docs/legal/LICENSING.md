@@ -27,13 +27,13 @@ Commercial licenses apply only to separately identified offerings, such as:
 
 ## Public repository rule
 
-A public repository must contain a top-level `LICENSE` file and must identify its license in repository metadata as `Apache-2.0`. New source files created after RC10 should normally carry a concise SPDX header appropriate to the file type:
+A public repository must contain a top-level `LICENSE` file and must identify its license in repository metadata as `Apache-2.0`. New source files created for RC11 and later should normally carry a concise SPDX header appropriate to the file type:
 
 ```text
 SPDX-License-Identifier: Apache-2.0
 ```
 
-RC10 files are immutable. SPDX headers are **not** backfilled into RC10 source files. The RC10 public export is licensed through the publication envelope, top-level license, NOTICE, and a hash-audited license manifest. Header normalization begins only in RC11 or another successor release.
+RC10 files are immutable. SPDX headers are **not** backfilled into RC10 source files. The RC10 public export is licensed through the publication envelope, top-level license, NOTICE, and a hash-audited license manifest. RC11 begins successor normalization without rewriting immutable RC10 evidence.
 
 ## Files not covered by Apache-2.0
 
@@ -60,3 +60,10 @@ Forks may use the Apache-licensed code according to Apache-2.0. They may accurat
 - Apache licensing FAQ: https://www.apache.org/foundation/license-faq.html
 - SPDX license information: https://spdx.org/licenses/Apache-2.0.html
 - SPDX identifier guidance: https://spdx.dev/learn/handling-license-info/
+
+
+## RC11 source-authority files
+
+`manifest.json`, `contracts.lock.json`, `source.lock.json`, and
+`checksums.sha256` are part of the Apache-2.0 public-source distribution or
+factual release metadata. They do not alter third-party license terms.

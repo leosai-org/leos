@@ -1,35 +1,11 @@
 {
   "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
   "bomFormat": "CycloneDX",
-  "specVersion": "1.7",
-  "serialNumber": "urn:uuid:8871af4b-6926-4072-8682-1873ca200f86",
-  "version": 1,
-  "metadata": {
-    "timestamp": "2026-07-22T00:59:15Z",
-    "tools": {
-      "components": [
-        {
-          "type": "application",
-          "author": "anchore",
-          "name": "syft",
-          "version": "1.49.0"
-        }
-      ]
-    },
-    "component": {
-      "bom-ref": "f635857a78a87625",
-      "type": "file",
-      "name": "leos-release://0.1.0-dev-preview-rc10"
-    }
-  },
   "components": [
     {
       "bom-ref": "pkg:pypi/fastapi@0.116.1?package-id=4dfd0e73fa5e5cca",
-      "type": "library",
-      "name": "fastapi",
-      "version": "0.116.1",
       "cpe": "cpe:2.3:a:python-fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
-      "purl": "pkg:pypi/fastapi@0.116.1",
+      "name": "fastapi",
       "properties": [
         {
           "name": "syft:package:foundBy",
@@ -95,15 +71,15 @@
           "name": "syft:location:0:path",
           "value": "/services/employee-resource-profile-service/requirements.txt"
         }
-      ]
+      ],
+      "purl": "pkg:pypi/fastapi@0.116.1",
+      "type": "library",
+      "version": "0.116.1"
     },
     {
       "bom-ref": "pkg:pypi/fastapi@0.116.1?package-id=ecedaa554984bbb0",
-      "type": "library",
-      "name": "fastapi",
-      "version": "0.116.1",
       "cpe": "cpe:2.3:a:python-fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
-      "purl": "pkg:pypi/fastapi@0.116.1",
+      "name": "fastapi",
       "properties": [
         {
           "name": "syft:package:foundBy",
@@ -169,15 +145,15 @@
           "name": "syft:location:0:path",
           "value": "/services/reference-research-content-employee/requirements.txt"
         }
-      ]
+      ],
+      "purl": "pkg:pypi/fastapi@0.116.1",
+      "type": "library",
+      "version": "0.116.1"
     },
     {
       "bom-ref": "pkg:pypi/pydantic@2.13.4?package-id=4a10ebc3356e576f",
-      "type": "library",
-      "name": "pydantic",
-      "version": "2.13.4",
       "cpe": "cpe:2.3:a:python-pydantic:python-pydantic:2.13.4:*:*:*:*:*:*:*",
-      "purl": "pkg:pypi/pydantic@2.13.4",
+      "name": "pydantic",
       "properties": [
         {
           "name": "syft:package:foundBy",
@@ -243,15 +219,15 @@
           "name": "syft:location:0:path",
           "value": "/services/reference-research-content-employee/requirements.txt"
         }
-      ]
+      ],
+      "purl": "pkg:pypi/pydantic@2.13.4",
+      "type": "library",
+      "version": "2.13.4"
     },
     {
       "bom-ref": "pkg:pypi/uvicorn@0.35.0?package-id=e77195b2068db34d",
-      "type": "library",
-      "name": "uvicorn",
-      "version": "0.35.0",
       "cpe": "cpe:2.3:a:python-uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
-      "purl": "pkg:pypi/uvicorn@0.35.0",
+      "name": "uvicorn",
       "properties": [
         {
           "name": "syft:package:foundBy",
@@ -317,15 +293,15 @@
           "name": "syft:location:0:path",
           "value": "/services/employee-resource-profile-service/requirements.txt"
         }
-      ]
+      ],
+      "purl": "pkg:pypi/uvicorn@0.35.0",
+      "type": "library",
+      "version": "0.35.0"
     },
     {
       "bom-ref": "pkg:pypi/uvicorn@0.35.0?package-id=57e1b8c917c48bad",
-      "type": "library",
-      "name": "uvicorn",
-      "version": "0.35.0",
       "cpe": "cpe:2.3:a:python-uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
-      "purl": "pkg:pypi/uvicorn@0.35.0",
+      "name": "uvicorn",
       "properties": [
         {
           "name": "syft:package:foundBy",
@@ -391,12 +367,13 @@
           "name": "syft:location:0:path",
           "value": "/services/reference-research-content-employee/requirements.txt"
         }
-      ]
+      ],
+      "purl": "pkg:pypi/uvicorn@0.35.0",
+      "type": "library",
+      "version": "0.35.0"
     },
     {
       "bom-ref": "f6b6ae49e0409dfd",
-      "type": "file",
-      "name": "leos-release://0.1.0-dev-preview-rc10/services/employee-resource-profile-service/requirements.txt",
       "hashes": [
         {
           "alg": "SHA-1",
@@ -406,12 +383,12 @@
           "alg": "SHA-256",
           "content": "a6e6509dda765e6d1a657c454d8208ca2a97a0148c0588e379a021afb76d0ee1"
         }
-      ]
+      ],
+      "name": "leos-release://0.1.0-dev-preview-rc10/services/employee-resource-profile-service/requirements.txt",
+      "type": "file"
     },
     {
       "bom-ref": "b19e1b4327c72218",
-      "type": "file",
-      "name": "leos-release://0.1.0-dev-preview-rc10/services/reference-research-content-employee/requirements.txt",
       "hashes": [
         {
           "alg": "SHA-1",
@@ -421,7 +398,44 @@
           "alg": "SHA-256",
           "content": "eea28cff5cd757875ed744ea9703f2e215fac08dc0fe665c83eeffb846dc850e"
         }
+      ],
+      "name": "leos-release://0.1.0-dev-preview-rc10/services/reference-research-content-employee/requirements.txt",
+      "type": "file"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "084f9609fdf4fb8d",
+      "name": "leos-release://0.1.0-dev-preview-rc11",
+      "type": "file"
+    },
+    "properties": [
+      {
+        "name": "leos:release",
+        "value": "0.1.0-dev-preview-rc11"
+      },
+      {
+        "name": "leos:distribution",
+        "value": "source-only"
+      },
+      {
+        "name": "leos:oci-status",
+        "value": "excluded"
+      }
+    ],
+    "timestamp": "2026-07-21T00:00:00Z",
+    "tools": {
+      "components": [
+        {
+          "author": "anchore",
+          "name": "syft",
+          "type": "application",
+          "version": "1.49.0"
+        }
       ]
     }
-  ]
+  },
+  "serialNumber": "urn:uuid:76cf182a-90f7-51af-aa17-dc5a6a48a464",
+  "specVersion": "1.7",
+  "version": 1
 }

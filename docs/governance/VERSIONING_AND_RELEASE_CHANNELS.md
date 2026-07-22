@@ -94,3 +94,15 @@ Use explicit labels instead of vague terms:
 - `stable`
 - `deprecated`
 - `unsupported`
+
+
+## Current public-preview successor
+
+```text
+0.1.0-dev-preview-rc11
+release_ordinal: 11
+expected tag: v0.1.0-dev-preview-rc11
+```
+
+RC11 corrects the public release surface and introduces deterministic source
+authority. RC10 remains a preserved predecessor and its tag must not move.

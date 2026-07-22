@@ -29,9 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/operator-cli.json"
 DEFAULT_SERVICE_CATALOG = ROOT / "config/operator-service-catalog.json"
 DEFAULT_SECURITY_OBSERVABILITY_CONFIG = ROOT / "config/security-observability.json"
-SOURCE_RELEASE = "0.1.0-dev-preview-rc9"
-SOURCE_TREE = "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da"
-SOURCE_PHASE = "52.4.5"
+# Release identity is loaded from manifest.json and source.lock.json.
 
 def release_identity() -> dict[str, str]:
     release = os.environ.get("LEOS_RELEASE_VERSION")
@@ -93,6 +91,41 @@ def load_object(path: Path, contract: str|None=None) -> dict[str,Any]:
     if not isinstance(value,dict): raise OperatorError(f"Expected JSON object: {path}")
     if contract and value.get('contract_version')!=contract: raise OperatorError(f"Unexpected contract in {path}")
     return value
+
+def load_source_authority(root: Path = ROOT) -> dict[str, Any]:
+    manifest_path = root / "manifest.json"
+    source_lock_path = root / "source.lock.json"
+    if not manifest_path.is_file() or not source_lock_path.is_file():
+        raise OperatorError(
+            "Release authority requires manifest.json and source.lock.json."
+        )
+    manifest = read_json(manifest_path)
+    source_lock = read_json(source_lock_path)
+    if not isinstance(manifest, dict) or not isinstance(source_lock, dict):
+        raise OperatorError("Release authority files must be JSON objects.")
+    if manifest.get("contract_version") != "leos.release-manifest.v1":
+        raise OperatorError("Unsupported release-manifest contract.")
+    if source_lock.get("contract_version") != "leos.source-lock.v1":
+        raise OperatorError("Unsupported source-lock contract.")
+    release = str(manifest.get("release_version", ""))
+    if source_lock.get("release_version") != release:
+        raise OperatorError("Release manifest and source lock disagree.")
+    payload = str(source_lock.get("payload_tree_sha256", ""))
+    if not re.fullmatch(r"[a-f0-9]{64}", payload):
+        raise OperatorError("Source-lock payload hash is invalid.")
+    return {
+        "release": release,
+        "phase": str(manifest.get("release_phase", "unknown")),
+        "payload_tree_sha256": payload,
+        "manifest_path": str(manifest_path),
+        "source_lock_path": str(source_lock_path),
+    }
+
+
+SOURCE_AUTHORITY = load_source_authority()
+SOURCE_RELEASE = SOURCE_AUTHORITY["release"]
+SOURCE_TREE = SOURCE_AUTHORITY["payload_tree_sha256"]
+SOURCE_PHASE = SOURCE_AUTHORITY["phase"]
 
 def contains_forbidden_secret(value: Any) -> bool:
     if isinstance(value,dict):
@@ -204,8 +237,8 @@ def doctor_payload(target: Path, config: dict[str,Any], catalog: dict[str,Any], 
     checks=[]
     checks.append(check('installation-manifest','installation',manifest.get('status')=='installed','fail','Installation manifest is installed.','Run leos install with the confirmed plan.'))
     checks.append(check('installation-plan','installation',plan.get('contract_version')=='leos.installation-plan.v1','fail','Installation plan is present.','Restore the installation plan.'))
-    checks.append(check('source-release','release-integrity',manifest.get('source_release')==SOURCE_RELEASE,'fail','Installation source release matches RC9.','Reinstall from the governed RC9 source.'))
-    checks.append(check('source-tree','release-integrity',manifest.get('source_tree_sha256')==SOURCE_TREE,'fail','Installation source tree matches RC9.','Reinstall from the exact RC9 tree.'))
+    checks.append(check('source-release','release-integrity',manifest.get('source_release')==SOURCE_RELEASE,'fail',f'Installation source release matches {SOURCE_RELEASE}.',f'Reinstall from the governed {SOURCE_RELEASE} source.'))
+    checks.append(check('source-tree','release-integrity',manifest.get('source_tree_sha256')==SOURCE_TREE,'fail','Installation source payload matches source.lock.json.','Reinstall from the exact source.lock.json payload.'))
     checks.append(check('manifest-drift','configuration-drift',not drift,'warn','Installed files match the manifest.','Review or restore modified installation files.'))
     checks.append(check('first-run-config','first-run',first.get('first_run_complete') is True,'fail','First-run configuration is complete.','Run leos first-run.'))
     checks.append(check('first-run-readiness','first-run',readiness.get('status')=='ready','fail','First-run readiness is ready.','Resolve readiness blockers and rerun first-run.'))

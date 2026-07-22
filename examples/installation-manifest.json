@@ -71,8 +71,8 @@
   },
   "plan_id": "plan-4ae24502f43546e5",
   "selected_profile": "leos-standard-nvidia",
-  "source_release": "0.1.0-dev-preview-rc9",
-  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "source_release": "0.1.0-dev-preview-rc11",
+  "source_tree_sha256": "bc2a07de0c8eb7cf3312c361c437b4fcef660853a2825654e0561e503ff53d51",
   "status": "installed",
   "target_root": "leos-example",
   "transaction_id": "install-tx-c7298fcd2958a6e8"

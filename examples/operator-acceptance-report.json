@@ -79,8 +79,8 @@
     "production_state_accessed": false,
     "secret_material_copied": false
   },
-  "source_root": "release-candidate/source",
-  "target_release": "0.1.0-dev-preview-rc10",
+  "source_root": "release-candidate/rc11-source",
+  "target_release": "0.1.0-dev-preview-rc11",
   "validator_summary": {
     "actual_total_tests": 128,
     "actual_total_validation_checks": 681,

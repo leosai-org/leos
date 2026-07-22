@@ -1,430 +1,19 @@
 {
-  "spdxVersion": "SPDX-2.3",
-  "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "LEOS-0.1.0-dev-preview-rc10-source",
-  "documentNamespace": "https://anchore.com/syft/dirleos-release://0.1.0-dev-preview-rc10-0b6fc897-6411-4f1d-b08d-c3212f50d1d1",
   "creationInfo": {
-    "licenseListVersion": "3.28",
+    "created": "2026-07-21T00:00:00Z",
     "creators": [
       "Organization: Anchore, Inc",
       "Tool: syft-1.49.0",
-      "Tool: LEOS P3 source-SBOM normalizer v1"
+      "Tool: LEOS P3 source-SBOM normalizer v1",
+      "Tool: LEOS RC11 source-SBOM normalizer v1"
     ],
-    "created": "2026-07-22T00:59:15Z"
+    "licenseListVersion": "3.28"
   },
-  "packages": [
-    {
-      "name": "fastapi",
-      "SPDXID": "SPDXRef-Package-python-fastapi-4dfd0e73fa5e5cca",
-      "versionInfo": "0.116.1",
-      "supplier": "NOASSERTION",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "sourceInfo": "acquired package info from installed python package manifest file: /services/employee-resource-profile-service/requirements.txt",
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-fastapi:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_fastapi:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:fastapi:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/fastapi@0.116.1"
-        }
-      ]
-    },
-    {
-      "name": "fastapi",
-      "SPDXID": "SPDXRef-Package-python-fastapi-ecedaa554984bbb0",
-      "versionInfo": "0.116.1",
-      "supplier": "NOASSERTION",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "sourceInfo": "acquired package info from installed python package manifest file: /services/reference-research-content-employee/requirements.txt",
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-fastapi:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_fastapi:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python-fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python_fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:fastapi:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:fastapi:0.116.1:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/fastapi@0.116.1"
-        }
-      ]
-    },
-    {
-      "name": "pydantic",
-      "SPDXID": "SPDXRef-Package-python-pydantic-4a10ebc3356e576f",
-      "versionInfo": "2.13.4",
-      "supplier": "NOASSERTION",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "sourceInfo": "acquired package info from installed python package manifest file: /services/reference-research-content-employee/requirements.txt",
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-pydantic:python-pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-pydantic:python_pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_pydantic:python-pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_pydantic:python_pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:pydantic:python-pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:pydantic:python_pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-pydantic:pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_pydantic:pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python-pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python_pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:pydantic:pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:pydantic:2.13.4:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/pydantic@2.13.4"
-        }
-      ]
-    },
-    {
-      "name": "uvicorn",
-      "SPDXID": "SPDXRef-Package-python-uvicorn-e77195b2068db34d",
-      "versionInfo": "0.35.0",
-      "supplier": "NOASSERTION",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "sourceInfo": "acquired package info from installed python package manifest file: /services/employee-resource-profile-service/requirements.txt",
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/uvicorn@0.35.0"
-        }
-      ]
-    },
-    {
-      "name": "uvicorn",
-      "SPDXID": "SPDXRef-Package-python-uvicorn-57e1b8c917c48bad",
-      "versionInfo": "0.35.0",
-      "supplier": "NOASSERTION",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "sourceInfo": "acquired package info from installed python package manifest file: /services/reference-research-content-employee/requirements.txt",
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python-uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python_uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python-uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:python_uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceType": "cpe23Type",
-          "referenceLocator": "cpe:2.3:a:python:uvicorn:0.35.0:*:*:*:*:*:*:*"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceType": "purl",
-          "referenceLocator": "pkg:pypi/uvicorn@0.35.0"
-        }
-      ]
-    },
-    {
-      "name": "LEOS",
-      "SPDXID": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
-      "supplier": "Organization: Bad Tech Labs LLC",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "licenseConcluded": "Apache-2.0",
-      "licenseDeclared": "Apache-2.0",
-      "copyrightText": "NOASSERTION",
-      "primaryPackagePurpose": "FILE",
-      "versionInfo": "0.1.0-dev-preview-rc10"
-    }
-  ],
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://leosai.org/spdx/0.1.0-dev-preview-rc11/48fc6436-ea67-588e-99c0-2c8179445822",
   "files": [
     {
-      "fileName": "services/assignment-service/requirements.txt",
       "SPDXID": "SPDXRef-File-...assignment-service-requirements.txt-bee63deba72f1d40",
       "checksums": [
         {
@@ -432,14 +21,14 @@
           "checksumValue": "0000000000000000000000000000000000000000"
         }
       ],
+      "copyrightText": "NOASSERTION",
+      "fileName": "services/assignment-service/requirements.txt",
       "licenseConcluded": "NOASSERTION",
       "licenseInfoInFiles": [
         "NOASSERTION"
-      ],
-      "copyrightText": "NOASSERTION"
+      ]
     },
     {
-      "fileName": "services/employee-builder/requirements.txt",
       "SPDXID": "SPDXRef-File-...employee-builder-requirements.txt-5879ffa31509b86b",
       "checksums": [
         {
@@ -447,14 +36,14 @@
           "checksumValue": "0000000000000000000000000000000000000000"
         }
       ],
+      "copyrightText": "NOASSERTION",
+      "fileName": "services/employee-builder/requirements.txt",
       "licenseConcluded": "NOASSERTION",
       "licenseInfoInFiles": [
         "NOASSERTION"
-      ],
-      "copyrightText": "NOASSERTION"
+      ]
     },
     {
-      "fileName": "services/employee-registry/requirements.txt",
       "SPDXID": "SPDXRef-File-...employee-registry-requirements.txt-a067acf3b7a5ed1b",
       "checksums": [
         {
@@ -462,18 +51,15 @@
           "checksumValue": "0000000000000000000000000000000000000000"
         }
       ],
+      "copyrightText": "NOASSERTION",
+      "fileName": "services/employee-registry/requirements.txt",
       "licenseConcluded": "NOASSERTION",
       "licenseInfoInFiles": [
         "NOASSERTION"
-      ],
-      "copyrightText": "NOASSERTION"
+      ]
     },
     {
-      "fileName": "services/employee-resource-profile-service/requirements.txt",
       "SPDXID": "SPDXRef-File-...requirements.txt-f6b6ae49e0409dfd",
-      "fileTypes": [
-        "TEXT"
-      ],
       "checksums": [
         {
           "algorithm": "SHA1",
@@ -484,14 +70,17 @@
           "checksumValue": "a6e6509dda765e6d1a657c454d8208ca2a97a0148c0588e379a021afb76d0ee1"
         }
       ],
+      "copyrightText": "NOASSERTION",
+      "fileName": "services/employee-resource-profile-service/requirements.txt",
+      "fileTypes": [
+        "TEXT"
+      ],
       "licenseConcluded": "NOASSERTION",
       "licenseInfoInFiles": [
         "NOASSERTION"
-      ],
-      "copyrightText": "NOASSERTION"
+      ]
     },
     {
-      "fileName": "services/execution-scheduler-service/requirements.txt",
       "SPDXID": "SPDXRef-File-...requirements.txt-05198064d3c017e9",
       "checksums": [
         {
@@ -499,14 +88,14 @@
           "checksumValue": "0000000000000000000000000000000000000000"
         }
       ],
+      "copyrightText": "NOASSERTION",
+      "fileName": "services/execution-scheduler-service/requirements.txt",
       "licenseConcluded": "NOASSERTION",
       "licenseInfoInFiles": [
         "NOASSERTION"
-      ],
-      "copyrightText": "NOASSERTION"
+      ]
     },
     {
-      "fileName": "services/persistent-employee-runtime-service/requirements.txt",
       "SPDXID": "SPDXRef-File-...requirements.txt-8e64b59b3e94056f",
       "checksums": [
         {
@@ -514,18 +103,15 @@
           "checksumValue": "0000000000000000000000000000000000000000"
         }
       ],
+      "copyrightText": "NOASSERTION",
+      "fileName": "services/persistent-employee-runtime-service/requirements.txt",
       "licenseConcluded": "NOASSERTION",
       "licenseInfoInFiles": [
         "NOASSERTION"
-      ],
-      "copyrightText": "NOASSERTION"
+      ]
     },
     {
-      "fileName": "services/reference-research-content-employee/requirements.txt",
       "SPDXID": "SPDXRef-File-...requirements.txt-b19e1b4327c72218",
-      "fileTypes": [
-        "TEXT"
-      ],
       "checksums": [
         {
           "algorithm": "SHA1",
@@ -536,73 +122,488 @@
           "checksumValue": "eea28cff5cd757875ed744ea9703f2e215fac08dc0fe665c83eeffb846dc850e"
         }
       ],
+      "copyrightText": "NOASSERTION",
+      "fileName": "services/reference-research-content-employee/requirements.txt",
+      "fileTypes": [
+        "TEXT"
+      ],
       "licenseConcluded": "NOASSERTION",
       "licenseInfoInFiles": [
         "NOASSERTION"
+      ]
+    }
+  ],
+  "name": "LEOS-0.1.0-dev-preview-rc11-source",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-python-fastapi-4dfd0e73fa5e5cca",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-fastapi:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_fastapi:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:fastapi:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/fastapi@0.116.1",
+          "referenceType": "purl"
+        }
       ],
-      "copyrightText": "NOASSERTION"
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "name": "fastapi",
+      "sourceInfo": "acquired package info from installed python package manifest file: /services/employee-resource-profile-service/requirements.txt",
+      "supplier": "NOASSERTION",
+      "versionInfo": "0.116.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-python-fastapi-ecedaa554984bbb0",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:fastapi:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:fastapi:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-fastapi:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_fastapi:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python-fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python_fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:fastapi:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:fastapi:0.116.1:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/fastapi@0.116.1",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "name": "fastapi",
+      "sourceInfo": "acquired package info from installed python package manifest file: /services/reference-research-content-employee/requirements.txt",
+      "supplier": "NOASSERTION",
+      "versionInfo": "0.116.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-python-pydantic-4a10ebc3356e576f",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-pydantic:python-pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-pydantic:python_pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_pydantic:python-pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_pydantic:python_pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:pydantic:python-pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:pydantic:python_pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-pydantic:pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_pydantic:pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python-pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python_pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:pydantic:pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:pydantic:2.13.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pydantic@2.13.4",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "name": "pydantic",
+      "sourceInfo": "acquired package info from installed python package manifest file: /services/reference-research-content-employee/requirements.txt",
+      "supplier": "NOASSERTION",
+      "versionInfo": "2.13.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-python-uvicorn-e77195b2068db34d",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/uvicorn@0.35.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "name": "uvicorn",
+      "sourceInfo": "acquired package info from installed python package manifest file: /services/employee-resource-profile-service/requirements.txt",
+      "supplier": "NOASSERTION",
+      "versionInfo": "0.35.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-python-uvicorn-57e1b8c917c48bad",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python-uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python_uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:uvicorn:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:uvicorn:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python-uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:python_uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:uvicorn:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:python:uvicorn:0.35.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/uvicorn@0.35.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "name": "uvicorn",
+      "sourceInfo": "acquired package info from installed python package manifest file: /services/reference-research-content-employee/requirements.txt",
+      "supplier": "NOASSERTION",
+      "versionInfo": "0.35.0"
+    },
+    {
+      "SPDXID": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "LEOS",
+      "primaryPackagePurpose": "FILE",
+      "supplier": "Organization: Bad Tech Labs LLC",
+      "versionInfo": "0.1.0-dev-preview-rc10"
     }
   ],
   "relationships": [
     {
-      "spdxElementId": "SPDXRef-Package-python-pydantic-4a10ebc3356e576f",
+      "comment": "evident-by: indicates the package's existence is evident by the given file",
       "relatedSpdxElement": "SPDXRef-File-...requirements.txt-b19e1b4327c72218",
       "relationshipType": "OTHER",
-      "comment": "evident-by: indicates the package's existence is evident by the given file"
+      "spdxElementId": "SPDXRef-Package-python-pydantic-4a10ebc3356e576f"
     },
     {
-      "spdxElementId": "SPDXRef-Package-python-fastapi-4dfd0e73fa5e5cca",
+      "comment": "evident-by: indicates the package's existence is evident by the given file",
       "relatedSpdxElement": "SPDXRef-File-...requirements.txt-f6b6ae49e0409dfd",
       "relationshipType": "OTHER",
-      "comment": "evident-by: indicates the package's existence is evident by the given file"
+      "spdxElementId": "SPDXRef-Package-python-fastapi-4dfd0e73fa5e5cca"
     },
     {
-      "spdxElementId": "SPDXRef-Package-python-uvicorn-57e1b8c917c48bad",
+      "comment": "evident-by: indicates the package's existence is evident by the given file",
       "relatedSpdxElement": "SPDXRef-File-...requirements.txt-b19e1b4327c72218",
       "relationshipType": "OTHER",
-      "comment": "evident-by: indicates the package's existence is evident by the given file"
+      "spdxElementId": "SPDXRef-Package-python-uvicorn-57e1b8c917c48bad"
     },
     {
-      "spdxElementId": "SPDXRef-Package-python-uvicorn-e77195b2068db34d",
+      "comment": "evident-by: indicates the package's existence is evident by the given file",
       "relatedSpdxElement": "SPDXRef-File-...requirements.txt-f6b6ae49e0409dfd",
       "relationshipType": "OTHER",
-      "comment": "evident-by: indicates the package's existence is evident by the given file"
+      "spdxElementId": "SPDXRef-Package-python-uvicorn-e77195b2068db34d"
     },
     {
-      "spdxElementId": "SPDXRef-Package-python-fastapi-ecedaa554984bbb0",
+      "comment": "evident-by: indicates the package's existence is evident by the given file",
       "relatedSpdxElement": "SPDXRef-File-...requirements.txt-b19e1b4327c72218",
       "relationshipType": "OTHER",
-      "comment": "evident-by: indicates the package's existence is evident by the given file"
+      "spdxElementId": "SPDXRef-Package-python-fastapi-ecedaa554984bbb0"
     },
     {
-      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
       "relatedSpdxElement": "SPDXRef-Package-python-fastapi-4dfd0e73fa5e5cca",
-      "relationshipType": "CONTAINS"
+      "relationshipType": "CONTAINS",
+      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source"
     },
     {
-      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
       "relatedSpdxElement": "SPDXRef-Package-python-fastapi-ecedaa554984bbb0",
-      "relationshipType": "CONTAINS"
+      "relationshipType": "CONTAINS",
+      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source"
     },
     {
-      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
       "relatedSpdxElement": "SPDXRef-Package-python-pydantic-4a10ebc3356e576f",
-      "relationshipType": "CONTAINS"
+      "relationshipType": "CONTAINS",
+      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source"
     },
     {
-      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
       "relatedSpdxElement": "SPDXRef-Package-python-uvicorn-e77195b2068db34d",
-      "relationshipType": "CONTAINS"
+      "relationshipType": "CONTAINS",
+      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source"
     },
     {
-      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
       "relatedSpdxElement": "SPDXRef-Package-python-uvicorn-57e1b8c917c48bad",
-      "relationshipType": "CONTAINS"
+      "relationshipType": "CONTAINS",
+      "spdxElementId": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source"
     },
     {
-      "spdxElementId": "SPDXRef-DOCUMENT",
       "relatedSpdxElement": "SPDXRef-DocumentRoot-Directory--mnt-nvme-ai-cloud-pub-staging-leos-0.1.0-dev-preview-rc10-public-source",
-      "relationshipType": "DESCRIBES"
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
     }
-  ]
+  ],
+  "spdxVersion": "SPDX-2.3"
 }

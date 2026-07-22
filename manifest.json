@@ -1,0 +1,30 @@
+{
+  "authority": {
+    "checksums": "checksums.sha256",
+    "contract_version": "leos.source-authority.v1",
+    "contracts_lock": "contracts.lock.json",
+    "payload_hash_contract": "leos.payload-tree.v1",
+    "source_lock": "source.lock.json"
+  },
+  "contract_version": "leos.release-manifest.v1",
+  "expected_tag": "v0.1.0-dev-preview-rc11",
+  "license": "Apache-2.0",
+  "oci": {
+    "exclusion": "docs/release/rc11/OCI_EXCLUSION.md",
+    "lock_present": false,
+    "published": false
+  },
+  "predecessor": {
+    "commit": "8fbe4f1de4a4cce2ebace614e57e3a7d8f03d323",
+    "release": "0.1.0-dev-preview-rc10",
+    "tag": "v0.1.0-dev-preview-rc10",
+    "tag_object": "6508bec5025fd747cc846ca9c5ed0060bf1f25b2",
+    "tree_sha256": "dc037039f46b4b812b7e7392b88d22ac5fde11103bdf46d62623c6540f7790d6"
+  },
+  "release_channel": "public-developer-preview",
+  "release_ordinal": 11,
+  "release_phase": "publication-correction-and-source-authority",
+  "release_version": "0.1.0-dev-preview-rc11",
+  "repository": "https://github.com/leosai-org/leos",
+  "source_only": true
+}

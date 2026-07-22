@@ -18,8 +18,7 @@ from typing import Any, Iterable
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/security-observability.json"
 DEFAULT_SERVICE_CATALOG = ROOT / "config/operator-service-catalog.json"
-SOURCE_RELEASE = "0.1.0-dev-preview-rc9"
-SOURCE_TREE = "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da"
+# Release identity is loaded from manifest.json and source.lock.json.
 
 CONTRACT_SECURITY = "leos.security-baseline-report.v1"
 CONTRACT_SECRET = "leos.secret-exposure-report.v1"
@@ -104,6 +103,41 @@ def load_object(path: Path, contract: str | None = None) -> dict[str, Any]:
     if contract and value.get("contract_version") != contract:
         raise SecurityObservabilityError(f"Unexpected contract in {path}")
     return value
+
+def load_source_authority(root: Path = ROOT) -> dict[str, Any]:
+    manifest_path = root / "manifest.json"
+    source_lock_path = root / "source.lock.json"
+    if not manifest_path.is_file() or not source_lock_path.is_file():
+        raise SecurityObservabilityError(
+            "Release authority requires manifest.json and source.lock.json."
+        )
+    manifest = read_json(manifest_path)
+    source_lock = read_json(source_lock_path)
+    if not isinstance(manifest, dict) or not isinstance(source_lock, dict):
+        raise SecurityObservabilityError("Release authority files must be JSON objects.")
+    if manifest.get("contract_version") != "leos.release-manifest.v1":
+        raise SecurityObservabilityError("Unsupported release-manifest contract.")
+    if source_lock.get("contract_version") != "leos.source-lock.v1":
+        raise SecurityObservabilityError("Unsupported source-lock contract.")
+    release = str(manifest.get("release_version", ""))
+    if source_lock.get("release_version") != release:
+        raise SecurityObservabilityError("Release manifest and source lock disagree.")
+    payload = str(source_lock.get("payload_tree_sha256", ""))
+    if not re.fullmatch(r"[a-f0-9]{64}", payload):
+        raise SecurityObservabilityError("Source-lock payload hash is invalid.")
+    return {
+        "release": release,
+        "phase": str(manifest.get("release_phase", "unknown")),
+        "payload_tree_sha256": payload,
+        "manifest_path": str(manifest_path),
+        "source_lock_path": str(source_lock_path),
+    }
+
+
+SOURCE_AUTHORITY = load_source_authority()
+SOURCE_RELEASE = SOURCE_AUTHORITY["release"]
+SOURCE_TREE = SOURCE_AUTHORITY["payload_tree_sha256"]
+SOURCE_PHASE = SOURCE_AUTHORITY["phase"]
 
 
 def safe_target(value: str | Path) -> Path:
@@ -510,7 +544,7 @@ def security_baseline_report(
                 "check_id": "release-source",
                 "domain": "release-integrity",
                 "status": "pass" if manifest.get("source_release") == SOURCE_RELEASE else "fail",
-                "message": "Installation source release matches RC9.",
+                "message": f"Installation source release matches {SOURCE_RELEASE}.",
                 "path": "state/installation-manifest.json",
                 "actual_mode": None,
                 "expected_mode_max": None,
@@ -520,11 +554,11 @@ def security_baseline_report(
                 "check_id": "release-tree",
                 "domain": "release-integrity",
                 "status": "pass" if manifest.get("source_tree_sha256") == SOURCE_TREE else "fail",
-                "message": "Installation source tree matches the immutable RC9 tree.",
+                "message": "Installation source payload matches source.lock.json.",
                 "path": "state/installation-manifest.json",
                 "actual_mode": None,
                 "expected_mode_max": None,
-                "remediation": None if manifest.get("source_tree_sha256") == SOURCE_TREE else "Reinstall from the exact RC9 source tree.",
+                "remediation": None if manifest.get("source_tree_sha256") == SOURCE_TREE else "Reinstall from the exact source.lock.json payload.",
             },
             {
                 "check_id": "secret-exposure",

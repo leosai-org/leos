@@ -13,6 +13,13 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def service_root(root: Path, service_id: str) -> Path:
+    direct = root / service_id
+    if direct.is_dir():
+        return direct
+    return root / "services" / service_id
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -22,14 +29,19 @@ def main() -> int:
     args = parser.parse_args()
     root = Path(args.root).resolve()
 
+    registry_root = service_root(root, "employee-registry")
+    scheduler_root = service_root(root, "execution-scheduler-service")
+    assignment_root = service_root(root, "assignment-service")
+    builder_root = service_root(root, "employee-builder")
+
     files = {
-        "registry_app": root / "employee-registry" / "app.py",
-        "lifecycle_engine": root / "employee-registry" / "lifecycle_engine.py",
-        "registry_test": root / "employee-registry" / "tests" / "test_lifecycle_engine.py",
-        "scheduler": root / "execution-scheduler-service" / "app" / "main.py",
-        "scheduler_test": root / "execution-scheduler-service" / "tests" / "test_phase522_employee_lifecycle.py",
-        "assignment": root / "assignment-service" / "app.py",
-        "builder": root / "employee-builder" / "app.py",
+        "registry_app": registry_root / "app.py",
+        "lifecycle_engine": registry_root / "lifecycle_engine.py",
+        "registry_test": registry_root / "tests" / "test_lifecycle_engine.py",
+        "scheduler": scheduler_root / "app" / "main.py",
+        "scheduler_test": scheduler_root / "tests" / "test_phase522_employee_lifecycle.py",
+        "assignment": assignment_root / "app.py",
+        "builder": builder_root / "app.py",
         "definition_contract": root / "contracts" / "employee-definition.v2.schema.json",
         "lifecycle_contract": root / "contracts" / "employee-lifecycle.v1.schema.json",
         "configuration": root / "config" / "employee-lifecycle.json",

@@ -33,7 +33,12 @@
   "plaintext_secret_output": false,
   "read_only_default": true,
   "security_observability_config": "config/security-observability.json",
-  "source_release": "0.1.0-dev-preview-rc9",
+  "source_authority": {
+    "contract_version": "leos.source-authority.v1",
+    "manifest": "manifest.json",
+    "source_lock": "source.lock.json"
+  },
+  "source_release": "0.1.0-dev-preview-rc11",
   "state_files": {
     "administrator_bootstrap": "state/administrator-bootstrap.json",
     "first_run_configuration": "config/first-run.json",

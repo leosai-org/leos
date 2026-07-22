@@ -29,14 +29,25 @@ class InstallerBootstrapTests(unittest.TestCase):
         self.target = self.root / "install-root"
         self.source = self.root / "offline-source"
         self.source.mkdir()
-        (self.source / "source-manifest.json").write_text(
+        (self.source / "manifest.json").write_text(
             json.dumps(
                 {
-                    "contract_version": "leos.offline-source.v1",
-                    "release": "0.1.0-dev-preview-rc9",
-                    "tree_sha256": (
-                        "64ba7c60c8c4e18ac9349edaa7ac96a7"
-                        "ae52242f8eba06e4d99b298cd3d2c7da"
+                    "contract_version": "leos.release-manifest.v1",
+                    "release_version": "0.1.0-dev-preview-rc11",
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        (self.source / "source.lock.json").write_text(
+            json.dumps(
+                {
+                    "contract_version": "leos.source-lock.v1",
+                    "release_version": "0.1.0-dev-preview-rc11",
+                    "payload_tree_sha256": (
+                        "bc2a07de0c8eb7cf3312c361c437b4fcef660853a2825654e0561e503ff53d51"
                     ),
                 },
                 indent=2,

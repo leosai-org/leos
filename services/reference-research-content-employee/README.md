@@ -25,3 +25,10 @@ The deployment fragment attaches the service to the existing `ai-cloud-net` netw
 - `POST /execute`
 
 The `/execute` endpoint accepts the existing LEOS capability-provider envelope and returns the completed run and artifact.
+
+
+## RC11 lineage
+
+The service retains its RC8 lifecycle implementation lineage. In the RC11
+source release, that historical origin is not a current release identifier; the
+service is distributed and governed as part of the RC11 monorepo.

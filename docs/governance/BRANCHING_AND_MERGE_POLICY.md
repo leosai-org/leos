@@ -64,9 +64,9 @@ branches accept fixes, documentation corrections, packaging changes, and
 security work approved for that release. New feature development stays on
 `main` for a later release.
 
-## Public-to-internal contribution flow
+## Public-to-successor contribution flow
 
-The public repository is not the authority for immutable RC10. Accepted public
-changes are recorded and applied to the active successor workspace through a
-reviewed integration process. The successor release then produces the next clean
-public export.
+The signed RC10 root remains immutable predecessor evidence. RC11 successor
+work occurs on `release/0.1.0-dev-preview-rc11` until its acceptance gates pass.
+After RC11 publication, normal public contributions use protected `main` and
+reviewed short-lived branches; published tags never move.

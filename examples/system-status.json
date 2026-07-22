@@ -47,7 +47,7 @@
     "unhealthy": 0,
     "unknown": 1
   },
-  "source_release": "0.1.0-dev-preview-rc9",
+  "source_release": "0.1.0-dev-preview-rc11",
   "status": "ready",
   "target_root": "leos-example"
 }

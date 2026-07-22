@@ -28,7 +28,7 @@ Secrets belong in a secret manager, never in a repository.
 
 ## Why the core starts as a monorepo
 
-RC10 contains tightly coordinated services, contracts, deployment definitions,
+RC11 contains tightly coordinated services, contracts, deployment definitions,
 tests, and release verification. Publishing those components in one repository
 preserves atomic changes and prevents incompatible cross-repository releases.
 
@@ -55,3 +55,10 @@ These are names, not launch requirements:
 
 Until the extraction criteria are met, these capabilities remain in `leos` or
 their appropriate existing publication repository.
+
+
+## RC11 publication lineage
+
+The public source authority is `leosai-org/leos`. RC10 remains the immutable
+predecessor root publication; RC11 is the current source-only successor. Private
+publication evidence remains outside the public monorepo.

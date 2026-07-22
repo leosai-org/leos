@@ -7,7 +7,8 @@ reporting only.
 
 | Version | Security reporting |
 |---|---|
-| 0.1.0-dev-preview-rc10 | Supported |
+| 0.1.0-dev-preview-rc11 | Supported |
+| 0.1.0-dev-preview-rc10 | Historical predecessor; not supported |
 | Earlier internal candidates | Not supported |
 
 ## Reporting a vulnerability
@@ -40,9 +41,9 @@ Security reports may cover source code, service boundaries, authentication and
 authorization behavior, secret handling, dependency risk, unsafe defaults,
 release provenance, or documentation that could cause insecure deployment.
 
-The RC10 source release does not include supported prebuilt container images.
+The RC11 source release does not include supported prebuilt container images.
 Reports concerning historical local images should identify the exact image
-digest and must not assume those images are RC10 artifacts.
+digest and must not assume those images are RC11 artifacts.
 
 ## Safe harbor
 

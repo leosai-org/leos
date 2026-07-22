@@ -12,7 +12,7 @@ This matrix is the default publication rule. A component-specific license file m
 | Reference employees, plugins, and examples | Public | Apache-2.0 | Public examples/plugins |
 | Baseline local security and observability | Public | Apache-2.0 | Public core |
 | Public documentation in source repositories | Public | Apache-2.0 unless marked | Public docs |
-| RC10 public-export metadata, manifests, checksums | Public | Apache-2.0 or factual data | Public release engineering |
+| RC11 public-source metadata, manifests, checksums | Public | Apache-2.0 or factual data | Public release engineering |
 | Enterprise identity, fleet, HA, compliance, advanced governance | Private/commercial | LEOS Enterprise agreement | Private enterprise |
 | Proprietary admin experiences and policy packs | Private/commercial | LEOS Enterprise agreement | Private enterprise |
 | Official premium connectors/plugins | Commercial | Premium Plugin License | Private plugin repo/package |
@@ -40,3 +40,10 @@ A commercial LEOS distribution may bundle Apache-licensed core and proprietary c
 3. avoid implying that the commercial agreement overrides Apache-2.0 rights in the core;
 4. include an SBOM and third-party notices;
 5. use separate entitlement checks only for proprietary components.
+
+
+## RC11 lineage note
+
+RC10 license and publication evidence remains historical. RC11 adds corrected
+public-source metadata and authority files under the same Apache-2.0 community
+boundary; brand assets and proprietary modules remain outside that grant.

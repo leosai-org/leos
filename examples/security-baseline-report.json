@@ -35,7 +35,7 @@
       "check_id": "release-source",
       "domain": "release-integrity",
       "expected_mode_max": null,
-      "message": "Installation source release matches RC9.",
+      "message": "Installation source release matches the governed RC11 authority.",
       "path": "state/installation-manifest.json",
       "remediation": null,
       "status": "pass"
@@ -45,7 +45,7 @@
       "check_id": "release-tree",
       "domain": "release-integrity",
       "expected_mode_max": null,
-      "message": "Installation source tree matches the immutable RC9 tree.",
+      "message": "Installation source payload matches source.lock.json.",
       "path": "state/installation-manifest.json",
       "remediation": null,
       "status": "pass"
@@ -104,8 +104,8 @@
     "read_only": true,
     "secret_material_copied": false
   },
-  "source_release": "0.1.0-dev-preview-rc9",
-  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "source_release": "0.1.0-dev-preview-rc11",
+  "source_tree_sha256": "bc2a07de0c8eb7cf3312c361c437b4fcef660853a2825654e0561e503ff53d51",
   "status": "pass",
   "target_root": "leos-installation"
 }

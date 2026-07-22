@@ -2,7 +2,7 @@
   "channel": "development",
   "confirmation_token": "update-confirm-8b4fb7dac0eea328",
   "contract_version": "leos.update-plan.v1",
-  "current_release": "0.1.0-dev-preview-rc9",
+  "current_release": "0.1.0-dev-preview-rc10",
   "execution_authorized": false,
   "external_network_contacted": false,
   "generated_at": "2026-07-20T00:00:00+00:00",
@@ -30,6 +30,6 @@
       "sequence": 5
     }
   ],
-  "target_release": "0.1.0-dev-preview-rc10",
+  "target_release": "0.1.0-dev-preview-rc11",
   "update_id": "update-8b4fb7dac0eea328"
 }

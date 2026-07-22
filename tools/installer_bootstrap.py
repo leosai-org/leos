@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import stat
 import sys
@@ -139,27 +140,38 @@ def mode_from_text(value: str) -> int:
 
 
 def source_release_record(source_root: Path) -> dict[str, Any]:
-    candidates = (
-        source_root / "rc9-release.json",
-        source_root / "release-manifest.json",
-        source_root / "source-manifest.json",
-    )
-    for candidate in candidates:
-        if candidate.is_file():
-            value = read_json(candidate)
-            if not isinstance(value, dict):
-                raise InstallerError(
-                    f"Source release record is not an object: {candidate}"
-                )
-            return {
-                "path": str(candidate),
-                "sha256": sha256_file(candidate),
-                "record": value,
-            }
-    raise InstallerError(
-        "Offline mode requires rc9-release.json, "
-        "release-manifest.json, or source-manifest.json."
-    )
+    manifest_path = source_root / "manifest.json"
+    source_lock_path = source_root / "source.lock.json"
+    if not manifest_path.is_file() or not source_lock_path.is_file():
+        raise InstallerError(
+            "Source authority requires manifest.json and source.lock.json."
+        )
+
+    manifest = read_json(manifest_path)
+    source_lock = read_json(source_lock_path)
+    if not isinstance(manifest, dict) or not isinstance(source_lock, dict):
+        raise InstallerError("Source authority files must be JSON objects.")
+    if manifest.get("contract_version") != "leos.release-manifest.v1":
+        raise InstallerError("Unsupported release-manifest contract.")
+    if source_lock.get("contract_version") != "leos.source-lock.v1":
+        raise InstallerError("Unsupported source-lock contract.")
+
+    release = str(manifest.get("release_version", ""))
+    if not release or source_lock.get("release_version") != release:
+        raise InstallerError("Release manifest and source lock disagree.")
+    payload = str(source_lock.get("payload_tree_sha256", ""))
+    if not re.fullmatch(r"[a-f0-9]{64}", payload):
+        raise InstallerError("Source lock payload hash is invalid.")
+
+    return {
+        "manifest_path": str(manifest_path),
+        "manifest_sha256": sha256_file(manifest_path),
+        "source_lock_path": str(source_lock_path),
+        "source_lock_sha256": sha256_file(source_lock_path),
+        "release": release,
+        "payload_tree_sha256": payload,
+        "record": manifest,
+    }
 
 
 def resolve_source(
@@ -195,10 +207,11 @@ def resolve_source(
         raise InstallerError(
             "Connected mode requires --allow-network."
         )
+    release = source_release_record(ROOT)
     return {
         "mode": "connected",
         "source_root": None,
-        "source_record": None,
+        "source_record": release,
         "external_network_contacted": False,
         "network_permission_granted": True,
         "acquisition_status": "network-acquisition-authorized-not-executed",
@@ -218,6 +231,11 @@ def build_transaction(
 ) -> dict[str, Any]:
     validate_plan(plan)
     target_root = normalize_target(target_root)
+    authority = source.get("source_record")
+    if not isinstance(authority, dict):
+        raise InstallerError("Resolved source authority is missing.")
+    source_release = str(authority["release"])
+    source_tree_sha256 = str(authority["payload_tree_sha256"])
 
     transaction_seed = {
         "plan_id": plan["plan_id"],
@@ -225,7 +243,7 @@ def build_transaction(
         "mode": mode,
         "source_root": source.get("source_root"),
         "selected_profile": plan["selected_profile"],
-        "source_release": bootstrap_config["source_release"],
+        "source_release": source_release,
         "layout_version": layout_config["layout_version"],
         "desired_owner": desired_owner,
         "desired_group": desired_group,
@@ -287,8 +305,8 @@ def build_transaction(
         "plan_id": plan["plan_id"],
         "node_id": plan["node_id"],
         "selected_profile": plan["selected_profile"],
-        "source_release": bootstrap_config["source_release"],
-        "source_tree_sha256": bootstrap_config["source_tree_sha256"],
+        "source_release": source_release,
+        "source_tree_sha256": source_tree_sha256,
         "target_root": str(target_root),
         "mode": mode,
         "state": "planned",
@@ -360,16 +378,27 @@ def desired_files(
     source_summary = {
         "mode": source["mode"],
         "source_root": source.get("source_root"),
-        "source_record_path": (
-            source_record.get("path")
+        "manifest_path": (
+            source_record.get("manifest_path")
             if isinstance(source_record, dict)
             else None
         ),
-        "source_record_sha256": (
-            source_record.get("sha256")
+        "manifest_sha256": (
+            source_record.get("manifest_sha256")
             if isinstance(source_record, dict)
             else None
         ),
+        "source_lock_path": (
+            source_record.get("source_lock_path")
+            if isinstance(source_record, dict)
+            else None
+        ),
+        "source_lock_sha256": (
+            source_record.get("source_lock_sha256")
+            if isinstance(source_record, dict)
+            else None
+        ),
+        "authority_contract": "leos.source-authority.v1",
         "external_network_contacted": False,
     }
 

@@ -14,8 +14,12 @@
   "network_contact_default": false,
   "requires_confirmation": true,
   "rollback_on_failure": true,
-  "source_release": "0.1.0-dev-preview-rc9",
-  "source_tree_sha256": "64ba7c60c8c4e18ac9349edaa7ac96a7ae52242f8eba06e4d99b298cd3d2c7da",
+  "source_authority": {
+    "contract_version": "leos.source-authority.v1",
+    "manifest": "manifest.json",
+    "source_lock": "source.lock.json"
+  },
+  "source_release": "0.1.0-dev-preview-rc11",
   "supported_modes": [
     "offline",
     "connected"
