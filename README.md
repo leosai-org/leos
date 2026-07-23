@@ -43,6 +43,52 @@ Models, model weights, private deployment configuration, credentials,
 commercial extensions, hosted infrastructure, and private operational data are
 not part of this source release.
 
+## See LEOS in Action
+
+LEOS provides a visual environment for building, operating, supervising,
+and improving an AI workforce.
+
+<table>
+<tr>
+<td width="50%">
+
+### Dashboard
+
+![LEOS Dashboard](docs/images/interface/leos_dashboard.png)
+
+</td>
+<td width="50%">
+
+### Command Center
+
+![LEOS Command Center](docs/images/interface/leos_command_center.png)
+
+</td>
+</tr>
+
+<tr>
+<td width="50%">
+
+### AI Workforce
+
+![LEOS AI Workforce](docs/images/interface/leos_workforce.png)
+
+</td>
+<td width="50%">
+
+### Organization Intelligence
+
+![LEOS Organization Intelligence](docs/images/interface/leos_organization_intelligence.png)
+
+</td>
+</tr>
+</table>
+
+> These screenshots show the current LEOS Developer Preview interface.
+> Layouts, labels, and capabilities may change before the stable release.
+
+**[Explore the complete LEOS Interface →](https://leosai.org/showcase.html)**
+
 ## Start here
 
 1. Read `RELEASE_NOTES.md`.
