@@ -58,9 +58,9 @@ Canonical validation has two required levels:
 
 An object is canonically valid only when it passes both levels. “Schema valid”
 does not mean “semantically valid.” The deterministic reference checks are
-implemented by `semantic_errors` in
-`tests/v2/test_execution_contracts.py`. Epic 1.2 implementations must enforce
-equivalent behavior at their service boundaries.
+implemented by the canonical runtime validator in `packages/leos-contracts/`.
+Contract tests consume that shared validator. Epic 1.2 implementations must
+enforce equivalent behavior at their service boundaries.
 
 Semantic validation requires:
 
