@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools==83.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leos-contracts"
+version = "0.1.0"
+description = "Runtime validation for governed LEOS contracts"
+requires-python = ">=3.11"
+dependencies = ["jsonschema>=4.18"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

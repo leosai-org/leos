@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import copy
 import json
-import re
+import sys
 import unittest
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +11,11 @@ from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
 ROOT = Path(__file__).resolve().parents[2]
+PACKAGE_SRC = ROOT / "packages" / "leos-contracts" / "src"
+sys.path.insert(0, str(PACKAGE_SRC))
+
+from leos_contracts import ContractValidationError, validate_contract
+
 CONTRACTS = ROOT / "contracts"
 EXAMPLES = ROOT / "examples"
 
@@ -31,208 +35,10 @@ RESERVED_APPROVAL_SHORTCUTS = {
     "approved",
     "has_approval",
 }
-DATE_TIME_FIELDS = {
-    "requested_at",
-    "resolved_at",
-    "valid_until",
-    "started_at",
-    "completed_at",
-}
-RFC3339 = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
-    r"(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
-)
 
 
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def semantic_errors(schema_name: str, value: Any) -> list[str]:
-    errors: list[str] = []
-    if not isinstance(value, dict):
-        return errors
-
-    def equal_when_present(
-        left: Any,
-        right: Any,
-        description: str,
-    ) -> None:
-        if left is not None and right is not None and left != right:
-            errors.append(f"{description} must match")
-
-    def validate_timestamps(item: Any, path: str = "$") -> None:
-        if isinstance(item, dict):
-            for key, child in item.items():
-                child_path = f"{path}.{key}"
-                if key in DATE_TIME_FIELDS:
-                    if not isinstance(child, str) or not RFC3339.fullmatch(child):
-                        errors.append(f"{child_path} must be RFC3339 date-time")
-                    else:
-                        try:
-                            parsed = datetime.fromisoformat(
-                                child[:-1] + "+00:00"
-                                if child.endswith("Z")
-                                else child
-                            )
-                            if parsed.tzinfo is None:
-                                raise ValueError("timezone required")
-                        except ValueError:
-                            errors.append(
-                                f"{child_path} must be RFC3339 date-time"
-                            )
-                validate_timestamps(child, child_path)
-        elif isinstance(item, list):
-            for index, child in enumerate(item):
-                validate_timestamps(child, f"{path}[{index}]")
-
-    validate_timestamps(value)
-
-    correlation_key = (
-        "trace" if schema_name == "execution.v1.schema.json" else "correlation"
-    )
-    correlation = value.get(correlation_key)
-    if not isinstance(correlation, dict):
-        correlation = {}
-
-    if schema_name == "execution.v1.schema.json":
-        equal_when_present(
-            value.get("execution_id"),
-            correlation.get("execution_id"),
-            "execution_id and trace.execution_id",
-        )
-
-    if schema_name == "capability-resolution-request.v1.schema.json":
-        def reject_approval_shortcuts(item: Any, path: str) -> None:
-            if isinstance(item, dict):
-                for key, child in item.items():
-                    if key in RESERVED_APPROVAL_SHORTCUTS:
-                        errors.append(
-                            f"{path}.{key} is not approval evidence"
-                        )
-                    reject_approval_shortcuts(child, f"{path}.{key}")
-            elif isinstance(item, list):
-                for index, child in enumerate(item):
-                    reject_approval_shortcuts(child, f"{path}[{index}]")
-
-        reject_approval_shortcuts(value.get("constraints", {}), "$.constraints")
-        reject_approval_shortcuts(value.get("policy", {}), "$.policy")
-
-    if schema_name == "capability-resolution-result.v1.schema.json":
-        equal_when_present(
-            value.get("resolution_id"),
-            correlation.get("resolution_id"),
-            "resolution_id and correlation.resolution_id",
-        )
-        candidates = value.get("candidate_evaluations")
-        if isinstance(candidates, list):
-            positions = [
-                candidate.get("position")
-                for candidate in candidates
-                if isinstance(candidate, dict)
-                and isinstance(candidate.get("position"), int)
-                and not isinstance(candidate.get("position"), bool)
-            ]
-            if len(positions) == len(candidates):
-                if len(set(positions)) != len(positions):
-                    errors.append("candidate positions must be unique")
-                if positions != sorted(positions):
-                    errors.append(
-                        "candidate evaluations must be in ascending position order"
-                    )
-            for candidate in candidates:
-                if not isinstance(candidate, dict):
-                    continue
-                if (
-                    candidate.get("outcome")
-                    in {"REJECTED", "APPROVAL_REQUIRED"}
-                    and not candidate.get("reasons")
-                ):
-                    errors.append(
-                        "rejected or approval-required candidates need reasons"
-                    )
-            if value.get("status") == "RESOLVED":
-                selected = value.get("selected_target")
-                selected_id = (
-                    selected.get("provider_id")
-                    if isinstance(selected, dict)
-                    else None
-                )
-                selected_matches = [
-                    candidate
-                    for candidate in candidates
-                    if isinstance(candidate, dict)
-                    and candidate.get("provider_id") == selected_id
-                ]
-                if len(selected_matches) != 1:
-                    errors.append(
-                        "selected target must appear exactly once in candidates"
-                    )
-                elif selected_matches[0].get("outcome") != "ELIGIBLE":
-                    errors.append("selected target candidate must be eligible")
-                first_eligible = next(
-                    (
-                        candidate.get("provider_id")
-                        for candidate in candidates
-                        if isinstance(candidate, dict)
-                        and candidate.get("outcome") == "ELIGIBLE"
-                    ),
-                    None,
-                )
-                if selected_id is not None and selected_id != first_eligible:
-                    errors.append(
-                        "selected target must be the first eligible candidate"
-                    )
-
-    if schema_name == "execution-result.v1.schema.json":
-        equal_when_present(
-            value.get("execution_id"),
-            correlation.get("execution_id"),
-            "execution_id and correlation.execution_id",
-        )
-        resolution_ref = value.get("resolution_ref")
-        resolution_reference_id = (
-            resolution_ref.get("reference_id")
-            if isinstance(resolution_ref, dict)
-            else None
-        )
-        equal_when_present(
-            resolution_reference_id,
-            correlation.get("resolution_id"),
-            "resolution_ref and correlation.resolution_id",
-        )
-        summary = value.get("attempt_summary")
-        if isinstance(summary, dict):
-            attempts = summary.get("attempts")
-            count = summary.get("attempt_count")
-            if isinstance(attempts, list):
-                if isinstance(count, int) and count != len(attempts):
-                    errors.append("attempt_count must equal number of attempts")
-                attempt_ids = [
-                    attempt.get("invocation_attempt_id")
-                    for attempt in attempts
-                    if isinstance(attempt, dict)
-                    and isinstance(attempt.get("invocation_attempt_id"), str)
-                ]
-                attempt_numbers = [
-                    attempt.get("attempt_number")
-                    for attempt in attempts
-                    if isinstance(attempt, dict)
-                    and isinstance(attempt.get("attempt_number"), int)
-                    and not isinstance(attempt.get("attempt_number"), bool)
-                ]
-                if len(attempt_ids) == len(attempts):
-                    if len(set(attempt_ids)) != len(attempt_ids):
-                        errors.append("invocation attempt IDs must be unique")
-                if len(attempt_numbers) == len(attempts):
-                    if len(set(attempt_numbers)) != len(attempt_numbers):
-                        errors.append("attempt numbers must be unique")
-                    if attempt_numbers != sorted(attempt_numbers):
-                        errors.append(
-                            "attempts must be in ascending number order"
-                        )
-
-    return errors
 
 
 class ExecutionContractTests(unittest.TestCase):
@@ -261,17 +67,19 @@ class ExecutionContractTests(unittest.TestCase):
         return read_json(EXAMPLES / example_name)
 
     def assert_valid(self, schema_name: str, value: Any) -> None:
-        schema_errors = sorted(
-            self.validator(schema_name).iter_errors(value),
-            key=lambda error: list(error.absolute_path),
-        )
-        errors = [error.message for error in schema_errors]
-        errors.extend(semantic_errors(schema_name, value))
-        self.assertEqual([], errors, "\n".join(errors))
+        try:
+            validate_contract(schema_name, value)
+        except ContractValidationError as error:
+            self.fail(
+                "\n".join(
+                    f"{issue.kind} {issue.path}: {issue.message}"
+                    for issue in error.issues
+                )
+            )
 
     def assert_invalid(self, schema_name: str, value: Any) -> None:
-        schema_errors = list(self.validator(schema_name).iter_errors(value))
-        self.assertTrue(schema_errors or semantic_errors(schema_name, value))
+        with self.assertRaises(ContractValidationError):
+            validate_contract(schema_name, value)
 
     def execution_request(self) -> dict[str, Any]:
         return self.example("execution.v1.json")
