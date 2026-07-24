@@ -1,0 +1,120 @@
+{
+  "$id": "https://leosai.org/contracts/capability-resolution-request.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Capability Resolution Request v1",
+  "description": "Request to Capability Manager for governed provider-capability resolution. It does not authorize invocation.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.capability-resolution-request.v1"
+    },
+    "capability_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$",
+      "maxLength": 256
+    },
+    "requester": {
+      "$ref": "#/$defs/requester"
+    },
+    "constraints": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "allow_approval_required",
+            "approval_granted",
+            "approved",
+            "has_approval"
+          ]
+        }
+      }
+    },
+    "policy": {
+      "$ref": "#/$defs/policy"
+    },
+    "correlation": {
+      "$ref": "execution-correlation.v1.schema.json"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "contract_version",
+    "capability_id",
+    "requester",
+    "constraints",
+    "policy",
+    "correlation",
+    "requested_at"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requester": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ]
+    },
+    "governed_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reference_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "authority",
+        "reference_id"
+      ]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capability_policy_ref": {
+          "$ref": "#/$defs/governed_reference"
+        },
+        "effective_intelligence_policy_ref": {
+          "$ref": "#/$defs/governed_reference"
+        },
+        "approval_grant_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/governed_reference"
+          }
+        }
+      }
+    }
+  }
+}

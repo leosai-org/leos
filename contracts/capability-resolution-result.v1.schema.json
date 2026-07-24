@@ -1,0 +1,274 @@
+{
+  "$id": "https://leosai.org/contracts/capability-resolution-result.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Capability Resolution Result v1",
+  "description": "Durable Capability Manager resolution outcome. This record does not represent provider invocation.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.capability-resolution-result.v1"
+    },
+    "resolution_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "status": {
+      "enum": [
+        "RESOLVED",
+        "APPROVAL_PENDING",
+        "NO_ELIGIBLE_PROVIDER"
+      ]
+    },
+    "capability_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$",
+      "maxLength": 256
+    },
+    "requester": {
+      "$ref": "#/$defs/requester"
+    },
+    "selected_target": {
+      "$ref": "#/$defs/provider_target"
+    },
+    "candidate_evaluations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidate_evaluation"
+      }
+    },
+    "rationale": {
+      "type": "object"
+    },
+    "approval_requirement_ref": {
+      "$ref": "#/$defs/governed_reference"
+    },
+    "correlation": {
+      "$ref": "execution-correlation.v1.schema.json"
+    },
+    "policy_revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "facts_revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "contract_version",
+    "resolution_id",
+    "status",
+    "capability_id",
+    "requester",
+    "candidate_evaluations",
+    "rationale",
+    "correlation",
+    "resolved_at"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "RESOLVED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "candidate_evaluations": {
+            "minItems": 1,
+            "contains": {
+              "properties": {
+                "outcome": {
+                  "const": "ELIGIBLE"
+                }
+              },
+              "required": [
+                "outcome"
+              ]
+            },
+            "minContains": 1
+          }
+        },
+        "required": [
+          "selected_target"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "selected_target"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "APPROVAL_PENDING"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "candidate_evaluations": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "approval_requirement_ref"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requester": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ]
+    },
+    "governed_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reference_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "authority",
+        "reference_id"
+      ]
+    },
+    "provider_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "provider_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "target_ref": {
+          "$ref": "#/$defs/governed_reference"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/governed_reference"
+        }
+      },
+      "required": [
+        "provider_id"
+      ]
+    },
+    "candidate_evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "position": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "provider_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "outcome": {
+          "enum": [
+            "ELIGIBLE",
+            "REJECTED",
+            "APPROVAL_REQUIRED"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      },
+      "required": [
+        "position",
+        "provider_id",
+        "outcome",
+        "reasons"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "REJECTED",
+                  "APPROVAL_REQUIRED"
+                ]
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reasons": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

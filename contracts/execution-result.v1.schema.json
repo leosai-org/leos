@@ -1,0 +1,355 @@
+{
+  "$id": "https://leosai.org/contracts/execution-result.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Normalized Execution Result v1",
+  "description": "Canonical normalized outcome recorded and returned by the Execution Dispatcher.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.execution-result.v1"
+    },
+    "execution_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "status": {
+      "enum": [
+        "SUCCESS",
+        "REJECTED",
+        "PROVIDER_ERROR",
+        "TRANSPORT_ERROR",
+        "AMBIGUOUS_OUTCOME",
+        "APPROVAL_PENDING"
+      ]
+    },
+    "capability_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$",
+      "maxLength": 256
+    },
+    "resolution_ref": {
+      "$ref": "#/$defs/governed_reference"
+    },
+    "authorized_target": {
+      "$ref": "#/$defs/provider_target"
+    },
+    "attempt_summary": {
+      "$ref": "#/$defs/attempt_summary"
+    },
+    "normalized_result": true,
+    "error": {
+      "$ref": "#/$defs/error"
+    },
+    "approval_requirement_ref": {
+      "$ref": "#/$defs/governed_reference"
+    },
+    "correlation": {
+      "$ref": "execution-correlation.v1.schema.json"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "contract_version",
+    "execution_id",
+    "status",
+    "capability_id",
+    "resolution_ref",
+    "attempt_summary",
+    "correlation",
+    "started_at",
+    "completed_at"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "SUCCESS"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "authorized_target",
+          "normalized_result"
+        ],
+        "not": {
+          "required": [
+            "error"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "PROVIDER_ERROR",
+              "TRANSPORT_ERROR",
+              "AMBIGUOUS_OUTCOME"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "authorized_target",
+          "error"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attempt_summary": {
+            "properties": {
+              "attempt_count": {
+                "const": 0
+              },
+              "attempts": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "not": {
+          "required": [
+            "authorized_target"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "APPROVAL_PENDING"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attempt_summary": {
+            "properties": {
+              "attempt_count": {
+                "const": 0
+              },
+              "attempts": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        "required": [
+          "approval_requirement_ref"
+        ],
+        "not": {
+          "required": [
+            "authorized_target"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "AMBIGUOUS_OUTCOME"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error": {
+            "properties": {
+              "remote_side_effect_possible": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "governed_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reference_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "authority",
+        "reference_id"
+      ]
+    },
+    "provider_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "provider_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "target_ref": {
+          "$ref": "#/$defs/governed_reference"
+        }
+      },
+      "required": [
+        "provider_id"
+      ]
+    },
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "invocation_attempt_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "attempt_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "SUCCESS",
+            "PROVIDER_ERROR",
+            "TRANSPORT_ERROR",
+            "AMBIGUOUS_OUTCOME"
+          ]
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "provider_operation_id": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "required": [
+        "invocation_attempt_id",
+        "attempt_number",
+        "status",
+        "started_at",
+        "completed_at"
+      ]
+    },
+    "attempt_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attempt_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "attempts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attempt"
+          }
+        }
+      },
+      "required": [
+        "attempt_count",
+        "attempts"
+      ]
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "retryable_same_target": {
+          "type": "boolean"
+        },
+        "remote_side_effect_possible": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable_same_target",
+        "remote_side_effect_possible"
+      ]
+    }
+  }
+}

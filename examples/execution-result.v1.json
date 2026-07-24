@@ -1,0 +1,52 @@
+{
+  "contract_version": "leos.execution-result.v1",
+  "execution_id": "execution-example-001",
+  "status": "SUCCESS",
+  "capability_id": "content.write",
+  "resolution_ref": {
+    "authority": "capability-manager",
+    "reference_id": "resolution-example-001",
+    "revision": "1"
+  },
+  "authorized_target": {
+    "provider_id": "provider-content-writer",
+    "provider_type": "service",
+    "adapter_id": "adapter-content-write",
+    "target_ref": {
+      "authority": "capability-manager",
+      "reference_id": "provider-target-example-001",
+      "revision": "9"
+    }
+  },
+  "attempt_summary": {
+    "attempt_count": 1,
+    "idempotency_key": "execution-example-001",
+    "attempts": [
+      {
+        "invocation_attempt_id": "invocation-attempt-example-001",
+        "attempt_number": 1,
+        "status": "SUCCESS",
+        "started_at": "2026-07-24T18:00:02Z",
+        "completed_at": "2026-07-24T18:00:03Z",
+        "provider_operation_id": "provider-operation-example-001"
+      }
+    ]
+  },
+  "normalized_result": {
+    "artifact_ref": "artifact-output-001",
+    "media_type": "text/markdown"
+  },
+  "correlation": {
+    "contract_version": "leos.execution-correlation.v1",
+    "job_id": "job-example-001",
+    "assignment_id": "assignment-example-001",
+    "cognitive_run_id": "cognitive-run-example-001",
+    "cognitive_attempt_id": "cognitive-attempt-example-001",
+    "resolution_id": "resolution-example-001",
+    "execution_id": "execution-example-001",
+    "invocation_attempt_id": "invocation-attempt-example-001",
+    "provider_operation_id": "provider-operation-example-001"
+  },
+  "started_at": "2026-07-24T18:00:00Z",
+  "completed_at": "2026-07-24T18:00:03Z"
+}
