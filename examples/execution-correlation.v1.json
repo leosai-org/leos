@@ -1,0 +1,12 @@
+{
+  "contract_version": "leos.execution-correlation.v1",
+  "mission_id": "mission-example-001",
+  "workflow_id": "workflow-example-001",
+  "step_id": "step-example-001",
+  "job_id": "job-example-001",
+  "employee_id": "employee-developer",
+  "assignment_id": "assignment-example-001",
+  "cognitive_run_id": "cognitive-run-example-001",
+  "cognitive_attempt_id": "cognitive-attempt-example-001",
+  "execution_id": "execution-example-001"
+}

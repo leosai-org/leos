@@ -1,0 +1,44 @@
+{
+  "contract_version": "leos.capability-resolution-result.v1",
+  "resolution_id": "resolution-example-001",
+  "status": "RESOLVED",
+  "capability_id": "content.write",
+  "requester": {
+    "type": "employee",
+    "id": "employee-developer"
+  },
+  "selected_target": {
+    "provider_id": "provider-content-writer",
+    "provider_type": "service",
+    "adapter_id": "adapter-content-write",
+    "target_ref": {
+      "authority": "capability-manager",
+      "reference_id": "provider-target-example-001",
+      "revision": "9"
+    }
+  },
+  "candidate_evaluations": [
+    {
+      "position": 1,
+      "provider_id": "provider-content-writer",
+      "outcome": "ELIGIBLE",
+      "reasons": []
+    }
+  ],
+  "rationale": {
+    "selection_rule": "first-ranked-valid",
+    "selected_position": 1
+  },
+  "correlation": {
+    "contract_version": "leos.execution-correlation.v1",
+    "job_id": "job-example-001",
+    "assignment_id": "assignment-example-001",
+    "cognitive_run_id": "cognitive-run-example-001",
+    "resolution_id": "resolution-example-001",
+    "execution_id": "execution-example-001"
+  },
+  "policy_revision": "capability-policy-4",
+  "facts_revision": "provider-facts-9",
+  "resolved_at": "2026-07-24T18:00:01Z",
+  "valid_until": "2026-07-24T18:05:01Z"
+}

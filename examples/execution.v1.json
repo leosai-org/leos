@@ -1,0 +1,41 @@
+{
+  "contract_version": "leos.execution.v1",
+  "execution_id": "execution-example-001",
+  "capability_id": "content.write",
+  "requester": {
+    "type": "employee",
+    "id": "employee-developer"
+  },
+  "input": {
+    "document_ref": "artifact-input-001",
+    "instruction": "Produce the governed output."
+  },
+  "context": {
+    "assignment_state_ref": "assignment-example-001"
+  },
+  "policy": {
+    "execution_policy_ref": {
+      "authority": "employee-config",
+      "reference_id": "execution-policy-example-001",
+      "revision": "7"
+    },
+    "effective_intelligence_policy_ref": {
+      "authority": "employee-config",
+      "reference_id": "intelligence-policy-example-001",
+      "revision": "3"
+    },
+    "idempotency_key": "execution-example-001"
+  },
+  "trace": {
+    "contract_version": "leos.execution-correlation.v1",
+    "mission_id": "mission-example-001",
+    "workflow_id": "workflow-example-001",
+    "step_id": "step-example-001",
+    "job_id": "job-example-001",
+    "employee_id": "employee-developer",
+    "assignment_id": "assignment-example-001",
+    "cognitive_run_id": "cognitive-run-example-001",
+    "cognitive_attempt_id": "cognitive-attempt-example-001",
+    "execution_id": "execution-example-001"
+  }
+}

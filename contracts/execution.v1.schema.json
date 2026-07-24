@@ -1,0 +1,118 @@
+{
+  "$id": "https://leosai.org/contracts/execution.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Canonical Execution Request v1",
+  "description": "Canonical request from a cognitive or other governed caller to the Execution Dispatcher.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.execution.v1"
+    },
+    "execution_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "capability_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$",
+      "maxLength": 256
+    },
+    "requester": {
+      "$ref": "#/$defs/requester"
+    },
+    "input": {
+      "type": "object"
+    },
+    "context": {
+      "type": "object"
+    },
+    "policy": {
+      "$ref": "#/$defs/policy"
+    },
+    "trace": {
+      "$ref": "execution-correlation.v1.schema.json"
+    }
+  },
+  "required": [
+    "contract_version",
+    "execution_id",
+    "capability_id",
+    "requester",
+    "input",
+    "context",
+    "policy",
+    "trace"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requester": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ]
+    },
+    "governed_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reference_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "authority",
+        "reference_id"
+      ]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "execution_policy_ref": {
+          "$ref": "#/$defs/governed_reference"
+        },
+        "effective_intelligence_policy_ref": {
+          "$ref": "#/$defs/governed_reference"
+        },
+        "approval_grant_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/governed_reference"
+          }
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    }
+  }
+}

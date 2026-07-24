@@ -1,0 +1,71 @@
+{
+  "$id": "https://leosai.org/contracts/execution-correlation.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Execution Correlation v1",
+  "description": "Optional identifiers that correlate work across execution-plane authorities. Services must omit identifiers they do not possess.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.execution-correlation.v1"
+    },
+    "trace_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "mission_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "workflow_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "step_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "job_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "lease_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "resource_reservation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "employee_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "assignment_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "cognitive_run_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "cognitive_attempt_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "resolution_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "execution_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "invocation_attempt_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "approval_grant_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "provider_operation_id": {
+      "$ref": "#/$defs/identifier"
+    }
+  },
+  "required": [
+    "contract_version"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    }
+  }
+}
