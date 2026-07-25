@@ -343,7 +343,7 @@ details are marked **OPEN**.
 - **Status:** Accepted
 - **Decision:** Production per Token (PPT) is an observational and reporting
   metric. PPT is never provider/model selection, eligibility, ranking,
-  fallback, retry, re-resolution, or escalation authority.
+  resolution, fallback, retry, re-resolution, or escalation authority.
 - **Context:** Token reduction is valuable only when the resulting work has
   externally grounded productive value. A composite calculated before outcome
   evidence and attributable cost exist could become hidden provider scoring or
@@ -358,7 +358,8 @@ details are marked **OPEN**.
   token, latency, provider-cost, and compute/resource costs. Reports expose the
   underlying outcome and cost evidence rather than only a composite number.
   PPT analysis may inform a human's separately authored ranking choices, but
-  runtime selection never consumes PPT as an ordering or eligibility input.
+  runtime selection and resolution never consume PPT as an ordering or
+  eligibility input.
 - **OPEN:** Canonical outcome-evidence authority, production-value
   normalization, cost-allocation rules, comparison cohorts, and treatment of
   delayed or reused outcomes.

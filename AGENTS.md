@@ -10,6 +10,8 @@ Read before implementation:
 - `docs/architecture/v2/EXECUTION_PLANE_DECISIONS.md`
 - `docs/architecture/v2/INTELLIGENCE_PLANE.md`
 - `docs/architecture/v2/INTELLIGENCE_PLANE_DECISIONS.md`
+- `docs/architecture/v2/AUTHORITY_REGISTRY.md`
+- `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md`
 - `docs/roadmap/DEV_PREVIEW_V2_GOALS.md` when present
 - `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`
 

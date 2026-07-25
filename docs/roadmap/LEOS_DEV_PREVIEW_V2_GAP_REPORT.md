@@ -826,6 +826,7 @@ Core-role status is therefore:
 | Secrets | Future Secret Authority | Environment variables, Config Service, kernel-variable resolution | Use opaque references and transient authorized resolution; never promote raw values. |
 | Scheduling and resource control | Scheduler | Workflow/planning/autonomous services may drive continuation directly | Workflow submits governed jobs; Scheduler alone owns leases/admission/release. |
 | Employee reasoning and durable state | Cognitive Service / Persistent Runtime | Legacy orchestration services may blend planning, continuation, and employee state | Migrate only necessary behavior into the accepted split; retire restart/reasoning peers. |
+| Public Assignment Service | Scheduler / Persistent Runtime / Employee Registry boundaries; employee-to-job selection owner remains **OPEN** | `services/assignment-service/app.py` persists peer jobs, uses legacy employee resolution/score and caller `force`, mutates employee load, and emits best-effort events | Treat as **Conflicting Authority**; inventory callers/data and decide migration, compatibility, and retirement before modification. |
 | Release publishing versus product publishing | Release engineering versus future Publishing Authority | Source publication report can be mistaken for plugin/template publishing | Keep separate terms and contracts: source release, published artifact, installed instance, active runtime. |
 
 ## 7. Prerequisite dependency graph
@@ -887,6 +888,9 @@ reasoner, resolver, invoker, scheduler, or transport selector.
 1. **Epic 3.0 — Architecture Lock and Authority Registry**
    - Record canonical owners, object vocabulary, lifecycle vocabulary, event
      boundaries, and compatibility/versioning rules.
+   - Canonical outputs:
+     `docs/architecture/v2/AUTHORITY_REGISTRY.md` and
+     `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md`.
 2. **Epic 3.1 — Publishing Authority and Artifact Contracts**
    - Define artifact, version, publisher, dependency, provenance, signature,
      compatibility, and public/private protocol boundaries.
@@ -975,10 +979,10 @@ reasoner, resolver, invoker, scheduler, or transport selector.
 22. **Epic 3.21 — Usage, Cost, and Production-per-Token Accounting**
     - Correlate tokens, provider cost, latency, resources, and accepted
       externally grounded production outcomes. PPT is observational reporting
-      only, never selection, eligibility, ranking, fallback, retry,
-      re-resolution, or escalation authority. Attribution includes retrieval,
-      embedding, reranking, revision, verification, and resources, and reports
-      expose underlying evidence rather than only a composite.
+      only, never selection, eligibility, ranking, resolution, fallback,
+      retry, re-resolution, or escalation authority. Attribution includes
+      retrieval, embedding, reranking, revision, verification, and resources,
+      and reports expose underlying evidence rather than only a composite.
 23. **Epic 3.22 — Dev Preview v2 Organization Acceptance**
     - Clean-machine install to a simulated and approved active flagship team,
       with audit, recovery, and no Lucy runtime dependency.

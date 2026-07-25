@@ -17,8 +17,8 @@ re-resolution, and escalation remain distinct. Examples below that use
 “fallback,” automatic local-first selection, provider scoring/priority, or
 Router-owned selection are historical product intent and must not be
 implemented as authority. Production per Token is observational evidence only:
-it never selects, ranks, filters, retries, falls back, re-resolves, or
-escalates provider/model candidates. The organization-first direction and
+it never selects, ranks, filters, resolves, retries, falls back, re-resolves,
+or escalates provider/model candidates. The organization-first direction and
 Phase 5.0 non-authoritative intelligence fixture are recorded in
 `LEOS_ORGANIZATION_FIRST_ROADMAP.md`.
 
@@ -504,7 +504,7 @@ intelligence-policy input. It must never:
 
 - score, select, rank, or filter providers or models;
 - override user-authored ranking;
-- authorize fallback, retry, re-resolution, or escalation;
+- authorize resolution, fallback, retry, re-resolution, or escalation;
 - equate technical completion or low token use with productive value; or
 - accept an employee's self-declaration of productive value.
 

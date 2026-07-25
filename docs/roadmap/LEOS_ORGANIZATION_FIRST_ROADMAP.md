@@ -388,6 +388,18 @@ Each gap must be classified as one of:
 
 Using the gap report, define and approve the Dev Preview v2.0 scope.
 
+The Phase 3 lock artifacts are:
+
+- `../architecture/v2/AUTHORITY_REGISTRY.md`, which records accepted owners,
+  explicitly **OPEN** authorities, canonical vocabulary, event boundaries,
+  forbidden overlaps, and compatibility/versioning rules; and
+- `DEV_PREVIEW_V2_SCOPE_LOCK.md`, which records locked release outcomes,
+  deferred scope, required architecture decisions, and release acceptance
+  gates.
+
+Neither artifact assigns an owner to an **OPEN** concern. The applicable
+authority decision must be accepted before implementation begins.
+
 The must-have scope should include, at minimum:
 
 ### Core runtime
@@ -520,8 +532,8 @@ Phase 5.0 fixture does not establish production onboarding conformance.
 ### Production per Token authority boundary
 
 Production per Token (PPT) is observational and reporting evidence only. It is
-never provider/model selection, eligibility, ranking, fallback, retry,
-re-resolution, or escalation authority.
+never provider/model selection, eligibility, ranking, resolution, fallback,
+retry, re-resolution, or escalation authority.
 
 PPT must not:
 
