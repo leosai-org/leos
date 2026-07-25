@@ -104,6 +104,10 @@ contract. Candidate positions preserve that supplied order; they are not
 scores. Rejected and approval-required candidates carry at least one reason.
 For a resolved outcome, the selected provider is the first eligible candidate
 in ascending evaluation order.
+Every `RESOLVED` selected target carries an immutable target-reference
+revision. Dispatcher must match both provider identity and that exact revision
+against inventory before invocation; identifier equality alone is not
+invocation authority.
 
 Dispatcher transport retry remains limited to the same authorized target.
 Provider/model re-resolution, model escalation, and validation-triggered
