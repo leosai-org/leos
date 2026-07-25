@@ -618,7 +618,6 @@ def persist_employee_decision(
                 "reasons": decision.get("reasons", []),
                 "error": error,
             },
-            db=db,
         )
 
 
