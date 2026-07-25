@@ -11,7 +11,7 @@ from typing import Any, Optional
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 SERVICE_NAME = "execution-scheduler-service"
@@ -216,6 +216,17 @@ def migrate() -> None:
                 details_json TEXT NOT NULL DEFAULT '{}',
                 created_at TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS scheduler_terminal_transitions (
+                transition_id TEXT PRIMARY KEY,
+                job_id TEXT NOT NULL,
+                lease_id TEXT,
+                requested_state TEXT NOT NULL,
+                request_json TEXT NOT NULL,
+                result_json TEXT,
+                state TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
 
             CREATE TABLE IF NOT EXISTS scheduler_resource_history (
                 resource_event_id TEXT PRIMARY KEY,
@@ -249,6 +260,22 @@ def migrate() -> None:
             "employee_checked_at": "TEXT",
             "employee_error": "TEXT",
         }
+        transition_columns = {
+            row["name"]
+            for row in db.execute(
+                "PRAGMA table_info(scheduler_terminal_transitions)"
+            ).fetchall()
+        }
+        if "lease_id" not in transition_columns:
+            db.execute(
+                "ALTER TABLE scheduler_terminal_transitions "
+                "ADD COLUMN lease_id TEXT"
+            )
+        db.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_scheduler_terminal_attempt "
+            "ON scheduler_terminal_transitions(job_id, lease_id) "
+            "WHERE lease_id IS NOT NULL"
+        )
         existing_job_columns = {
             row["name"]
             for row in db.execute(
@@ -413,6 +440,15 @@ class JobStateUpdate(BaseModel):
     )
     error: Optional[str] = None
     retry_delay_seconds: int = 0
+    transition_id: Optional[str] = None
+
+
+class JobCancelRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    transition_id: str
+    worker_id: Optional[str] = None
+    lease_id: Optional[str] = None
+    reason: str
 
 
 migrate()
@@ -2679,112 +2715,9 @@ def complete_job(
     job_id: str,
     request: JobStateUpdate,
 ) -> dict[str, Any]:
-    with connect() as db:
-        row = db.execute(
-            """
-            SELECT *
-            FROM scheduler_jobs
-            WHERE job_id=?
-            """,
-            (job_id,),
-        ).fetchone()
-
-        if row is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Job not found.",
-            )
-
-        if row["state"] not in {
-            "leased",
-            "running",
-        }:
-            raise HTTPException(
-                status_code=409,
-                detail=(
-                    "Job is not active."
-                ),
-            )
-
-        if request.lease_id and (
-            request.lease_id
-            != row["lease_id"]
-        ):
-            raise HTTPException(
-                status_code=409,
-                detail="Lease mismatch.",
-            )
-
-        if row["lease_id"]:
-            release_lease(
-                db,
-                lease_id=row["lease_id"],
-                reason="job_complete",
-            )
-
-        db.execute(
-            """
-            UPDATE scheduler_jobs
-            SET
-                state='complete',
-                result_json=?,
-                error=NULL,
-                completed_at=?,
-                resource_state=?,
-                resource_release_reason='job-complete',
-                updated_at=?
-            WHERE job_id=?
-            """,
-            (
-                json.dumps(request.result),
-                now(),
-                (
-                    "release-pending"
-                    if row["resource_reservation_id"]
-                    else "released"
-                ),
-                now(),
-                job_id,
-            ),
-        )
-        record_resource_history(
-            db,
-            event_type="job_complete_resource_release_requested",
-            job_id=row["job_id"],
-            employee_id=row["employee_id"],
-            reservation_id=row["resource_reservation_id"],
-            decision=parse_json(row["resource_decision_json"]),
-            details={"lease_id": row["lease_id"]},
-        )
-
-    resource_released = release_job_resources(
-        job_id,
-        row["resource_reservation_id"],
-        "job-complete",
+    return terminal_job_transition(
+        job_id, request, target_state="complete"
     )
-
-    emit(
-        "scheduler_job_complete",
-        job_id=job_id,
-        worker_id=row["assigned_worker_id"],
-        details={
-            "result": request.result,
-            "resource_reservation_id": row[
-                "resource_reservation_id"
-            ],
-            "resource_released": resource_released,
-        },
-    )
-
-    return {
-        "ok": True,
-        "job_id": job_id,
-        "state": "complete",
-        "resource_reservation_id": row[
-            "resource_reservation_id"
-        ],
-        "resource_released": resource_released,
-    }
 
 
 @app.post("/jobs/{job_id}/fail")
@@ -2792,146 +2725,177 @@ def fail_job(
     job_id: str,
     request: JobStateUpdate,
 ) -> dict[str, Any]:
+    return terminal_job_transition(
+        job_id, request, target_state="failed"
+    )
+
+
+@app.post("/jobs/{job_id}/cancel")
+def cancel_job(
+    job_id: str,
+    request: JobCancelRequest,
+) -> dict[str, Any]:
+    return terminal_job_transition(
+        job_id, request, target_state="cancelled"
+    )
+
+
+def terminal_job_transition(
+    job_id: str,
+    request: JobStateUpdate | JobCancelRequest,
+    *,
+    target_state: str,
+) -> dict[str, Any]:
+    transition_id = request.transition_id
+    if not transition_id:
+        raise HTTPException(422, "transition_id is required.")
+    request_json = request.model_dump_json()
     with connect() as db:
+        db.execute("BEGIN IMMEDIATE")
+        prior = db.execute(
+            "SELECT * FROM scheduler_terminal_transitions "
+            "WHERE transition_id=?",
+            (transition_id,),
+        ).fetchone()
+        if prior is not None:
+            if (
+                prior["job_id"] != job_id
+                or prior["requested_state"] != target_state
+                or prior["request_json"] != request_json
+            ):
+                raise HTTPException(409, "terminal_transition_identity_conflict")
+            if prior["result_json"]:
+                return json.loads(prior["result_json"])
         row = db.execute(
-            """
-            SELECT *
-            FROM scheduler_jobs
-            WHERE job_id=?
-            """,
+            "SELECT * FROM scheduler_jobs WHERE job_id=?",
             (job_id,),
         ).fetchone()
-
         if row is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Job not found.",
-            )
+            raise HTTPException(404, "Job not found.")
+        if prior is None:
+            if row["state"] in {"complete", "failed", "cancelled"}:
+                raise HTTPException(409, "terminal_transition_conflict")
+            if target_state in {"complete", "failed"}:
+                if (
+                    row["state"] not in {"leased", "running"}
+                    or not request.lease_id
+                    or request.lease_id != row["lease_id"]
+                ):
+                    raise HTTPException(
+                        409, "stale_or_inactive_execution_attempt"
+                    )
+            elif request.lease_id and request.lease_id != row["lease_id"]:
+                raise HTTPException(409, "stale_execution_attempt")
+            timestamp = now()
+            try:
+                db.execute(
+                    """
+                    INSERT INTO scheduler_terminal_transitions(
+                        transition_id, job_id, lease_id, requested_state,
+                        request_json, result_json, state, created_at, updated_at
+                    ) VALUES(?, ?, ?, ?, ?, NULL, 'requested', ?, ?)
+                    """,
+                    (
+                        transition_id, job_id, request.lease_id,
+                        target_state, request_json, timestamp, timestamp,
+                    ),
+                )
+            except sqlite3.IntegrityError as exc:
+                raise HTTPException(
+                    409, "terminal_transition_conflict"
+                ) from exc
+        elif target_state in {"complete", "failed"} and (
+            row["lease_id"] != prior["lease_id"]
+            or row["state"] not in {"leased", "running"}
+        ):
+            raise HTTPException(409, "stale_execution_attempt")
 
+        reason = {
+            "complete": "job_complete",
+            "failed": "job_failed",
+            "cancelled": "job_cancelled",
+        }[target_state]
         if row["lease_id"]:
             release_lease(
-                db,
-                lease_id=row["lease_id"],
-                reason="job_failed",
+                db, lease_id=row["lease_id"], reason=reason
             )
-
         should_retry = (
-            row["attempt_count"]
-            < row["max_attempts"]
+            target_state == "failed"
+            and row["attempt_count"] < row["max_attempts"]
         )
-
-        new_state = (
-            "queued"
-            if should_retry
-            else "failed"
-        )
-
-        not_before = (
-            (
-                now_dt()
-                + timedelta(
-                    seconds=max(
-                        0,
-                        request.retry_delay_seconds,
-                    )
-                )
-            ).isoformat()
-            if should_retry
+        job_state = "queued" if should_retry else target_state
+        completed_at = None if should_retry else now()
+        error = (
+            request.error if target_state == "failed"
+            else request.reason if target_state == "cancelled"
             else None
         )
-
         db.execute(
             """
-            UPDATE scheduler_jobs
-            SET
-                state=?,
-                assigned_worker_id=NULL,
-                lease_id=NULL,
-                lease_expires_at=NULL,
-                error=?,
-                not_before=?,
-                queued_at=?,
-                completed_at=?,
-                resource_state=?,
-                resource_release_reason='job-failed',
-                updated_at=?
+            UPDATE scheduler_jobs SET state=?,
+                assigned_worker_id=NULL, lease_id=NULL,
+                lease_expires_at=NULL, error=?, not_before=?,
+                completed_at=?, resource_state=?,
+                resource_release_reason=?, result_json=?, updated_at=?
             WHERE job_id=?
             """,
             (
-                new_state,
-                request.error,
-                not_before,
-                now(),
+                job_state, error,
                 (
-                    None
-                    if should_retry
-                    else now()
+                    (
+                        now_dt() + timedelta(
+                            seconds=max(0, request.retry_delay_seconds)
+                        )
+                    ).isoformat()
+                    if should_retry else None
                 ),
+                completed_at,
+                "release-pending"
+                if row["resource_reservation_id"] else "released",
+                reason.replace("_", "-"),
                 (
-                    "release-pending"
-                    if row["resource_reservation_id"]
-                    else "released"
+                    json.dumps(request.result)
+                    if target_state == "complete" else row["result_json"]
                 ),
-                now(),
-                job_id,
+                now(), job_id,
             ),
         )
-        record_resource_history(
-            db,
-            event_type="job_failed_resource_release_requested",
-            job_id=row["job_id"],
-            employee_id=row["employee_id"],
-            reservation_id=row["resource_reservation_id"],
-            decision=parse_json(row["resource_decision_json"]),
-            details={
-                "retry": should_retry,
-                "new_state": new_state,
-                "error": request.error,
-            },
+        result = {
+            "ok": True,
+            "job_id": job_id,
+            "state": job_state,
+            "retry": should_retry,
+            "lease_id": request.lease_id,
+            "resource_reservation_id": row["resource_reservation_id"],
+            "resource_released": not bool(row["resource_reservation_id"]),
+        }
+        db.execute(
+            "UPDATE scheduler_terminal_transitions SET state='applied', "
+            "result_json=?, updated_at=? WHERE transition_id=?",
+            (json.dumps(result), now(), transition_id),
         )
 
     resource_released = release_job_resources(
-        job_id,
-        row["resource_reservation_id"],
-        "job-failed",
+        job_id, row["resource_reservation_id"], reason.replace("_", "-")
     )
-
+    result["resource_released"] = resource_released
+    with connect() as db:
+        db.execute(
+            "UPDATE scheduler_terminal_transitions SET state='completed', "
+            "result_json=?, updated_at=? WHERE transition_id=?",
+            (json.dumps(result), now(), transition_id),
+        )
     emit(
-        "scheduler_job_failed",
+        f"scheduler_job_{target_state}",
         job_id=job_id,
         worker_id=row["assigned_worker_id"],
-        severity=(
-            "warning"
-            if should_retry
-            else "error"
-        ),
         details={
-            "error": request.error,
+            "transition_id": transition_id,
             "retry": should_retry,
-            "new_state": new_state,
-            "attempt_count": (
-                row["attempt_count"]
-            ),
-            "max_attempts": (
-                row["max_attempts"]
-            ),
-            "resource_reservation_id": row[
-                "resource_reservation_id"
-            ],
             "resource_released": resource_released,
         },
     )
-
-    return {
-        "ok": True,
-        "job_id": job_id,
-        "state": new_state,
-        "retry": should_retry,
-        "resource_reservation_id": row[
-            "resource_reservation_id"
-        ],
-        "resource_released": resource_released,
-    }
+    return result
 
 
 @app.post("/resources/reconcile")

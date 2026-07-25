@@ -5,12 +5,18 @@
     "leos.runtime-reconciliation.v3.1",
     "leos.employee-runtime-resource-lifecycle.v1"
   ],
+  "provisional_service_local_contracts": [
+    "leos.assignment-terminal-transition.v1"
+  ],
   "dependencies": [
     "execution-scheduler-service",
     "employee-resource-profile-service"
   ],
   "ownership": {
     "assignment_execution": true,
+    "assignment_failure": true,
+    "assignment_cancellation": true,
+    "assignment_terminal_transition_journal": true,
     "lease_reconciliation": true,
     "resource_completion_release": true,
     "resource_start_validation": true,
