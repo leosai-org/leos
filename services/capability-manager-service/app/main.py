@@ -1,5 +1,4 @@
 from __future__ import annotations
-from app.execution_contract import adapt_provider_payload, router as execution_contract_router
 
 import json
 import os
@@ -8,19 +7,33 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
+from urllib.parse import urlsplit
 
-import httpx
 from fastapi import FastAPI, HTTPException, Query
-from leos_contracts import validate_contract as validate_governed_contract
+from leos_contracts import (
+    ContractRootError,
+    ContractValidationError,
+    validate_contract,
+)
 from pydantic import BaseModel, Field
 
+SERVICE_VERSION = "0.2.0-dev-preview-v2"
 DATA_DIR = Path(os.getenv("CAPABILITY_MANAGER_DATA_DIR", "/data/capability-manager"))
 DB_PATH = DATA_DIR / "capability-manager.db"
-ADAPTER_MANAGER_URL = os.getenv(
-    "ADAPTER_MANAGER_URL",
-    "http://adapter-manager:8000",
-).rstrip("/")
-REQUEST_TIMEOUT = float(os.getenv("CAPABILITY_REQUEST_TIMEOUT_SECONDS", "60"))
+REQUEST_CONTRACT = "leos.capability-resolution-request.v1"
+RESULT_CONTRACT = "leos.capability-resolution-result.v1"
+CORRELATION_CONTRACT = "leos.execution-correlation.v1"
+PROVIDER_ORDER_CONSTRAINT = "provider_preference_order"
+RAW_CREDENTIAL_KEYS = {
+    "access_token",
+    "api_key",
+    "api_token",
+    "client_secret",
+    "credential",
+    "credentials",
+    "password",
+    "secret",
+}
 
 
 def now() -> str:
@@ -36,10 +49,11 @@ def connect() -> sqlite3.Connection:
     return db
 
 
-def init_db() -> None:
+def migrate() -> None:
+    """Apply the non-destructive v2 schema transition."""
     with connect() as db:
         db.executescript(
-            '''
+            """
             CREATE TABLE IF NOT EXISTS providers (
                 provider_id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -89,55 +103,64 @@ def init_db() -> None:
                     ON DELETE CASCADE
             );
 
-            CREATE TABLE IF NOT EXISTS resolutions (
-                resolution_id TEXT PRIMARY KEY,
-                capability_id TEXT NOT NULL,
-                selected_provider_id TEXT,
-                requester_type TEXT,
-                requester_id TEXT,
-                candidates_json TEXT NOT NULL,
-                reason TEXT,
-                created_at TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS executions (
-                execution_id TEXT PRIMARY KEY,
-                resolution_id TEXT,
-                capability_id TEXT NOT NULL,
-                provider_id TEXT,
-                requester_type TEXT,
-                requester_id TEXT,
-                request_json TEXT NOT NULL,
-                response_json TEXT,
-                status TEXT NOT NULL,
-                status_code INTEGER,
-                error TEXT,
-                started_at TEXT NOT NULL,
-                completed_at TEXT
-            );
-
             CREATE TABLE IF NOT EXISTS events (
                 event_id TEXT PRIMARY KEY,
                 event_type TEXT NOT NULL,
                 provider_id TEXT,
                 capability_id TEXT,
-                details_json TEXT NOT NULL,
+                details_json TEXT NOT NULL DEFAULT '{}',
                 created_at TEXT NOT NULL
             );
-            '''
+
+            CREATE TABLE IF NOT EXISTS canonical_resolutions (
+                resolution_id TEXT PRIMARY KEY,
+                contract_version TEXT NOT NULL,
+                status TEXT NOT NULL,
+                capability_id TEXT NOT NULL,
+                requester_type TEXT NOT NULL,
+                requester_id TEXT NOT NULL,
+                correlation_json TEXT NOT NULL,
+                candidate_evaluations_json TEXT NOT NULL,
+                selected_provider_id TEXT,
+                rationale_json TEXT NOT NULL,
+                request_json TEXT NOT NULL,
+                result_json TEXT NOT NULL,
+                resolved_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS capability_manager_schema (
+                component TEXT PRIMARY KEY,
+                schema_version INTEGER NOT NULL,
+                migrated_at TEXT NOT NULL
+            );
+            """
+        )
+        db.execute(
+            """
+            INSERT INTO capability_manager_schema (
+                component, schema_version, migrated_at
+            ) VALUES ('capability-manager', 2, ?)
+            ON CONFLICT(component) DO UPDATE SET
+                schema_version=excluded.schema_version,
+                migrated_at=excluded.migrated_at
+            """,
+            (now(),),
         )
 
 
 def decode(row: sqlite3.Row) -> dict[str, Any]:
-    item = dict(row)
-    for key in list(item):
+    value = dict(row)
+    for key in tuple(value):
         if key.endswith("_json"):
-            raw = item.pop(key)
-            item[key[:-5]] = json.loads(raw) if raw else {}
+            target = key[:-5]
+            try:
+                value[target] = json.loads(value.pop(key))
+            except Exception:
+                value[target] = value.pop(key)
     for key in ("enabled", "approval_required"):
-        if key in item:
-            item[key] = bool(item[key])
-    return item
+        if key in value:
+            value[key] = bool(value[key])
+    return value
 
 
 def emit(
@@ -148,10 +171,7 @@ def emit(
 ) -> None:
     with connect() as db:
         db.execute(
-            '''
-            INSERT INTO events
-            VALUES (?, ?, ?, ?, ?, ?)
-            ''',
+            "INSERT INTO events VALUES (?, ?, ?, ?, ?, ?)",
             (
                 str(uuid.uuid4()),
                 event_type,
@@ -160,6 +180,29 @@ def emit(
                 json.dumps(details or {}),
                 now(),
             ),
+        )
+
+
+def contains_raw_credentials(value: Any) -> bool:
+    if isinstance(value, dict):
+        return any(
+            str(key).lower() in RAW_CREDENTIAL_KEYS
+            or contains_raw_credentials(child)
+            for key, child in value.items()
+        )
+    if isinstance(value, list):
+        return any(contains_raw_credentials(child) for child in value)
+    return False
+
+
+def reject_raw_credentials(value: Any, location: str) -> None:
+    if contains_raw_credentials(value):
+        raise HTTPException(
+            422,
+            {
+                "code": "raw_credentials_forbidden",
+                "location": location,
+            },
         )
 
 
@@ -177,7 +220,7 @@ class Provider(BaseModel):
     status: str = "active"
     priority: int = 100
     trust_level: str = "community"
-    metadata: dict[str, Any] = {}
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Capability(BaseModel):
@@ -187,7 +230,7 @@ class Capability(BaseModel):
     category: Optional[str] = None
     risk_level: str = "low"
     approval_required: bool = False
-    metadata: dict[str, Any] = {}
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Binding(BaseModel):
@@ -196,65 +239,62 @@ class Binding(BaseModel):
     enabled: bool = True
     provider_priority: Optional[int] = None
     approval_policy: str = "allowed"
-    permissions: list[str] = []
-    metadata: dict[str, Any] = {}
+    permissions: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Bundle(BaseModel):
     provider: Provider
     capabilities: list[Capability]
-    bindings: list[Binding] = []
+    bindings: list[Binding] = Field(default_factory=list)
 
 
-class ResolveRequest(BaseModel):
-    capability_id: str
-    requester_type: str = "system"
-    requester_id: Optional[str] = None
-    preferred_provider_id: Optional[str] = None
-    allow_unhealthy: bool = False
-    allow_approval_required: bool = False
-
-
-class ExecuteRequest(BaseModel):
-    capability_id: str
-    input: dict[str, Any] = {}
-    requester_type: str = "system"
-    requester_id: Optional[str] = None
-    preferred_provider_id: Optional[str] = None
-    allow_approval_required: bool = False
-
-
-init_db()
-app = FastAPI(title="LEOS Capability Manager", version="0.1.0")
-app.include_router(execution_contract_router)
+migrate()
+app = FastAPI(title="LEOS Capability Manager", version=SERVICE_VERSION)
 
 
 @app.get("/health")
 def health() -> dict[str, Any]:
     with connect() as db:
         providers = db.execute("SELECT COUNT(*) c FROM providers").fetchone()["c"]
-        capabilities = db.execute("SELECT COUNT(*) c FROM capabilities").fetchone()["c"]
-        executions = db.execute("SELECT COUNT(*) c FROM executions").fetchone()["c"]
+        capabilities = db.execute(
+            "SELECT COUNT(*) c FROM capabilities"
+        ).fetchone()["c"]
+        resolutions = db.execute(
+            "SELECT COUNT(*) c FROM canonical_resolutions"
+        ).fetchone()["c"]
     return {
         "ok": True,
         "service": "capability-manager-service",
         "platform": "LEOS",
-        "version": "0.1.0",
+        "version": SERVICE_VERSION,
         "release_channel": "developer-preview",
         "provider_count": providers,
         "capability_count": capabilities,
-        "execution_count": executions,
-        "adapter_manager_url": ADAPTER_MANAGER_URL,
+        "canonical_resolution_count": resolutions,
         "database": str(DB_PATH),
     }
 
 
 @app.post("/providers")
 def register_provider(request: Provider) -> dict[str, Any]:
+    reject_raw_credentials(request.metadata, "provider.metadata")
+    parsed_base_url = urlsplit(request.base_url) if request.base_url else None
+    if parsed_base_url and (
+        parsed_base_url.username is not None
+        or parsed_base_url.password is not None
+    ):
+        raise HTTPException(
+            422,
+            {
+                "code": "raw_credentials_forbidden",
+                "location": "provider.base_url",
+            },
+        )
     timestamp = now()
     with connect() as db:
         db.execute(
-            '''
+            """
             INSERT INTO providers (
                 provider_id, name, provider_type, source_id, adapter_name,
                 base_url, execute_path, health_url, status, health_state,
@@ -274,7 +314,7 @@ def register_provider(request: Provider) -> dict[str, Any]:
                 trust_level=excluded.trust_level,
                 metadata_json=excluded.metadata_json,
                 updated_at=excluded.updated_at
-            ''',
+            """,
             (
                 request.provider_id,
                 request.name,
@@ -292,16 +332,17 @@ def register_provider(request: Provider) -> dict[str, Any]:
                 timestamp,
             ),
         )
-    emit("provider_registered", request.provider_id, details=request.model_dump())
+    emit("provider_registered", request.provider_id)
     return {"ok": True, "provider_id": request.provider_id}
 
 
 @app.post("/capabilities")
 def register_capability(request: Capability) -> dict[str, Any]:
+    reject_raw_credentials(request.metadata, "capability.metadata")
     timestamp = now()
     with connect() as db:
         db.execute(
-            '''
+            """
             INSERT INTO capabilities (
                 capability_id, name, description, category, risk_level,
                 approval_required, metadata_json, created_at, updated_at
@@ -315,7 +356,7 @@ def register_capability(request: Capability) -> dict[str, Any]:
                 approval_required=excluded.approval_required,
                 metadata_json=excluded.metadata_json,
                 updated_at=excluded.updated_at
-            ''',
+            """,
             (
                 request.capability_id,
                 request.name or request.capability_id,
@@ -328,16 +369,13 @@ def register_capability(request: Capability) -> dict[str, Any]:
                 timestamp,
             ),
         )
-    emit(
-        "capability_registered",
-        capability_id=request.capability_id,
-        details=request.model_dump(),
-    )
+    emit("capability_registered", capability_id=request.capability_id)
     return {"ok": True, "capability_id": request.capability_id}
 
 
 @app.post("/bindings")
 def register_binding(request: Binding) -> dict[str, Any]:
+    reject_raw_credentials(request.metadata, "binding.metadata")
     timestamp = now()
     with connect() as db:
         if db.execute(
@@ -350,9 +388,8 @@ def register_binding(request: Binding) -> dict[str, Any]:
             (request.capability_id,),
         ).fetchone() is None:
             raise HTTPException(404, "Capability not found.")
-
         db.execute(
-            '''
+            """
             INSERT INTO provider_capabilities (
                 provider_id, capability_id, enabled, provider_priority,
                 approval_policy, permissions_json, metadata_json,
@@ -366,7 +403,7 @@ def register_binding(request: Binding) -> dict[str, Any]:
                 permissions_json=excluded.permissions_json,
                 metadata_json=excluded.metadata_json,
                 updated_at=excluded.updated_at
-            ''',
+            """,
             (
                 request.provider_id,
                 request.capability_id,
@@ -383,7 +420,6 @@ def register_binding(request: Binding) -> dict[str, Any]:
         "provider_capability_bound",
         request.provider_id,
         request.capability_id,
-        request.model_dump(),
     )
     return {
         "ok": True,
@@ -397,22 +433,21 @@ def register_bundle(request: Bundle) -> dict[str, Any]:
     register_provider(request.provider)
     for capability in request.capabilities:
         register_capability(capability)
-
     bindings = request.bindings or [
         Binding(
             provider_id=request.provider.provider_id,
-            capability_id=item.capability_id,
+            capability_id=capability.capability_id,
         )
-        for item in request.capabilities
+        for capability in request.capabilities
     ]
-
     for binding in bindings:
         register_binding(binding)
-
     return {
         "ok": True,
         "provider_id": request.provider.provider_id,
-        "capabilities": [item.capability_id for item in request.capabilities],
+        "capabilities": [
+            capability.capability_id for capability in request.capabilities
+        ],
         "binding_count": len(bindings),
     }
 
@@ -433,17 +468,16 @@ def providers(
         where = "WHERE pc.capability_id=?"
         params.append(capability_id)
     params.append(limit)
-
     with connect() as db:
         rows = db.execute(
-            f'''
+            f"""
             SELECT DISTINCT providers.*
             FROM providers
             {join}
             {where}
-            ORDER BY priority, name
+            ORDER BY provider_id
             LIMIT ?
-            ''',
+            """,
             params,
         ).fetchall()
     return {
@@ -459,7 +493,7 @@ def capabilities(
 ) -> dict[str, Any]:
     with connect() as db:
         rows = db.execute(
-            '''
+            """
             SELECT capabilities.*,
                    (
                      SELECT COUNT(*)
@@ -470,7 +504,7 @@ def capabilities(
             FROM capabilities
             ORDER BY capability_id
             LIMIT ?
-            ''',
+            """,
             (limit,),
         ).fetchall()
     return {
@@ -480,343 +514,327 @@ def capabilities(
     }
 
 
-def select_candidates(request: ResolveRequest) -> list[dict[str, Any]]:
-    clauses = [
-        "pc.capability_id=?",
-        "pc.enabled=1",
-        "p.status='active'",
-        "pc.approval_policy!='denied'",
-    ]
-    params: list[Any] = [request.capability_id]
+def validation_error(error: ContractValidationError) -> HTTPException:
+    return HTTPException(
+        422,
+        {
+            "code": "invalid_contract",
+            "contract_id": error.contract_id,
+            "issues": [
+                {
+                    "kind": issue.kind,
+                    "path": issue.path,
+                    "message": issue.message,
+                }
+                for issue in error.issues
+            ],
+        },
+    )
 
-    if not request.allow_unhealthy:
-        clauses.append("p.health_state IN ('healthy','unknown')")
-    if not request.allow_approval_required:
-        clauses.append("pc.approval_policy!='approval_required'")
 
+def validate_resolution_request(request: dict[str, Any]) -> None:
+    try:
+        validate_contract(REQUEST_CONTRACT, request)
+    except ContractValidationError as error:
+        raise validation_error(error) from error
+    except ContractRootError as error:
+        raise HTTPException(
+            500,
+            {"code": "contract_authority_unavailable"},
+        ) from error
+    reject_raw_credentials(request.get("constraints", {}), "constraints")
+
+
+def candidate_rows(capability_id: str) -> dict[str, sqlite3.Row]:
     with connect() as db:
         rows = db.execute(
-            f'''
-            SELECT p.*, pc.provider_priority, pc.approval_policy,
-                   pc.permissions_json AS binding_permissions_json,
+            """
+            SELECT p.*, pc.enabled, pc.provider_priority,
+                   pc.approval_policy, pc.permissions_json,
+                   pc.metadata_json AS binding_metadata_json,
                    c.risk_level, c.approval_required
             FROM provider_capabilities pc
             JOIN providers p ON p.provider_id=pc.provider_id
             JOIN capabilities c ON c.capability_id=pc.capability_id
-            WHERE {" AND ".join(clauses)}
-            ''',
-            params,
+            WHERE pc.capability_id=?
+            """,
+            (capability_id,),
         ).fetchall()
+    return {row["provider_id"]: row for row in rows}
 
-    trust = {"builtin": 0, "verified": 10, "community": 30, "untrusted": 100}
-    health = {"healthy": 0, "unknown": 10, "degraded": 30, "unhealthy": 100}
-    result = []
 
-    for row in rows:
-        item = decode(row)
-        effective = (
-            item["provider_priority"]
-            if item.get("provider_priority") is not None
-            else item["priority"]
+def ordered_provider_ids(
+    request: dict[str, Any],
+    rows: dict[str, sqlite3.Row],
+) -> tuple[list[str], bool]:
+    supplied = request["constraints"].get(PROVIDER_ORDER_CONSTRAINT)
+    if supplied is None:
+        return sorted(rows), False
+    if (
+        not isinstance(supplied, list)
+        or any(not isinstance(item, str) or not item for item in supplied)
+        or len(set(supplied)) != len(supplied)
+    ):
+        raise HTTPException(
+            422,
+            {
+                "code": "invalid_provider_preference_order",
+                "location": (
+                    f"constraints.{PROVIDER_ORDER_CONSTRAINT}"
+                ),
+            },
         )
-        score = effective + trust.get(item["trust_level"], 50) + health.get(
-            item["health_state"],
-            50,
-        )
-        if request.preferred_provider_id == item["provider_id"]:
-            score -= 10000
-        item["resolution_score"] = score
-        result.append(item)
+    return list(supplied), True
 
-    result.sort(key=lambda item: (item["resolution_score"], item["provider_id"]))
-    return result
+
+def candidate_disposition(
+    row: Optional[sqlite3.Row],
+) -> tuple[str, list[str]]:
+    if row is None:
+        return "REJECTED", ["provider_not_bound"]
+    if not bool(row["enabled"]):
+        return "REJECTED", ["binding_disabled"]
+    if row["status"] != "active":
+        return "REJECTED", ["provider_disabled"]
+    if row["health_state"] == "unhealthy":
+        return "REJECTED", ["provider_unhealthy"]
+    if row["approval_policy"] == "denied":
+        return "REJECTED", ["binding_policy_denied"]
+    approval_required = (
+        bool(row["approval_required"])
+        or row["approval_policy"] == "approval_required"
+    )
+    if approval_required:
+        return "APPROVAL_REQUIRED", ["approval_grant_required"]
+    return "ELIGIBLE", []
+
+
+def provider_target(row: sqlite3.Row) -> dict[str, Any]:
+    target: dict[str, Any] = {
+        "provider_id": row["provider_id"],
+        "provider_type": row["provider_type"],
+        "target_ref": {
+            "authority": "capability-manager",
+            "reference_id": row["provider_id"],
+            "revision": row["updated_at"],
+        },
+    }
+    if row["adapter_name"]:
+        target["adapter_id"] = row["adapter_name"]
+    return target
+
+
+def persist_resolution(
+    request: dict[str, Any],
+    result: dict[str, Any],
+) -> None:
+    with connect() as db:
+        db.execute(
+            """
+            INSERT INTO canonical_resolutions (
+                resolution_id, contract_version, status, capability_id,
+                requester_type, requester_id, correlation_json,
+                candidate_evaluations_json, selected_provider_id,
+                rationale_json, request_json, result_json, resolved_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                result["resolution_id"],
+                result["contract_version"],
+                result["status"],
+                result["capability_id"],
+                result["requester"]["type"],
+                result["requester"]["id"],
+                json.dumps(result["correlation"]),
+                json.dumps(result["candidate_evaluations"]),
+                (
+                    result.get("selected_target", {}).get("provider_id")
+                    or None
+                ),
+                json.dumps(result["rationale"]),
+                json.dumps(request),
+                json.dumps(result),
+                result["resolved_at"],
+            ),
+        )
 
 
 @app.post("/resolve")
-def resolve(request: ResolveRequest) -> dict[str, Any]:
-    with connect() as db:
-        capability = db.execute(
-            "SELECT * FROM capabilities WHERE capability_id=?",
-            (request.capability_id,),
-        ).fetchone()
-    if capability is None:
-        raise HTTPException(404, "Capability not registered.")
-
-    candidates = select_candidates(request)
-    if not candidates:
-        raise HTTPException(404, "No eligible provider.")
-
-    selected = candidates[0]
+def resolve(request: dict[str, Any]) -> dict[str, Any]:
+    validate_resolution_request(request)
     resolution_id = str(uuid.uuid4())
+    correlation = dict(request["correlation"])
+    correlation["resolution_id"] = resolution_id
+    rows = candidate_rows(request["capability_id"])
+    ordered_ids, governed_order_supplied = ordered_provider_ids(request, rows)
+    evaluations: list[dict[str, Any]] = []
+    selected: Optional[sqlite3.Row] = None
+    approval_provider_id: Optional[str] = None
+    governed_order_required = False
 
-    with connect() as db:
-        db.execute(
-            '''
-            INSERT INTO resolutions
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''',
-            (
-                resolution_id,
-                request.capability_id,
-                selected["provider_id"],
-                request.requester_type,
-                request.requester_id,
-                json.dumps(candidates),
-                "lowest_weighted_score",
-                now(),
-            ),
-        )
-
-    emit(
-        "capability_resolved",
-        selected["provider_id"],
-        request.capability_id,
-        {
-            "resolution_id": resolution_id,
-            "candidate_count": len(candidates),
-        },
-    )
-
-    return {
-        "ok": True,
-        "resolution_id": resolution_id,
-        "capability": decode(capability),
-        "provider": selected,
-        "candidates": candidates,
-        "reason": "lowest_weighted_score",
-    }
-
-
-@app.post("/execute")
-async def execute(request: ExecuteRequest) -> dict[str, Any]:
-    resolution = resolve(
-        ResolveRequest(
-            capability_id=request.capability_id,
-            requester_type=request.requester_type,
-            requester_id=request.requester_id,
-            preferred_provider_id=request.preferred_provider_id,
-            allow_approval_required=request.allow_approval_required,
-        )
-    )
-
-    provider = resolution["provider"]
-    target = None
-
-    if provider.get("base_url"):
-        target = provider["base_url"].rstrip("/") + provider.get(
-            "execute_path",
-            "/execute",
-        )
-    elif provider.get("adapter_name"):
-        target = (
-            f"{ADAPTER_MANAGER_URL}/adapters/"
-            f"{provider['adapter_name']}/execute"
-        )
-
-    if not target:
-        raise HTTPException(409, "Provider has no execution target.")
-
-    execution_id = str(uuid.uuid4())
-    started = now()
-
-    with connect() as db:
-        db.execute(
-            '''
-            INSERT INTO executions (
-                execution_id, resolution_id, capability_id, provider_id,
-                requester_type, requester_id, request_json, status, started_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'running', ?)
-            ''',
-            (
-                execution_id,
-                resolution["resolution_id"],
-                request.capability_id,
-                provider["provider_id"],
-                request.requester_type,
-                request.requester_id,
-                json.dumps(request.model_dump()),
-                started,
-            ),
-        )
-
-    payload = {
-        "capability": request.capability_id,
-        "input": request.input,
-        "requester": {
-            "type": request.requester_type,
-            "id": request.requester_id,
-        },
-    }
-
-    try:
-        async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-            response = await client.post(target, json=adapt_provider_payload(locals(), payload))
-
-        try:
-            body = response.json()
-        except Exception:
-            body = {"raw": response.text}
-
-        status = "complete" if response.status_code < 400 else "failed"
-
-        with connect() as db:
-            db.execute(
-                '''
-                UPDATE executions
-                SET response_json=?, status=?, status_code=?, completed_at=?
-                WHERE execution_id=?
-                ''',
-                (
-                    json.dumps(body),
-                    status,
-                    response.status_code,
-                    now(),
-                    execution_id,
-                ),
-            )
-
-        if response.status_code >= 400:
-            raise HTTPException(
-                502,
-                {
-                    "message": "Provider execution failed.",
-                    "provider_status": response.status_code,
-                    "provider_response": body,
-                },
-            )
-
-        return {
-            "ok": True,
-            "execution_id": execution_id,
-            "resolution": resolution,
-            "provider_response": body,
-        }
-
-    except HTTPException:
-        raise
-    except Exception as exc:
-        with connect() as db:
-            db.execute(
-                '''
-                UPDATE executions
-                SET status='failed', error=?, completed_at=?
-                WHERE execution_id=?
-                ''',
-                (str(exc), now(), execution_id),
-            )
-        raise HTTPException(
-            502,
+    for position, provider_id in enumerate(ordered_ids, start=1):
+        row = rows.get(provider_id)
+        outcome, reasons = candidate_disposition(row)
+        evaluations.append(
             {
-                "message": "Provider execution failed.",
-                "error": str(exc),
-                "target": target,
-            },
-        ) from exc
-
-
-@app.post("/sync/adapters")
-async def sync_adapters() -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=30) as client:
-        response = await client.get(f"{ADAPTER_MANAGER_URL}/adapters")
-    if response.status_code >= 400:
-        raise HTTPException(502, response.text[:2000])
-
-    payload = response.json()
-    adapters = payload.get("adapters", payload) if isinstance(payload, dict) else payload
-
-    if isinstance(adapters, dict):
-        items = [
-            {**value, "name": value.get("name", key)}
-            for key, value in adapters.items()
-        ]
-    elif isinstance(adapters, list):
-        items = adapters
-    else:
-        raise HTTPException(502, "Unexpected Adapter Manager response.")
-
-    registered = []
-
-    for adapter in items:
-        name = adapter.get("name")
-        if not name:
-            continue
-
-        provider_id = f"adapter:{name}"
-        register_provider(
-            Provider(
-                provider_id=provider_id,
-                name=name,
-                provider_type="adapter",
-                source_id=name,
-                adapter_name=name,
-                base_url=adapter.get("entrypoint"),
-                execute_path=adapter.get("execute_path", "/execute"),
-                status=adapter.get("status", "active"),
-                trust_level=(
-                    "builtin"
-                    if name in {
-                        "music-adapter",
-                        "gis-adapter",
-                        "research-employee-adapter",
-                        "writer-employee-adapter",
-                    }
-                    else "community"
-                ),
-                metadata={"adapter": adapter, "sync_source": "adapter-manager"},
-            )
-        )
-
-        caps = []
-        for capability_id in adapter.get("capabilities", []):
-            register_capability(
-                Capability(
-                    capability_id=capability_id,
-                    name=capability_id,
-                    category=capability_id.split(".", 1)[0],
-                    metadata={"sync_source": "adapter-manager"},
-                )
-            )
-            register_binding(
-                Binding(
-                    provider_id=provider_id,
-                    capability_id=capability_id,
-                    metadata={"adapter_name": name},
-                )
-            )
-            caps.append(capability_id)
-
-        registered.append(
-            {
+                "position": position,
                 "provider_id": provider_id,
-                "adapter_name": name,
-                "capabilities": caps,
+                "outcome": outcome,
+                "reasons": reasons,
             }
         )
+        if governed_order_supplied:
+            if outcome == "APPROVAL_REQUIRED":
+                approval_provider_id = provider_id
+                break
+            if outcome == "ELIGIBLE":
+                selected = row
+                break
 
-    return {
-        "ok": True,
-        "adapter_count": len(items),
-        "registered_count": len(registered),
-        "providers": registered,
+    if not governed_order_supplied:
+        eligible = [
+            evaluation
+            for evaluation in evaluations
+            if evaluation["outcome"] == "ELIGIBLE"
+        ]
+        approval_required = [
+            evaluation
+            for evaluation in evaluations
+            if evaluation["outcome"] == "APPROVAL_REQUIRED"
+        ]
+        if len(eligible) == 1:
+            selected = rows[eligible[0]["provider_id"]]
+        elif len(eligible) > 1:
+            governed_order_required = True
+        elif len(approval_required) == 1:
+            approval_provider_id = approval_required[0]["provider_id"]
+        elif len(approval_required) > 1:
+            for evaluation in approval_required:
+                evaluation["outcome"] = "REJECTED"
+                evaluation["reasons"] = ["governed_order_required"]
+
+    timestamp = now()
+    result: dict[str, Any] = {
+        "contract_version": RESULT_CONTRACT,
+        "resolution_id": resolution_id,
+        "status": "NO_ELIGIBLE_PROVIDER",
+        "capability_id": request["capability_id"],
+        "requester": dict(request["requester"]),
+        "candidate_evaluations": evaluations,
+        "rationale": {
+            "selection_rule": "first-ranked-valid",
+            "provider_order_source": (
+                f"constraints.{PROVIDER_ORDER_CONSTRAINT}"
+                if governed_order_supplied
+                else "none"
+            ),
+            "outcome": "no_eligible_provider",
+        },
+        "correlation": correlation,
+        "resolved_at": timestamp,
     }
 
+    if governed_order_required:
+        result["status"] = "GOVERNED_ORDER_REQUIRED"
+        result["rationale"]["outcome"] = "governed_order_required"
+        result["rationale"]["eligible_candidate_count"] = sum(
+            1
+            for item in evaluations
+            if item["outcome"] == "ELIGIBLE"
+        )
+    elif approval_provider_id is not None:
+        result["status"] = "APPROVAL_PENDING"
+        result["approval_requirement_ref"] = {
+            "authority": "capability-manager",
+            "reference_id": (
+                f"{resolution_id}:{approval_provider_id}:approval"
+            ),
+        }
+        result["rationale"]["outcome"] = "approval_pending"
+        result["rationale"]["blocked_position"] = len(evaluations)
+    elif selected is not None:
+        result["status"] = "RESOLVED"
+        result["selected_target"] = provider_target(selected)
+        result["rationale"]["outcome"] = "selected"
+        result["rationale"]["selected_position"] = next(
+            item["position"]
+            for item in evaluations
+            if item["provider_id"] == selected["provider_id"]
+        )
+    elif (
+        not governed_order_supplied
+        and any(
+            "governed_order_required" in item["reasons"]
+            for item in evaluations
+        )
+    ):
+        result["rationale"]["outcome"] = (
+            "governed_order_required_for_multiple_candidates"
+        )
 
-@app.get("/executions")
-def executions(limit: int = Query(default=200, ge=1, le=2000)):
+    try:
+        validate_contract(RESULT_CONTRACT, result)
+    except ContractValidationError as error:
+        raise HTTPException(
+            500,
+            {
+                "code": "invalid_canonical_resolution",
+                "issues": [
+                    {
+                        "kind": issue.kind,
+                        "path": issue.path,
+                        "message": issue.message,
+                    }
+                    for issue in error.issues
+                ],
+            },
+        ) from error
+    persist_resolution(request, result)
+    emit(
+        "capability_resolved",
+        result.get("selected_target", {}).get("provider_id"),
+        request["capability_id"],
+        {
+            "resolution_id": resolution_id,
+            "status": result["status"],
+        },
+    )
+    return result
+
+
+@app.get("/resolutions/{resolution_id}")
+def resolution(resolution_id: str) -> dict[str, Any]:
+    with connect() as db:
+        row = db.execute(
+            "SELECT result_json FROM canonical_resolutions "
+            "WHERE resolution_id=?",
+            (resolution_id,),
+        ).fetchone()
+    if row is None:
+        raise HTTPException(404, "Resolution not found.")
+    result = json.loads(row["result_json"])
+    try:
+        validate_contract(RESULT_CONTRACT, result)
+    except ContractValidationError as error:
+        raise HTTPException(
+            500,
+            {"code": "persisted_resolution_invalid"},
+        ) from error
+    return result
+
+
+@app.get("/resolutions")
+def resolutions(
+    limit: int = Query(default=200, ge=1, le=2000),
+) -> dict[str, Any]:
     with connect() as db:
         rows = db.execute(
-            "SELECT * FROM executions ORDER BY started_at DESC LIMIT ?",
+            "SELECT result_json FROM canonical_resolutions "
+            "ORDER BY resolved_at DESC LIMIT ?",
             (limit,),
         ).fetchall()
-    return {"ok": True, "executions": [decode(row) for row in rows]}
-
-
-@app.get("/events")
-def events(limit: int = Query(default=500, ge=1, le=2000)):
-    with connect() as db:
-        rows = db.execute(
-            "SELECT * FROM events ORDER BY created_at DESC LIMIT ?",
-            (limit,),
-        ).fetchall()
-    return {"ok": True, "events": [decode(row) for row in rows]}
+    return {
+        "ok": True,
+        "resolution_count": len(rows),
+        "resolutions": [json.loads(row["result_json"]) for row in rows],
+    }

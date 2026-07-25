@@ -145,6 +145,24 @@ class ValidationApiTests(unittest.TestCase):
         self.assertEqual("semantic", raised.exception.issues[0].kind)
         self.assertTrue(raised.exception.issues[0].path.startswith("$"))
 
+    def test_governed_order_required_semantics_need_two_eligible(self):
+        value = self.example(
+            "capability-resolution-result.governed-order-required.v1.json"
+        )
+        value["candidate_evaluations"] = value["candidate_evaluations"][:1]
+        with self.assertRaises(ContractValidationError) as raised:
+            validate_contract(
+                "leos.capability-resolution-result.v1",
+                value,
+            )
+        self.assertTrue(
+            any(
+                issue.kind == "semantic"
+                and "at least two eligible" in issue.message
+                for issue in raised.exception.issues
+            )
+        )
+
     def test_unsupported_contract_is_rejected(self):
         with self.assertRaises(KeyError):
             validate_contract("leos.unknown.v1", {})
