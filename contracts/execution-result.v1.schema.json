@@ -19,7 +19,8 @@
         "PROVIDER_ERROR",
         "TRANSPORT_ERROR",
         "AMBIGUOUS_OUTCOME",
-        "APPROVAL_PENDING"
+        "APPROVAL_PENDING",
+        "GOVERNED_ORDER_REQUIRED"
       ]
     },
     "capability_id": {
@@ -176,6 +177,77 @@
         "not": {
           "required": [
             "authorized_target"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "GOVERNED_ORDER_REQUIRED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attempt_summary": {
+            "properties": {
+              "attempt_count": {
+                "const": 0
+              },
+              "attempts": {
+                "maxItems": 0
+              }
+            },
+            "not": {
+              "required": [
+                "idempotency_key"
+              ]
+            }
+          },
+          "correlation": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "invocation_attempt_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "provider_operation_id"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "authorized_target"
+              ]
+            },
+            {
+              "required": [
+                "normalized_result"
+              ]
+            },
+            {
+              "required": [
+                "error"
+              ]
+            },
+            {
+              "required": [
+                "approval_requirement_ref"
+              ]
+            }
           ]
         }
       }
