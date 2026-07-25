@@ -95,6 +95,9 @@ class ExecutionContractTests(unittest.TestCase):
             "execution-result.governed-order-required.v1.json"
         )
 
+    def no_eligible_provider_execution_result(self) -> dict[str, Any]:
+        return self.example("execution-result.no-eligible-provider.v1.json")
+
     def error_result(self, status: str) -> dict[str, Any]:
         value = self.execution_result()
         value["status"] = status
@@ -340,6 +343,105 @@ class ExecutionContractTests(unittest.TestCase):
             "reference_id": "approval-requirement-unrelated",
         }
         self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_execution_result(self):
+        self.assert_valid(
+            "execution-result.v1.schema.json",
+            self.no_eligible_provider_execution_result(),
+        )
+
+    def test_no_eligible_provider_requires_zero_attempt_count(self):
+        value = self.no_eligible_provider_execution_result()
+        value["attempt_summary"]["attempt_count"] = 1
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_requires_empty_attempts(self):
+        value = self.no_eligible_provider_execution_result()
+        value["attempt_summary"]["attempts"] = [
+            self.execution_result()["attempt_summary"]["attempts"][0]
+        ]
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_prohibits_authorized_target(self):
+        value = self.no_eligible_provider_execution_result()
+        value["authorized_target"] = self.execution_result()[
+            "authorized_target"
+        ]
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_prohibits_invocation_evidence(self):
+        for field in ("invocation_attempt_id", "provider_operation_id"):
+            with self.subTest(field=field):
+                value = self.no_eligible_provider_execution_result()
+                value["correlation"][field] = f"{field}-unexpected"
+                self.assert_invalid("execution-result.v1.schema.json", value)
+
+        value = self.no_eligible_provider_execution_result()
+        value["attempt_summary"]["idempotency_key"] = "unexpected-invocation"
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_prohibits_provider_outcome_evidence(self):
+        value = self.no_eligible_provider_execution_result()
+        value["normalized_result"] = {"unexpected": "provider output"}
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+        for code in ("provider_error", "transport_error"):
+            with self.subTest(code=code):
+                value = self.no_eligible_provider_execution_result()
+                value["error"] = {
+                    "code": code,
+                    "message": "No provider invocation occurred.",
+                    "retryable_same_target": False,
+                    "remote_side_effect_possible": False,
+                }
+                self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_prohibits_approval_requirement(self):
+        value = self.no_eligible_provider_execution_result()
+        value["approval_requirement_ref"] = {
+            "authority": "approval-authority",
+            "reference_id": "approval-requirement-unrelated",
+        }
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_requires_resolution_reference(self):
+        value = self.no_eligible_provider_execution_result()
+        value.pop("resolution_ref")
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_preserves_resolution_correlation(self):
+        value = self.no_eligible_provider_execution_result()
+        value["correlation"]["resolution_id"] = "resolution-other"
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_no_eligible_provider_is_distinct_from_rejected(self):
+        no_eligible = self.no_eligible_provider_execution_result()
+        no_eligible["error"] = {
+            "code": "policy_denied",
+            "message": "This would falsely represent a rejection.",
+            "retryable_same_target": False,
+            "remote_side_effect_possible": False,
+        }
+        self.assert_invalid("execution-result.v1.schema.json", no_eligible)
+
+        rejected = self.execution_result()
+        rejected["status"] = "REJECTED"
+        rejected.pop("normalized_result")
+        rejected.pop("authorized_target")
+        rejected["attempt_summary"] = {"attempt_count": 0, "attempts": []}
+        rejected["error"] = {
+            "code": "policy_denied",
+            "message": "Execution was rejected before invocation.",
+            "retryable_same_target": False,
+            "remote_side_effect_possible": False,
+        }
+        self.assert_valid("execution-result.v1.schema.json", rejected)
+
+    def test_governed_order_required_remains_valid(self):
+        self.assert_valid(
+            "execution-result.v1.schema.json",
+            self.governed_order_required_execution_result(),
+        )
 
     def test_malformed_contract_versions_are_rejected(self):
         for schema_name, example_name in SCHEMA_EXAMPLES.items():

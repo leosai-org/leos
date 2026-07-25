@@ -119,7 +119,8 @@ The execution-result statuses distinguish:
 - `TRANSPORT_ERROR`;
 - `AMBIGUOUS_OUTCOME`;
 - `APPROVAL_PENDING`;
-- `GOVERNED_ORDER_REQUIRED`.
+- `GOVERNED_ORDER_REQUIRED`;
+- `NO_ELIGIBLE_PROVIDER`.
 
 Attempt records identify concrete invocation attempts. Structured errors state
 whether same-target retry is potentially allowed and whether a remote side
@@ -133,14 +134,27 @@ target, zero attempts, and no provider-operation evidence.
 `APPROVAL_PENDING` additionally requires an external approval-requirement
 reference.
 
-`NO_ELIGIBLE_PROVIDER` is a capability-resolution outcome: no candidate
-survived governed eligibility evaluation. `GOVERNED_ORDER_REQUIRED` is both a
-capability-resolution and execution-result outcome: multiple candidates
-survived eligibility, but LEOS lacked authoritative ordering needed to select
-one. The execution result records that resolution authorized no target; it
-does not reinterpret or duplicate the complete resolution rationale. It has
-no authorized target, invocation attempt, provider-operation evidence,
-normalized provider result, or provider/transport error.
+`NO_ELIGIBLE_PROVIDER` is both a capability-resolution and execution-result
+outcome: resolution completed normally, but no candidate survived governed
+eligibility evaluation. It is distinct from `REJECTED`, which records a
+governed post-resolution, pre-invocation rejection.
+`GOVERNED_ORDER_REQUIRED` is also both a capability-resolution and
+execution-result outcome: multiple candidates survived eligibility, but LEOS
+lacked authoritative ordering needed to select one. For both outcomes, the
+execution result records that resolution authorized no target; it does not
+reinterpret or duplicate the complete resolution rationale. Each has no
+authorized target, invocation attempt, idempotency or provider-operation
+evidence, normalized provider result, provider/transport error, or approval
+requirement.
+
+The truthful resolution-to-execution mapping is:
+
+| Capability resolution | Execution result |
+|---|---|
+| `RESOLVED` | Invocation may produce `SUCCESS`, `PROVIDER_ERROR`, `TRANSPORT_ERROR`, or `AMBIGUOUS_OUTCOME` |
+| `APPROVAL_PENDING` | `APPROVAL_PENDING` |
+| `GOVERNED_ORDER_REQUIRED` | `GOVERNED_ORDER_REQUIRED` |
+| `NO_ELIGIBLE_PROVIDER` | `NO_ELIGIBLE_PROVIDER` |
 
 `AMBIGUOUS_OUTCOME` requires
 `remote_side_effect_possible: true`; it exists only when LEOS cannot safely
