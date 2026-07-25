@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from fastapi import HTTPException
 
@@ -15,6 +16,24 @@ os.environ["EXECUTION_SCHEDULER_EMPLOYEE_LIFECYCLE_ENFORCEMENT"] = "true"
 os.environ["EXECUTION_SCHEDULER_EMPLOYEE_LIFECYCLE_FAIL_CLOSED"] = "true"
 
 from app import main as scheduler  # noqa: E402
+
+ORIGINAL_EMIT = scheduler.emit
+
+
+class KernelResponse:
+    status_code = 200
+    text = ""
+
+
+class KernelClient:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
+
+    def post(self, url, json):
+        return KernelResponse()
 
 
 class EmployeeLifecycleSchedulerTests(unittest.TestCase):
@@ -160,6 +179,32 @@ class EmployeeLifecycleSchedulerTests(unittest.TestCase):
         self.assertEqual(job["state"], "leased")
         self.assertEqual(job["employee_state"], "eligible")
         self.assertTrue(job["employee_decision"]["eligible"])
+
+    def test_real_emit_signature_allows_eligible_job_to_be_leased(self):
+        self.create("job-real-emit")
+        scheduler.employee_eligibility = self.eligible
+        scheduler.reserve_resources = self.admitted
+        with (
+            patch.object(scheduler, "emit", ORIGINAL_EMIT),
+            patch.object(
+                scheduler.httpx,
+                "Client",
+                return_value=KernelClient(),
+            ),
+        ):
+            tick = scheduler.schedule_tick()
+
+        self.assertEqual(1, tick["assignment_count"])
+        assignment = tick["assignments"][0]
+        job = scheduler.get_job("job-real-emit")["job"]
+        self.assertEqual("leased", job["state"])
+        self.assertEqual("eligible", job["employee_state"])
+        self.assertTrue(job["employee_decision"]["eligible"])
+        self.assertEqual(job["lease_id"], assignment["lease_id"])
+        self.assertEqual(
+            job["resource_reservation_id"],
+            assignment["resource_reservation_id"],
+        )
 
     def test_lifecycle_authority_error_is_fail_closed(self):
         self.create("job-error")
