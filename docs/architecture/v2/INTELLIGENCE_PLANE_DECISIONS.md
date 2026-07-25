@@ -298,7 +298,7 @@ details are marked **OPEN**.
   Observation freshness and policy determine eligibility.
 - **OPEN:** Probe authority, freshness, and degraded-state rules.
 
-## ADR-IP-020: Lucy is migration evidence, not intelligence source authority
+## ADR-IP-021: Lucy is migration evidence, not intelligence source authority
 
 - **Status:** Accepted
 - **Decision:** `lucy-runtime-reference` remains immutable evidence. All v2
@@ -311,6 +311,57 @@ details are marked **OPEN**.
   it runs on Lucy.
 - **OPEN:** Operational data extraction, provenance packaging, and compatibility
   acceptance procedure.
+
+## ADR-IP-022: Phase 5 intelligence fixtures are non-authoritative
+
+- **Status:** Accepted
+- **Decision:** Phase 5 knowledge, memory, provenance, retrieval, and
+  data-governance work may use test/reference-only intelligence fixtures before
+  Phase 6 production model/provider/runtime onboarding exists. Fixtures are
+  deterministic by default. An optional pinned local embedding or reranking
+  runtime may be used for integration testing.
+- **Context:** Knowledge contracts require executable embedding and reranking
+  behavior for meaningful conformance, but moving production onboarding into
+  Phase 5 would prematurely make test scaffolding an activation or runtime
+  authority.
+- **Consequences:** Fixtures use no cloud services or production credentials.
+  They are not production installation, discovery, onboarding, health,
+  ranking, or runtime-activation paths. They use isolated configuration,
+  persistence, and temporary authority records and are removable without
+  production migration obligations. They do not authorize direct model
+  invocation by the knowledge plane or Cognitive Service. Where practical,
+  tests exercise Capability Manager resolution, Dispatcher invocation, and
+  adapter transport rather than bypassing the canonical boundary. No fixture
+  state may remain in production authority stores or configuration. Phase 6
+  reruns the same knowledge integration suite through the production
+  onboarding path.
+- **OPEN:** Exact deterministic fixture protocol, pinned local runtime, and
+  isolation mechanism.
+
+## ADR-IP-023: Production per Token is observational evidence only
+
+- **Status:** Accepted
+- **Decision:** Production per Token (PPT) is an observational and reporting
+  metric. PPT is never provider/model selection, eligibility, ranking,
+  fallback, retry, re-resolution, or escalation authority.
+- **Context:** Token reduction is valuable only when the resulting work has
+  externally grounded productive value. A composite calculated before outcome
+  evidence and attributable cost exist could become hidden provider scoring or
+  reward cheap but ineffective behavior.
+- **Consequences:** PPT never automatically changes or overrides user ranking.
+  Technical completion or low token use alone is insufficient evidence of
+  productive value. Employees may not self-declare their output productive.
+  The numerator relies on externally grounded evidence such as governed
+  validation, human acceptance, an accepted artifact, a completed workflow
+  objective, or another independently authoritative outcome. Attribution
+  includes applicable retrieval, embedding, reranking, revision, verification,
+  token, latency, provider-cost, and compute/resource costs. Reports expose the
+  underlying outcome and cost evidence rather than only a composite number.
+  PPT analysis may inform a human's separately authored ranking choices, but
+  runtime selection never consumes PPT as an ordering or eligibility input.
+- **OPEN:** Canonical outcome-evidence authority, production-value
+  normalization, cost-allocation rules, comparison cohorts, and treatment of
+  delayed or reused outcomes.
 
 ## Consolidated OPEN questions
 
@@ -334,3 +385,7 @@ details are marked **OPEN**.
     by First Run.
 17. Provider Registry and Router compatibility periods.
 18. Lucy operational data migration and provenance.
+19. Phase 5 deterministic fixture protocol, pinned local integration runtime,
+    and isolation mechanism.
+20. PPT outcome-evidence authority, production-value normalization,
+    attribution, cohorts, and delayed/reused outcome treatment.

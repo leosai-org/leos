@@ -16,7 +16,10 @@ Capability Manager resolves; Dispatcher invokes; Router transports; and retry,
 re-resolution, and escalation remain distinct. Examples below that use
 “fallback,” automatic local-first selection, provider scoring/priority, or
 Router-owned selection are historical product intent and must not be
-implemented as authority. The organization-first direction is recorded in
+implemented as authority. Production per Token is observational evidence only:
+it never selects, ranks, filters, retries, falls back, re-resolves, or
+escalates provider/model candidates. The organization-first direction and
+Phase 5.0 non-authoritative intelligence fixture are recorded in
 `LEOS_ORGANIZATION_FIRST_ROADMAP.md`.
 
 ---
@@ -496,6 +499,20 @@ Expected potential benefits:
 
 This must be measured rather than assumed.
 
+Production per Token is an observational and reporting metric, not an
+intelligence-policy input. It must never:
+
+- score, select, rank, or filter providers or models;
+- override user-authored ranking;
+- authorize fallback, retry, re-resolution, or escalation;
+- equate technical completion or low token use with productive value; or
+- accept an employee's self-declaration of productive value.
+
+The numerator must rely on externally grounded outcome evidence. Attribution
+must include applicable retrieval, embedding, reranking, revision,
+verification, provider, token, latency, and compute/resource costs. Reports
+must expose that underlying evidence rather than only a composite number.
+
 ---
 
 # 13. Token, Cost, and Productivity Telemetry
@@ -551,6 +568,11 @@ LEOS workflow:
 ```
 
 Any marketing claim should be based on actual measured results.
+
+The metric remains observational even after it can be measured. PPT analysis
+may help a human make a separately governed ranking decision, but LEOS runtime
+selection must not consume PPT as hidden provider/model ordering or
+eligibility.
 
 ---
 

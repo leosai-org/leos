@@ -466,6 +466,75 @@ operations; they do not authorize changing the target of an active invocation.
 - activity history
 - cost visibility
 
+## Phase 5.0 — Non-authoritative Intelligence Test Fixture
+
+The detailed implementation roadmap established after the Phase 3 scope lock
+must place knowledge, memory, provenance, retrieval, and data-governance work
+in Phase 5 before the production model/provider/runtime onboarding work in
+Phase 6.
+
+Phase 5 may use a narrowly scoped intelligence fixture so its contracts and
+behavior can be tested without prematurely implementing or authorizing the
+Phase 6 production onboarding system.
+
+The fixture is:
+
+- test/reference-only;
+- deterministic by default;
+- optionally backed by a pinned local embedding or reranking runtime for
+  integration testing;
+- prohibited from using cloud services or production credentials;
+- not a production installation, activation, discovery, or onboarding path;
+- not an authority over models, providers, ranking, health, or runtime
+  activation;
+- prohibited from creating a direct knowledge-plane or Cognitive Service
+  model-invocation path;
+- expected to use the canonical Capability Manager to Dispatcher to adapter
+  path where practical;
+- isolated from production configuration, persistence, and authority state;
+- limited to temporary fixture-owned facts, bindings, rankings, and endpoint
+  records when the canonical path requires them; and
+- removable without production migration or compatibility obligations.
+
+The deterministic fixture is the conformance default. An optional pinned local
+runtime may prove real embedding or reranking integration, but its model,
+runtime, package, and configuration choices do not become production
+authority.
+
+Phase 5 acceptance must prove:
+
+1. deterministic fixture conformance;
+2. optional real local embedding/reranking integration when the required
+   runtime is available;
+3. truthful failure, timeout, and malformed-response handling;
+4. retained provenance and access scope through retrieval and context use;
+5. no direct model invocation by the knowledge plane or Cognitive Service;
+6. no cloud contact or production credential use; and
+7. no fixture state in production authority stores or production
+   configuration.
+
+Phase 6 must rerun the same knowledge integration suite through the production
+model/provider/runtime onboarding and activation path. Passing against the
+Phase 5.0 fixture does not establish production onboarding conformance.
+
+### Production per Token authority boundary
+
+Production per Token (PPT) is observational and reporting evidence only. It is
+never provider/model selection, eligibility, ranking, fallback, retry,
+re-resolution, or escalation authority.
+
+PPT must not:
+
+- create hidden provider or model scores;
+- automatically change or override user ranking;
+- treat technical completion or low token use as productive value; or
+- accept an employee's self-declaration that its output was productive.
+
+The numerator must use externally grounded outcome evidence. Attribution must
+include applicable retrieval, embedding, reranking, revision, verification,
+token, provider, latency, and compute/resource costs. Reports must expose the
+underlying outcome and cost evidence rather than only a composite number.
+
 ---
 
 # 6. Plugin Layer — Required Prerequisite
@@ -1032,13 +1101,23 @@ Implement Plugin Layer
         ↓
 Stabilize Capability Registry and Permission Model
         ↓
+Implement Knowledge, Memory, Provenance, and Data-Governance Contracts
+        ↓
+Establish Phase 5.0 Non-authoritative Intelligence Test Fixture
+        ↓
+Pass Phase 5 Knowledge Conformance and Optional Local Integration
+        ↓
+Complete Phase 6 Production Model/Provider/Runtime Onboarding
+        ↓
+Rerun the Phase 5 Knowledge Integration Suite Through Phase 6
+        ↓
 Define Team Template Contract
         ↓
 Implement Team Architect v1
         ↓
 Implement Core LEOS Employees
         ↓
-Implement Guided Installation and Model Setup
+Implement Guided Installation and Organization Setup
         ↓
 Implement History and Knowledge Import
         ↓
