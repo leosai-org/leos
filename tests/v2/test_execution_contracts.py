@@ -145,6 +145,45 @@ class ExecutionContractTests(unittest.TestCase):
         value["rationale"] = {"outcome": "no_eligible_provider"}
         self.assert_valid("capability-resolution-result.v1.schema.json", value)
 
+    def test_governed_order_required_resolution(self):
+        value = self.example(
+            "capability-resolution-result.governed-order-required.v1.json"
+        )
+        self.assert_valid("capability-resolution-result.v1.schema.json", value)
+
+    def test_governed_order_required_prohibits_selected_target(self):
+        value = self.example(
+            "capability-resolution-result.governed-order-required.v1.json"
+        )
+        value["selected_target"] = {
+            "provider_id": "provider-content-local"
+        }
+        self.assert_invalid(
+            "capability-resolution-result.v1.schema.json",
+            value,
+        )
+
+    def test_governed_order_required_needs_two_eligible_candidates(self):
+        value = self.example(
+            "capability-resolution-result.governed-order-required.v1.json"
+        )
+        value["candidate_evaluations"][1]["outcome"] = "REJECTED"
+        value["candidate_evaluations"][1]["reasons"] = ["unavailable"]
+        self.assert_invalid(
+            "capability-resolution-result.v1.schema.json",
+            value,
+        )
+
+    def test_no_eligible_provider_cannot_report_eligible_candidate(self):
+        value = self.resolution_result()
+        value["status"] = "NO_ELIGIBLE_PROVIDER"
+        value.pop("selected_target")
+        value["rationale"] = {"outcome": "no_eligible_provider"}
+        self.assert_invalid(
+            "capability-resolution-result.v1.schema.json",
+            value,
+        )
+
     def test_approval_pending_resolution(self):
         value = self.resolution_result()
         value["status"] = "APPROVAL_PENDING"

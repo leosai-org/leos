@@ -326,6 +326,37 @@ def validate_semantics(
                         "$.selected_target.provider_id",
                         "selected target must be the first eligible candidate",
                     )
+            if document.get("status") == "NO_ELIGIBLE_PROVIDER":
+                eligible_count = sum(
+                    1
+                    for candidate in candidates
+                    if isinstance(candidate, dict)
+                    and candidate.get("outcome") == "ELIGIBLE"
+                )
+                if eligible_count:
+                    add(
+                        "$.candidate_evaluations",
+                        "NO_ELIGIBLE_PROVIDER must not contain eligible candidates",
+                    )
+            if document.get("status") == "GOVERNED_ORDER_REQUIRED":
+                eligible_count = sum(
+                    1
+                    for candidate in candidates
+                    if isinstance(candidate, dict)
+                    and candidate.get("outcome") == "ELIGIBLE"
+                )
+                if eligible_count < 2:
+                    add(
+                        "$.candidate_evaluations",
+                        "GOVERNED_ORDER_REQUIRED needs at least two "
+                        "eligible candidates",
+                    )
+                rationale = document.get("rationale")
+                if not isinstance(rationale, dict) or not rationale:
+                    add(
+                        "$.rationale",
+                        "GOVERNED_ORDER_REQUIRED needs nonempty rationale",
+                    )
 
     if name == "execution-result.v1.schema.json":
         equal_when_present(

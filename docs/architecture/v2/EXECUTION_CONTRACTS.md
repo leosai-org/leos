@@ -86,10 +86,16 @@ when both copies exist.
 
 ## Resolution and invocation
 
-A resolution outcome is `RESOLVED`, `APPROVAL_PENDING`, or
-`NO_ELIGIBLE_PROVIDER`. Only `RESOLVED` carries a selected target.
+A resolution outcome is `RESOLVED`, `APPROVAL_PENDING`,
+`NO_ELIGIBLE_PROVIDER`, or `GOVERNED_ORDER_REQUIRED`. Only `RESOLVED`
+carries a selected target.
 `APPROVAL_PENDING` carries an external approval-requirement reference and does
 not silently select a lower-ranked candidate.
+`NO_ELIGIBLE_PROVIDER` means hard eligibility filtering left no eligible
+candidate. `GOVERNED_ORDER_REQUIRED` means at least two candidates remain
+eligible but no governed ordering exists, so LEOS refuses to invent selection
+authority. It retains those candidates as `ELIGIBLE`, returns no selected
+target, and authorizes no invocation.
 
 Candidate positions and eligibility outcomes may be recorded, but these
 contracts do not define candidate ranking. User-governed effective ranking is

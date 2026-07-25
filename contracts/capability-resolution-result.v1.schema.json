@@ -16,7 +16,8 @@
       "enum": [
         "RESOLVED",
         "APPROVAL_PENDING",
-        "NO_ELIGIBLE_PROVIDER"
+        "NO_ELIGIBLE_PROVIDER",
+        "GOVERNED_ORDER_REQUIRED"
       ]
     },
     "capability_id": {
@@ -136,6 +137,39 @@
         "required": [
           "approval_requirement_ref"
         ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "GOVERNED_ORDER_REQUIRED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "candidate_evaluations": {
+            "minItems": 2,
+            "contains": {
+              "properties": {
+                "outcome": {
+                  "const": "ELIGIBLE"
+                }
+              },
+              "required": [
+                "outcome"
+              ]
+            },
+            "minContains": 2
+          },
+          "rationale": {
+            "minProperties": 1
+          }
+        }
       }
     }
   ],
