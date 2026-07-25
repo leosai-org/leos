@@ -1,0 +1,161 @@
+name: leos-epic-1-2e
+
+services:
+  resource-profile:
+    build:
+      context: ../../../services/employee-resource-profile-service
+    environment:
+      LEOS_RESOURCE_PROFILE_DB: /data/resource/resource-policy.db
+    tmpfs:
+      - /data/resource
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  scheduler:
+    build:
+      context: ../../../services/execution-scheduler-service
+    environment:
+      EMPLOYEE_RESOURCE_PROFILE_URL: http://resource-profile:8000
+      EXECUTION_SCHEDULER_AUTO_SCHEDULE: "false"
+      EXECUTION_SCHEDULER_EMPLOYEE_LIFECYCLE_ENFORCEMENT: "false"
+      LEOS_KERNEL_URL: http://127.0.0.1:9
+    tmpfs:
+      - /data/execution-scheduler
+    depends_on:
+      resource-profile:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  persistent-runtime:
+    build:
+      context: ../../../services/persistent-employee-runtime-service
+    environment:
+      EMPLOYEE_RUNTIME_AUTO_POLL_SCHEDULER: "false"
+      EXECUTION_SCHEDULER_URL: http://scheduler:8000
+      LEOS_KERNEL_URL: http://127.0.0.1:9
+    tmpfs:
+      - /data/persistent-employee-runtime
+    depends_on:
+      scheduler:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  capability-manager:
+    build:
+      context: ../../..
+      dockerfile: services/capability-manager-service/Dockerfile
+    environment:
+      CAPABILITY_MANAGER_DATA_DIR: /data/capability-manager
+    tmpfs:
+      - /data/capability-manager
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  synthetic-provider:
+    build:
+      context: .
+      dockerfile: synthetic-provider.Dockerfile
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  dispatcher:
+    build:
+      context: ../../..
+      dockerfile: services/execution-dispatcher-service/Dockerfile
+    environment:
+      CAPABILITY_MANAGER_URL: http://capability-manager:8000
+      EXECUTION_DISPATCHER_DATA_DIR: /data/execution-dispatcher
+      EXECUTION_DISPATCHER_MAX_PROVIDER_RETRIES: "0"
+      EXECUTION_DISPATCHER_TIMEOUT_SECONDS: "20"
+    tmpfs:
+      - /data/execution-dispatcher
+    depends_on:
+      capability-manager:
+        condition: service_healthy
+      synthetic-provider:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  cognitive:
+    build:
+      context: ../../..
+      dockerfile: services/employee-cognitive-service/Dockerfile
+    environment:
+      EMPLOYEE_COGNITIVE_AUTO_RUN: "false"
+      EMPLOYEE_COGNITIVE_DATA_DIR: /data/employee-cognitive
+      EXECUTION_DISPATCHER_URL: http://dispatcher:8000
+      PERSISTENT_EMPLOYEE_RUNTIME_URL: http://persistent-runtime:8000
+    tmpfs:
+      - /data/employee-cognitive
+    depends_on:
+      dispatcher:
+        condition: service_healthy
+      persistent-runtime:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  e2e-test:
+    build:
+      context: .
+      dockerfile: test-runner.Dockerfile
+    depends_on:
+      cognitive:
+        condition: service_healthy
+      resource-profile:
+        condition: service_healthy
+    environment:
+      E2E_TIMEOUT_SECONDS: "30"
+
