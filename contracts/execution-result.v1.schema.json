@@ -20,7 +20,8 @@
         "TRANSPORT_ERROR",
         "AMBIGUOUS_OUTCOME",
         "APPROVAL_PENDING",
-        "GOVERNED_ORDER_REQUIRED"
+        "GOVERNED_ORDER_REQUIRED",
+        "NO_ELIGIBLE_PROVIDER"
       ]
     },
     "capability_id": {
@@ -185,7 +186,10 @@
       "if": {
         "properties": {
           "status": {
-            "const": "GOVERNED_ORDER_REQUIRED"
+            "enum": [
+              "GOVERNED_ORDER_REQUIRED",
+              "NO_ELIGIBLE_PROVIDER"
+            ]
           }
         },
         "required": [
