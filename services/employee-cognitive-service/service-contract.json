@@ -1,0 +1,34 @@
+{
+  "capabilities": [
+    "cognition.run",
+    "cognition.observe",
+    "cognition.reconcile"
+  ],
+  "canonical_contracts_consumed": [
+    "leos.execution.v1",
+    "leos.execution-result.v1"
+  ],
+  "dependencies": [
+    "execution-dispatcher-service",
+    "persistent-employee-runtime-service"
+  ],
+  "forbidden_dependencies": [
+    "ai-router",
+    "capability-manager-service",
+    "execution-scheduler-service",
+    "provider"
+  ],
+  "ownership": {
+    "assignment_lifecycle": false,
+    "cognitive_attempts": true,
+    "cognitive_context": true,
+    "cognitive_runs": true,
+    "provider_invocation": false,
+    "reason_act_observe": true
+  },
+  "provisional_service_local_contracts_consumed": [
+    "leos.assignment-terminal-transition.v1"
+  ],
+  "schema_version": "1.0.0",
+  "service": "employee-cognitive-service"
+}
