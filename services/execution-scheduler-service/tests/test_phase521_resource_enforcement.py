@@ -166,6 +166,7 @@ class RuntimeResourceEnforcementTests(unittest.TestCase):
         completed = scheduler.complete_job(
             "job-admitted",
             scheduler.JobStateUpdate(
+                transition_id="complete-job-admitted",
                 lease_id=job["lease_id"],
                 result={"artifact_id": "artifact-1"},
             ),

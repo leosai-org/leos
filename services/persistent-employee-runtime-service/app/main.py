@@ -7,11 +7,11 @@ import sqlite3
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 SERVICE_NAME = "persistent-employee-runtime-service"
@@ -83,6 +83,7 @@ def migrate() -> None:
                 capabilities_json TEXT NOT NULL DEFAULT '[]',
                 metadata_json TEXT NOT NULL DEFAULT '{}',
                 current_job_id TEXT,
+                current_assignment_id TEXT,
                 current_workflow_id TEXT,
                 current_step_id TEXT,
                 last_heartbeat_at TEXT,
@@ -149,8 +150,31 @@ def migrate() -> None:
                 updated_at TEXT NOT NULL
             );
 
-            CREATE UNIQUE INDEX IF NOT EXISTS idx_employee_assignment_job
-                ON employee_assignments(job_id);
+            CREATE INDEX IF NOT EXISTS idx_employee_assignment_job
+                ON employee_assignments(job_id, assigned_at);
+
+            CREATE TABLE IF NOT EXISTS assignment_terminal_transitions (
+                transition_id TEXT PRIMARY KEY,
+                assignment_id TEXT NOT NULL,
+                requested_state TEXT NOT NULL,
+                request_json TEXT NOT NULL,
+                scheduler_result_json TEXT,
+                state TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS employee_event_outbox (
+                event_id TEXT PRIMARY KEY,
+                transition_id TEXT NOT NULL UNIQUE,
+                employee_id TEXT,
+                event_type TEXT NOT NULL,
+                severity TEXT NOT NULL DEFAULT 'info',
+                details_json TEXT NOT NULL DEFAULT '{}',
+                delivered_at TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
 
             CREATE TABLE IF NOT EXISTS employee_events (
                 event_id TEXT PRIMARY KEY,
@@ -171,6 +195,16 @@ def migrate() -> None:
             "resource_decision_json": "TEXT NOT NULL DEFAULT '{}'",
             "resource_state": "TEXT",
         }
+        employee_columns = {
+            row["name"]
+            for row in db.execute(
+                "PRAGMA table_info(employees)"
+            ).fetchall()
+        }
+        if "current_assignment_id" not in employee_columns:
+            db.execute(
+                "ALTER TABLE employees ADD COLUMN current_assignment_id TEXT"
+            )
         existing_columns = {
             row["name"]
             for row in db.execute(
@@ -183,6 +217,11 @@ def migrate() -> None:
                     "ALTER TABLE employee_assignments "
                     f"ADD COLUMN {column} {definition}"
                 )
+        db.execute("DROP INDEX IF EXISTS idx_employee_assignment_job")
+        db.execute(
+            "CREATE INDEX IF NOT EXISTS idx_employee_assignment_job_history "
+            "ON employee_assignments(job_id, assigned_at)"
+        )
 
 
 def parse_json(value: Any, default: Any) -> Any:
@@ -207,7 +246,7 @@ async def publish_kernel_event(
     employee_id: Optional[str] = None,
     severity: str = "info",
     details: Optional[dict[str, Any]] = None,
-) -> None:
+) -> bool:
     payload = {
         "event_type": event_type,
         "subsystem_id": "persistent-employee-runtime",
@@ -224,27 +263,29 @@ async def publish_kernel_event(
 
     try:
         async with httpx.AsyncClient(timeout=8) as client:
-            await client.post(
+            response = await client.post(
                 f"{KERNEL_URL}/events/publish",
                 json=payload,
             )
+            return response.status_code < 400
     except Exception:
-        pass
+        return False
 
 
 def emit_local(
     event_type: str,
     *,
+    event_id: Optional[str] = None,
     employee_id: Optional[str] = None,
     severity: str = "info",
     details: Optional[dict[str, Any]] = None,
 ) -> str:
-    event_id = str(uuid.uuid4())
+    event_id = event_id or str(uuid.uuid4())
 
     with connect() as db:
         db.execute(
             """
-            INSERT INTO employee_events (
+            INSERT OR IGNORE INTO employee_events (
                 event_id,
                 employee_id,
                 event_type,
@@ -310,6 +351,20 @@ class MemoryCreate(BaseModel):
 class AssignmentStateUpdate(BaseModel):
     result: dict[str, Any] = Field(default_factory=dict)
     error: Optional[str] = None
+
+
+class AssignmentTerminalTransition(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_version: Literal[
+        "leos.assignment-terminal-transition.v1"
+    ] = "leos.assignment-terminal-transition.v1"
+    transition_id: str
+    cognitive_run_id: Optional[str] = None
+    cognitive_attempt_id: Optional[str] = None
+    execution_id: Optional[str] = None
+    reason: dict[str, Any]
+    result: dict[str, Any] = Field(default_factory=dict)
+    retry_delay_seconds: int = Field(default=0, ge=0)
 
 
 migrate()
@@ -490,6 +545,7 @@ async def import_scheduler_assignments() -> dict[str, Any]:
                 SELECT assignment_id
                 FROM employee_assignments
                 WHERE job_id=?
+                  AND state IN ('assigned', 'running')
                 """,
                 (job["job_id"],),
             ).fetchone()
@@ -645,6 +701,7 @@ async def poll_loop() -> None:
         try:
             if AUTO_POLL_SCHEDULER:
                 await import_scheduler_assignments()
+            await deliver_pending_terminal_events()
         except Exception:
             pass
 
@@ -660,6 +717,7 @@ async def startup() -> None:
     migrate()
     await register_with_kernel()
     await register_scheduler_worker()
+    await deliver_pending_terminal_events()
 
     if AUTO_POLL_SCHEDULER and (
         _loop_task is None
@@ -815,7 +873,7 @@ async def create_employee(
         },
     )
 
-    await publish_kernel_event(
+    delivered = await publish_kernel_event(
         "employee_registered",
         employee_id=request.employee_id,
         details={
@@ -860,6 +918,8 @@ def list_employees(
 
     params.append(limit)
 
+    if not delivered:
+        return False
     with connect() as db:
         rows = db.execute(
             f"""
@@ -1461,10 +1521,11 @@ async def start_assignment(
         db.execute(
             """
             UPDATE employees
-            SET runtime_state='working', updated_at=?
+            SET runtime_state='working', current_assignment_id=?, updated_at=?
             WHERE employee_id=?
             """,
             (
+                assignment_id,
                 now(),
                 row["employee_id"],
             ),
@@ -1496,165 +1557,327 @@ async def start_assignment(
     }
 
 
-@app.post("/assignments/{assignment_id}/complete")
-async def complete_assignment(
+async def terminal_assignment_transition(
     assignment_id: str,
-    request: AssignmentStateUpdate,
+    request: AssignmentTerminalTransition,
+    *,
+    target_state: str,
 ) -> dict[str, Any]:
+    request_json = request.model_dump_json()
+    replay_result: Optional[dict[str, Any]] = None
+    acknowledged_result: Optional[dict[str, Any]] = None
     with connect() as db:
+        db.execute("BEGIN IMMEDIATE")
         row = db.execute(
-            """
-            SELECT *
-            FROM employee_assignments
-            WHERE assignment_id=?
-            """,
+            "SELECT * FROM employee_assignments WHERE assignment_id=?",
             (assignment_id,),
         ).fetchone()
-
-    if row is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Assignment not found.",
-        )
-
-    if row["state"] not in {"assigned", "running"}:
-        raise HTTPException(
-            status_code=409,
-            detail="Assignment is not active.",
-        )
-
-    try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            scheduler_response = await client.post(
-                f"{SCHEDULER_URL}/jobs/{row['job_id']}/complete",
-                json={
-                    "worker_id": (
-                        "persistent-employee-runtime"
+        if row is None:
+            raise HTTPException(404, "Assignment not found.")
+        prior = db.execute(
+            "SELECT * FROM assignment_terminal_transitions "
+            "WHERE transition_id=?",
+            (request.transition_id,),
+        ).fetchone()
+        if prior is not None:
+            if (
+                prior["assignment_id"] != assignment_id
+                or prior["requested_state"] != target_state
+                or prior["request_json"] != request_json
+            ):
+                raise HTTPException(
+                    409, "Terminal transition identity conflict."
+                )
+            if prior["state"] == "local_committed":
+                replay_result = {
+                    "ok": True,
+                    "assignment_id": assignment_id,
+                    "state": target_state,
+                    "changed": False,
+                    "scheduler": parse_json(
+                        prior["scheduler_result_json"], {}
                     ),
-                    "lease_id": row["lease_id"],
-                    "result": request.result,
+                }
+                replay_result["resource_released"] = (
+                    replay_result["scheduler"].get("resource_released")
+                )
+            elif prior["state"] == "scheduler_acknowledged":
+                acknowledged_result = parse_json(
+                    prior["scheduler_result_json"], {}
+                )
+        else:
+            if row["state"] not in {"assigned", "running"}:
+                raise HTTPException(
+                    409, "terminal_transition_conflict"
+                )
+            winner = db.execute(
+                "SELECT * FROM assignment_terminal_transitions "
+                "WHERE assignment_id=?",
+                (assignment_id,),
+            ).fetchone()
+            if winner is not None:
+                raise HTTPException(409, "terminal_transition_conflict")
+            timestamp = now()
+            try:
+                db.execute(
+                    """
+                    INSERT INTO assignment_terminal_transitions(
+                        transition_id, assignment_id, requested_state,
+                        request_json, scheduler_result_json, state,
+                        created_at, updated_at
+                    ) VALUES(?, ?, ?, ?, NULL, 'requested', ?, ?)
+                    """,
+                    (
+                        request.transition_id, assignment_id, target_state,
+                        request_json, timestamp, timestamp,
+                    ),
+                )
+            except sqlite3.IntegrityError as exc:
+                raise HTTPException(
+                    409, "terminal_transition_conflict"
+                ) from exc
+
+    if replay_result is not None:
+        await deliver_terminal_event(request.transition_id)
+        return replay_result
+
+    reason = str(
+        request.reason.get("message")
+        or request.reason.get("code")
+        or target_state
+    )
+    operation = {
+        "complete": "complete",
+        "failed": "fail",
+        "cancelled": "cancel",
+    }[target_state]
+    path = f"/jobs/{row['job_id']}/{operation}"
+    scheduler_request: dict[str, Any] = {
+        "transition_id": request.transition_id,
+        "worker_id": "persistent-employee-runtime",
+        "lease_id": row["lease_id"],
+    }
+    if target_state == "complete":
+        scheduler_request["result"] = request.result
+    elif target_state == "failed":
+        scheduler_request.update(
+            {
+                "error": reason,
+                "retry_delay_seconds": request.retry_delay_seconds,
+            }
+        )
+    else:
+        scheduler_request["reason"] = reason
+
+    if acknowledged_result is None:
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                scheduler_response = await client.post(
+                    f"{SCHEDULER_URL}{path}", json=scheduler_request
+                )
+            scheduler_body = scheduler_response.json()
+        except Exception as exc:
+            raise HTTPException(
+                503,
+                {
+                    "message": "Scheduler terminal transition is unresolved.",
+                    "transition_id": request.transition_id,
+                    "error": str(exc),
+                },
+            ) from exc
+        if scheduler_response.status_code >= 400:
+            raise HTTPException(
+                409,
+                {
+                    "message": "Scheduler rejected terminal transition.",
+                    "transition_id": request.transition_id,
+                    "scheduler_status": scheduler_response.status_code,
+                    "scheduler_response": scheduler_body,
                 },
             )
-        try:
-            scheduler_body = scheduler_response.json()
-        except Exception:
-            scheduler_body = {
-                "raw": scheduler_response.text,
-            }
-    except Exception as exc:
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "message": (
-                    "Scheduler completion and resource release "
-                    "could not be completed."
-                ),
-                "error": str(exc),
-                "job_id": row["job_id"],
-                "resource_reservation_id": row[
-                    "resource_reservation_id"
-                ],
-            },
-        ) from exc
-
-    if scheduler_response.status_code >= 400:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "message": (
-                    "Scheduler rejected assignment completion."
-                ),
-                "scheduler_status": scheduler_response.status_code,
-                "scheduler_response": scheduler_body,
-                "job_id": row["job_id"],
-                "resource_reservation_id": row[
-                    "resource_reservation_id"
-                ],
-            },
-        )
+        with connect() as db:
+            db.execute(
+                "UPDATE assignment_terminal_transitions SET "
+                "state='scheduler_acknowledged', scheduler_result_json=?, "
+                "updated_at=? WHERE transition_id=?",
+                (json.dumps(scheduler_body), now(), request.transition_id),
+            )
+    else:
+        scheduler_body = acknowledged_result
 
     with connect() as db:
+        db.execute("BEGIN IMMEDIATE")
+        journal = db.execute(
+            "SELECT * FROM assignment_terminal_transitions "
+            "WHERE transition_id=?",
+            (request.transition_id,),
+        ).fetchone()
+        if journal["state"] == "local_committed":
+            return {
+                "ok": True,
+                "assignment_id": assignment_id,
+                "state": target_state,
+                "changed": False,
+                "scheduler": parse_json(
+                    journal["scheduler_result_json"], {}
+                ),
+            }
         current = db.execute(
-            """
-            SELECT *
-            FROM employee_assignments
-            WHERE assignment_id=?
-            """,
+            "SELECT * FROM employee_assignments WHERE assignment_id=?",
             (assignment_id,),
         ).fetchone()
-        if current is None or current["state"] not in {
-            "assigned",
-            "running",
-        }:
-            raise HTTPException(
-                status_code=409,
-                detail="Assignment state changed before completion.",
-            )
-
+        if current["state"] not in {"assigned", "running", target_state}:
+            raise HTTPException(409, "terminal_transition_conflict")
+        timestamp = now()
         db.execute(
             """
-            UPDATE employee_assignments
-            SET
-                state='complete',
-                result_json=?,
-                error=NULL,
-                resource_state='released',
-                completed_at=?,
-                updated_at=?
+            UPDATE employee_assignments SET state=?, error=?,
+                result_json=?, resource_state=?,
+                completed_at=COALESCE(completed_at, ?), updated_at=?
             WHERE assignment_id=?
             """,
             (
-                json.dumps(request.result),
-                now(),
-                now(),
-                assignment_id,
+                target_state,
+                None if target_state == "complete" else reason,
+                json.dumps(
+                    request.result if target_state == "complete" else {
+                        "reason": request.reason,
+                        "cognitive_run_id": request.cognitive_run_id,
+                        "cognitive_attempt_id": request.cognitive_attempt_id,
+                        "execution_id": request.execution_id,
+                    }
+                ),
+                (
+                    "released"
+                    if scheduler_body.get("resource_released") is True
+                    else "release-pending"
+                ),
+                timestamp, timestamp, assignment_id,
             ),
         )
-
         db.execute(
             """
-            UPDATE employees
-            SET
-                runtime_state='idle',
-                current_job_id=NULL,
+            UPDATE employees SET runtime_state='idle',
+                current_assignment_id=NULL, current_job_id=NULL,
                 current_workflow_id=NULL,
-                current_step_id=NULL,
-                updated_at=?
-            WHERE employee_id=?
+                current_step_id=NULL, updated_at=?
+            WHERE employee_id=? AND current_assignment_id=?
             """,
-            (
-                now(),
-                row["employee_id"],
-            ),
+            (timestamp, row["employee_id"], assignment_id),
         )
-
-    await publish_kernel_event(
-        "employee_assignment_completed",
-        employee_id=row["employee_id"],
-        details={
+        event_id = f"assignment-terminal:{request.transition_id}"
+        event_type = f"employee_assignment_{target_state}"
+        event_details = {
             "assignment_id": assignment_id,
             "job_id": row["job_id"],
-            "result": request.result,
-            "resource_reservation_id": row[
-                "resource_reservation_id"
-            ],
-            "resource_released": scheduler_body.get(
-                "resource_released"
+            "transition_id": request.transition_id,
+            "reason": request.reason,
+            "scheduler_state": scheduler_body.get("state"),
+        }
+        db.execute(
+            """
+            INSERT OR IGNORE INTO employee_event_outbox(
+                event_id, transition_id, employee_id, event_type, severity,
+                details_json, delivered_at, created_at, updated_at
+            ) VALUES(?, ?, ?, ?, ?, ?, NULL, ?, ?)
+            """,
+            (
+                event_id, request.transition_id, row["employee_id"],
+                event_type,
+                "error" if target_state == "failed" else "info",
+                json.dumps(event_details), timestamp, timestamp,
             ),
-        },
-    )
+        )
+        db.execute(
+            "UPDATE assignment_terminal_transitions SET "
+            "state='local_committed', updated_at=? WHERE transition_id=?",
+            (timestamp, request.transition_id),
+        )
 
+    await deliver_terminal_event(request.transition_id)
     return {
         "ok": True,
         "assignment_id": assignment_id,
-        "state": "complete",
-        "resource_reservation_id": row[
-            "resource_reservation_id"
-        ],
-        "resource_released": scheduler_body.get(
-            "resource_released"
-        ),
+        "state": target_state,
+        "changed": True,
+        "scheduler": scheduler_body,
+        "resource_released": scheduler_body.get("resource_released"),
     }
+
+
+async def deliver_terminal_event(transition_id: str) -> bool:
+    with connect() as db:
+        event = db.execute(
+            "SELECT * FROM employee_event_outbox WHERE transition_id=?",
+            (transition_id,),
+        ).fetchone()
+    if event is None or event["delivered_at"] is not None:
+        return False
+    details = parse_json(event["details_json"], {})
+    emit_local(
+        event["event_type"],
+        event_id=event["event_id"],
+        employee_id=event["employee_id"],
+        severity=event["severity"],
+        details=details,
+    )
+    await publish_kernel_event(
+        event["event_type"],
+        employee_id=event["employee_id"],
+        severity=event["severity"],
+        details={**details, "event_id": event["event_id"]},
+    )
+    with connect() as db:
+        db.execute(
+            "UPDATE employee_event_outbox SET delivered_at=?, updated_at=? "
+            "WHERE transition_id=? AND delivered_at IS NULL",
+            (now(), now(), transition_id),
+        )
+    return True
+
+
+async def deliver_pending_terminal_events(limit: int = 100) -> int:
+    with connect() as db:
+        rows = db.execute(
+            "SELECT transition_id FROM employee_event_outbox "
+            "WHERE delivered_at IS NULL ORDER BY created_at LIMIT ?",
+            (limit,),
+        ).fetchall()
+    delivered = 0
+    for row in rows:
+        if await deliver_terminal_event(row["transition_id"]):
+            delivered += 1
+    return delivered
+
+
+@app.post("/assignments/{assignment_id}/complete")
+async def complete_assignment(
+    assignment_id: str,
+    request: AssignmentTerminalTransition,
+) -> dict[str, Any]:
+    return await terminal_assignment_transition(
+        assignment_id, request, target_state="complete"
+    )
+
+
+@app.post("/assignments/{assignment_id}/fail")
+async def fail_assignment(
+    assignment_id: str,
+    request: AssignmentTerminalTransition,
+) -> dict[str, Any]:
+    return await terminal_assignment_transition(
+        assignment_id, request, target_state="failed"
+    )
+
+
+@app.post("/assignments/{assignment_id}/cancel")
+async def cancel_assignment(
+    assignment_id: str,
+    request: AssignmentTerminalTransition,
+) -> dict[str, Any]:
+    return await terminal_assignment_transition(
+        assignment_id, request, target_state="cancelled"
+    )
 
 
 @app.get("/events")

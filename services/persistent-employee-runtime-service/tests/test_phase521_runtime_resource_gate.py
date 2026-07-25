@@ -173,8 +173,10 @@ class RuntimeResourceGateTests(
         with self.assertRaises(HTTPException):
             await runtime.complete_assignment(
                 "assignment-1",
-                runtime.AssignmentStateUpdate(
-                    result={"ok": True}
+                runtime.AssignmentTerminalTransition(
+                    transition_id="complete-release-failed",
+                    reason={"code": "completed"},
+                    result={"ok": True},
                 ),
             )
         self.assertEqual(self.assignment_state(), "running")
@@ -198,8 +200,10 @@ class RuntimeResourceGateTests(
         )
         result = await runtime.complete_assignment(
             "assignment-1",
-            runtime.AssignmentStateUpdate(
-                result={"artifact_id": "artifact-1"}
+            runtime.AssignmentTerminalTransition(
+                transition_id="complete-released",
+                reason={"code": "completed"},
+                result={"artifact_id": "artifact-1"},
             ),
         )
         self.assertEqual(result["state"], "complete")

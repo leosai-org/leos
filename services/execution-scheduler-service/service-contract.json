@@ -1,6 +1,8 @@
 {
   "capabilities": [
     "jobs.schedule",
+    "jobs.cancel",
+    "jobs.fail",
     "leases.create",
     "resource-admission.enforce",
     "resource-reservation.coordinate",
@@ -32,6 +34,7 @@
     "mandatory": true,
     "release_on_complete": true,
     "release_on_failure": true,
+    "release_on_cancellation": true,
     "release_on_lease_expiration": true,
     "reservation_required_before_lease": true,
     "reservation_required_before_running": true,
