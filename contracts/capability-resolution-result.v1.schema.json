@@ -236,7 +236,16 @@
           "$ref": "#/$defs/identifier"
         },
         "target_ref": {
-          "$ref": "#/$defs/governed_reference"
+          "allOf": [
+            {
+              "$ref": "#/$defs/governed_reference"
+            },
+            {
+              "required": [
+                "revision"
+              ]
+            }
+          ]
         },
         "credential_ref": {
           "$ref": "#/$defs/governed_reference"

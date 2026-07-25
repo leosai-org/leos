@@ -514,6 +514,11 @@ class ExecutionContractTests(unittest.TestCase):
         value.pop("selected_target")
         self.assert_invalid("capability-resolution-result.v1.schema.json", value)
 
+    def test_resolved_target_requires_immutable_revision(self):
+        value = self.resolution_result()
+        value["selected_target"]["target_ref"].pop("revision")
+        self.assert_invalid("capability-resolution-result.v1.schema.json", value)
+
     def test_resolved_requires_nonempty_candidates(self):
         value = self.resolution_result()
         value["candidate_evaluations"] = []
