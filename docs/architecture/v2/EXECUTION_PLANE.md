@@ -312,11 +312,10 @@ The Persistent Employee Runtime may project a waiting state, but it does not
 decide whether an action is approved. The Employee Cognitive Service may
 request approval and wait for it, but it does not self-grant approval.
 
-**OPEN:** The service that issues and revokes approval grants is outside this
-document's settled scope.
-
-**OPEN:** The approval grant schema and cryptographic or registry-based
-verification mechanism remain to be defined.
+Approval Authority issues, expires, revokes, consumes, and verifies grants
+under `IDENTITY_OWNERSHIP_AND_TRUST.md`. Canonical request, grant, and
+verification-result schemas now exist. Durable service/API implementation,
+approver policy, and atomic verification/consumption remain **OPEN**.
 
 ## 8. Retry and idempotency principles
 
@@ -414,7 +413,7 @@ The execution plane must preserve applicable identifiers end to end:
 | `resolution_id` | Capability Manager | Identifies the governed provider resolution |
 | `execution_id` | Execution Dispatcher | Identifies canonical execution |
 | `invocation_attempt_id` | Execution Dispatcher | Identifies one provider invocation attempt |
-| `approval_grant_id` | **OPEN** approval authority | Identifies verifiable approval evidence |
+| `approval_grant_id` | Approval Authority | Identifies verifiable approval evidence |
 | `provider_operation_id` | Provider, when supplied | Correlates provider-local execution |
 
 Not every job originates in a mission or workflow, so higher-level identifiers

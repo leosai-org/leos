@@ -730,8 +730,12 @@ secret resolution. Dispatcher, Router, adapters, and providers may transiently
 consume authorized credential material as required, but must never persist it
 in governed execution records, prompts, memory, events, or normal logs.
 
-**OPEN:** Secret authority service boundary, credential-injection mechanism,
-and whether the Dispatcher receives or delegates use of credential material.
+Secret Authority owns opaque Secret Reference identity and the protected-value
+lifecycle boundary under `IDENTITY_OWNERSHIP_AND_TRUST.md`.
+
+**OPEN:** Secret Authority deployment/backend, use-authorization and lease
+contracts, credential-injection mechanism, and whether Dispatcher receives or
+delegates use of credential material.
 
 ## 25. First-run activation relationship
 
@@ -971,8 +975,10 @@ Migration occurs through reviewed changes to `leos-v2`.
 9. What observation freshness and degraded-health rules apply?
 10. How does scheduler admission interact with model capacity without
     reordering valid candidates?
-11. Who owns approval grants, cloud permission, and budget authority?
-12. What service implements secret resolution and credential injection?
+11. Which authorities own cloud permission and budget? Approval Authority owns
+    Approval Grants under the identity/trust foundation.
+12. What Secret Authority deployment/backend implements resolution and
+    credential injection?
 13. Which failure classes permit automatic re-resolution or
     validation-triggered escalation?
 14. Does AI Router remain one service or become protocol-specific adapters?

@@ -1,0 +1,95 @@
+{
+  "contract_version": "leos.approval-grant.v1",
+  "identity": {
+    "resource_type": "APPROVAL_GRANT",
+    "resource_id": "approval-grant:cloud-invoke:001",
+    "display_name": "Cloud invocation approval grant",
+    "revision": "sha256:approval-grant-cloud-invoke-001-active",
+    "ownership": {
+      "owner": {
+        "principal_id": "principal:user:brett",
+        "principal_type": "HUMAN_USER"
+      },
+      "creator": {
+        "principal_id": "principal:service:approval-authority",
+        "principal_type": "SERVICE"
+      },
+      "steward": {
+        "principal_id": "principal:service:approval-authority",
+        "principal_type": "SERVICE"
+      },
+      "lifecycle_authority": {
+        "authority_id": "approval-authority",
+        "principal": {
+          "principal_id": "principal:service:approval-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:approval-authority-policy-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:approval-authority:grant-001",
+      "revision": "sha256:actor-context-approval-grant-001"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "approval-authority",
+      "reference_id": "approval-decision:cloud-invoke:001",
+      "revision": "sha256:authorization-approval-grant-001"
+    },
+    "audit_id": "audit:approval-grant:cloud-invoke:001:active",
+    "created_at": "2026-07-25T12:22:00Z",
+    "updated_at": "2026-07-25T12:22:00Z"
+  },
+  "request_ref": {
+    "resource_type": "APPROVAL_REQUEST",
+    "resource_id": "approval-request:cloud-invoke:001",
+    "revision": "sha256:approval-request-cloud-invoke-001"
+  },
+  "issuer": {
+    "authority_id": "approval-authority",
+    "principal": {
+      "principal_id": "principal:service:approval-authority",
+      "principal_type": "SERVICE"
+    },
+    "authority_revision": "sha256:approval-authority-policy-v1"
+  },
+  "approved_by_actor_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {
+        "principal_id": "principal:service:identity-authority",
+        "principal_type": "SERVICE"
+      },
+      "authority_revision": "sha256:identity-authority-policy-v1"
+    },
+    "reference_id": "actor-context:brett:session-001",
+    "revision": "sha256:actor-context-brett-session-001"
+  },
+  "recipient": {
+    "principal_id": "principal:employee:researcher",
+    "principal_type": "EMPLOYEE"
+  },
+  "scope": {
+    "subject": {
+      "principal_id": "principal:employee:researcher",
+      "principal_type": "EMPLOYEE"
+    },
+    "action": "provider.invoke",
+    "resource": {
+      "resource_type": "PROVIDER",
+      "resource_id": "provider:cloud:example",
+      "revision": "sha256:provider-cloud-example-v1"
+    },
+    "context_type": "execution",
+    "context_id": "execution:cloud:001",
+    "context_revision": "sha256:execution-cloud-request-v1",
+    "context_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "status": "ACTIVE",
+  "use_policy": "SINGLE_USE",
+  "issued_at": "2026-07-25T12:22:00Z",
+  "valid_from": "2026-07-25T12:22:00Z",
+  "expires_at": "2026-07-25T12:32:00Z"
+}

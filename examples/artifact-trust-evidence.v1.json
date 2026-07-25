@@ -1,0 +1,104 @@
+{
+  "contract_version": "leos.artifact-trust-evidence.v1",
+  "identity": {
+    "resource_type": "ARTIFACT_TRUST_EVIDENCE",
+    "resource_id": "artifact-trust:plugin:example:1.0.0",
+    "display_name": "Example plugin trust evidence",
+    "revision": "sha256:artifact-trust-plugin-example-1-0-0",
+    "ownership": {
+      "owner": {
+        "principal_id": "principal:publisher:example",
+        "principal_type": "PUBLISHER"
+      },
+      "creator": {
+        "principal_id": "principal:service:artifact-trust-authority",
+        "principal_type": "SERVICE"
+      },
+      "steward": {
+        "principal_id": "principal:service:artifact-trust-authority",
+        "principal_type": "SERVICE"
+      },
+      "lifecycle_authority": {
+        "authority_id": "artifact-trust-authority",
+        "principal": {
+          "principal_id": "principal:service:artifact-trust-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:artifact-trust-policy-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:artifact-trust-authority:verify-001",
+      "revision": "sha256:actor-context-artifact-trust-verify-001"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "artifact-trust-authority",
+      "reference_id": "authority-mandate:artifact-trust-verification",
+      "revision": "sha256:authorization-artifact-trust-verify-001"
+    },
+    "audit_id": "audit:artifact-trust:plugin:example:1.0.0",
+    "created_at": "2026-07-25T12:30:00Z",
+    "updated_at": "2026-07-25T12:30:00Z"
+  },
+  "artifact_ref": {
+    "resource_type": "ARTIFACT",
+    "resource_id": "artifact:plugin:example",
+    "revision": "sha256:artifact-plugin-example-1-0-0"
+  },
+  "artifact_version": "1.0.0",
+  "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "publisher": {
+    "principal_id": "principal:publisher:example",
+    "principal_type": "PUBLISHER"
+  },
+  "signatures": [
+    {
+      "signer": {
+        "principal_id": "principal:publisher:example",
+        "principal_type": "PUBLISHER"
+      },
+      "algorithm": "reference-detached-signature",
+      "key_ref": "signing-key:publisher:example:v1",
+      "signature_ref": "signature:artifact:plugin:example:1.0.0"
+    }
+  ],
+  "provenance_refs": [
+    {
+      "authority": {
+        "authority_id": "artifact-trust-authority",
+        "principal": {
+          "principal_id": "principal:service:artifact-trust-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:artifact-trust-policy-v1"
+      },
+      "reference_id": "provenance:artifact:plugin:example:1.0.0",
+      "revision": "sha256:provenance-artifact-plugin-example-1-0-0"
+    }
+  ],
+  "trust_policy_ref": {
+    "authority": {
+      "authority_id": "artifact-trust-authority",
+      "principal": {
+        "principal_id": "principal:service:artifact-trust-authority",
+        "principal_type": "SERVICE"
+      },
+      "authority_revision": "sha256:artifact-trust-policy-v1"
+    },
+    "reference_id": "trust-policy:local-artifact",
+    "revision": "sha256:trust-policy-local-artifact-v1"
+  },
+  "verifier": {
+    "authority_id": "artifact-trust-authority",
+    "principal": {
+      "principal_id": "principal:service:artifact-trust-authority",
+      "principal_type": "SERVICE"
+    },
+    "authority_revision": "sha256:artifact-trust-policy-v1"
+  },
+  "outcome": "TRUSTED",
+  "reasons": [],
+  "verified_at": "2026-07-25T12:30:00Z",
+  "valid_until": "2026-07-25T13:30:00Z"
+}

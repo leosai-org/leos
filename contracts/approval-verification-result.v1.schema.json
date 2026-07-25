@@ -1,0 +1,126 @@
+{
+  "$id": "https://leosai.org/contracts/approval-verification-result.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Approval Verification Result v1",
+  "description": "Fail-closed Approval Authority comparison of a current grant against one exact requested subject, action, resource, and context.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.approval-verification-result.v1"
+    },
+    "identity": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"
+    },
+    "grant_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/resourceRef"
+    },
+    "requested_scope": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actionScope"
+    },
+    "outcome": {
+      "enum": [
+        "VERIFIED",
+        "DENIED",
+        "NOT_FOUND",
+        "EXPIRED",
+        "REVOKED",
+        "CONSUMED",
+        "WRONG_SUBJECT",
+        "WRONG_SCOPE",
+        "STALE_REVISION",
+        "AUTHORITY_UNAVAILABLE"
+      ]
+    },
+    "authority": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/authorityRef"
+    },
+    "verified_grant_revision": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"
+    },
+    "use_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"
+    },
+    "reasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "contract_version",
+    "identity",
+    "grant_ref",
+    "requested_scope",
+    "outcome",
+    "authority",
+    "reasons",
+    "verified_at"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "VERIFIED"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "grant_ref": {
+            "required": [
+              "revision"
+            ]
+          }
+        },
+        "required": [
+          "verified_grant_revision",
+          "use_ref",
+          "valid_until"
+        ]
+      },
+      "else": {
+        "properties": {
+          "reasons": {
+            "minItems": 1
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "verified_grant_revision"
+              ]
+            },
+            {
+              "required": [
+                "use_ref"
+              ]
+            },
+            {
+              "required": [
+                "valid_until"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

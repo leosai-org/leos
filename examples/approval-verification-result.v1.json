@@ -1,0 +1,79 @@
+{
+  "contract_version": "leos.approval-verification-result.v1",
+  "identity": {
+    "resource_type": "APPROVAL_VERIFICATION",
+    "resource_id": "approval-verification:cloud-invoke:001",
+    "display_name": "Cloud invocation approval verification",
+    "revision": "sha256:approval-verification-cloud-invoke-001",
+    "ownership": {
+      "owner": {
+        "principal_id": "principal:user:brett",
+        "principal_type": "HUMAN_USER"
+      },
+      "creator": {
+        "principal_id": "principal:service:approval-authority",
+        "principal_type": "SERVICE"
+      },
+      "steward": {
+        "principal_id": "principal:service:approval-authority",
+        "principal_type": "SERVICE"
+      },
+      "lifecycle_authority": {
+        "authority_id": "approval-authority",
+        "principal": {
+          "principal_id": "principal:service:approval-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:approval-authority-policy-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:approval-authority:verification-001",
+      "revision": "sha256:actor-context-approval-verification-001"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "approval-authority",
+      "reference_id": "authority-mandate:approval-verification",
+      "revision": "sha256:authorization-approval-verify-001"
+    },
+    "audit_id": "audit:approval-verification:cloud-invoke:001",
+    "created_at": "2026-07-25T12:23:00Z",
+    "updated_at": "2026-07-25T12:23:00Z"
+  },
+  "grant_ref": {
+    "resource_type": "APPROVAL_GRANT",
+    "resource_id": "approval-grant:cloud-invoke:001",
+    "revision": "sha256:approval-grant-cloud-invoke-001-active"
+  },
+  "requested_scope": {
+    "subject": {
+      "principal_id": "principal:employee:researcher",
+      "principal_type": "EMPLOYEE"
+    },
+    "action": "provider.invoke",
+    "resource": {
+      "resource_type": "PROVIDER",
+      "resource_id": "provider:cloud:example",
+      "revision": "sha256:provider-cloud-example-v1"
+    },
+    "context_type": "execution",
+    "context_id": "execution:cloud:001",
+    "context_revision": "sha256:execution-cloud-request-v1",
+    "context_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "outcome": "VERIFIED",
+  "authority": {
+    "authority_id": "approval-authority",
+    "principal": {
+      "principal_id": "principal:service:approval-authority",
+      "principal_type": "SERVICE"
+    },
+    "authority_revision": "sha256:approval-authority-policy-v1"
+  },
+  "verified_grant_revision": "sha256:approval-grant-cloud-invoke-001-active",
+  "use_ref": "approval-use:execution:cloud:001",
+  "reasons": [],
+  "verified_at": "2026-07-25T12:23:00Z",
+  "valid_until": "2026-07-25T12:24:00Z"
+}

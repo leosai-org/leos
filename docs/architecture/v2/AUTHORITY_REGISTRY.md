@@ -12,6 +12,8 @@ It consolidates decisions already accepted in:
 - `INTELLIGENCE_PLANE.md`
 - `INTELLIGENCE_PLANE_DECISIONS.md`
 - `EXECUTION_CONTRACTS.md`
+- `IDENTITY_OWNERSHIP_AND_TRUST.md`
+- `IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md`
 - `EFFECTIVE_RANKING_AND_MODEL_RESOLUTION.md`
 - `../../roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`
 - `../../roadmap/LEOS_DEV_PREVIEW_V2_GAP_REPORT.md`
@@ -46,6 +48,14 @@ authority may still be incomplete, while a working Lucy service may remain
 
 | Concern or canonical object | Authority | State authority | Required boundary |
 |---|---|---|---|
+| Principal definition and lifecycle | Identity Authority | Principal identities, subject bindings, status, authentication-policy references, and revisions | Does not own domain resources, permission policy, approval, secrets, capability resolution, or execution. |
+| Authenticated actor evidence | Identity Authority | Bounded Actor Context evidence after recognized authenticator verification | Contract validity or caller construction never authenticates; production authenticators remain **OPEN**. |
+| Subject/action/resource authorization decision | Authorization Authority | Revisioned, evidence-backed, time-bounded allow/deny decisions | Does not authenticate, rank, resolve capabilities, issue approvals, or invoke. Policy/grant sources remain partly **OPEN**. |
+| Common resource identity and ownership | Each accepted domain lifecycle authority | Its resource identity, exactly-one-owner evidence, revision, lifecycle transition, and audit identity | Identity Authority validates principal references; no central peer resource/ownership store. **OPEN** domain objects remain blocked. |
+| Approval request, grant, and verification | Approval Authority | Requests, authenticated decisions, grant lifecycle, expiry, revocation, consumption, verification, audit, and events | Only trusted current `VERIFIED` evidence authorizes; no caller Boolean, reference existence, copied grant, or event authority. |
+| Artifact trust evidence | Artifact Trust Authority | Digest, signature, provenance, trust-policy verification, and trust revocation evidence | Never publishes, installs, configures, grants, approves, or activates. Those lifecycle owners remain **OPEN**. |
+| Secret-reference identity | Secret Authority | Opaque reference identity and protected-value lifecycle boundary | Reference possession never authorizes resolution; backend, transient injection, and production implementation remain **OPEN**. |
+| Canonical event production | Authority that owns the represented state transition | Immutable event identity, source, producer, actor, subject revision, correlation, causation, time, and schema revision | Broker/delivery/event projections remain non-authoritative; outbox, ordering, replay, and retention remain **OPEN**. |
 | Job lifecycle | Scheduler | Jobs and scheduler-owned job transitions | Does not own employee reasoning, provider resolution, or assignment working state. |
 | Worker lease | Scheduler | Lease identity, acquisition, renewal, and release | No workflow, runtime, or coordinator may create a peer lease authority. |
 | Compute/resource admission | Scheduler | Admission decisions and resource reservations | Employee resource profiles supply governed inputs; they do not admit work. |
@@ -82,9 +92,9 @@ seek approval for the authority; it may not silently choose one.
 
 | Concern | What is established | What remains OPEN | Interim prohibition |
 |---|---|---|---|
-| Human, service, employee, plugin, publisher, and operator principals | Actions require trustworthy actor evidence | Canonical principal model, authentication owner, service identity, and publisher identity | Caller strings or employee IDs alone must not become authenticated authority. |
-| Resource ownership | Objects need organization/owner scope | Common resource identity, ownership, visibility, transfer, and archival authority | New services must not invent incompatible organization/owner fields as policy authority. |
-| Canonical event envelope | Correlation must be preserved; state owners publish their own facts | Envelope, causation, revision, ordering, delivery, replay, retention, and outbox rules | Event existence or receipt must not replace a canonical state read or transfer ownership. |
+| Production authentication and trust bootstrap | Principal model and Actor Context owner are accepted | Human/workload authenticators, proof formats, recovery, session revocation, first-principal bootstrap, and deployment topology | Caller strings, employee IDs, development assurance, or schema-valid Actor Context documents must not become production authentication. |
+| Ownership policy and transfer | Common exactly-one-owner evidence and domain-state ownership are accepted | Domain transfer, inheritance, visibility, archival, and cross-authority reconciliation policy | New services must not invent incompatible owner fields or treat ownership as authorization. |
+| Event delivery and evolution | Canonical envelope and producer authority are accepted | Outbox, broker, ordering, acknowledgement, replay, retention, schema evolution, and global event-store topology | Event existence or receipt must not replace canonical state or transfer ownership. |
 | Publishing artifact metadata | Public/private repository boundary is documented | Core publishing owner and artifact object model | Release-publication evidence must not be reused as plugin/template publishing authority. |
 | Artifact version and dependency lifecycle | Immutable versioning and provenance are required | Package, signature, compatibility, dependency, deprecation, and revocation contracts | No ad hoc package format may become canonical by implementation. |
 | Installed artifact instance | Published definition and installed instance must differ | Install, configure, enable, update, rollback, remove, and data-ownership authority | Installation must not imply activation or permission. |
@@ -97,10 +107,10 @@ seek approval for the authority; it may not silently choose one.
 | Plugin lifecycle | Public Plugin SDK/manifest direction is required | Manifest, trust, dependency, install-instance, update, rollback, removal, and isolation owner | Lucy Plugin Platform and Module Registry are not canonical. |
 | Capability declaration | Capability Manager owns canonical inventory/resolution | Boundary among publisher declaration, installed inventory, and canonical ingestion | A plugin manifest must not directly grant or resolve capability use. |
 | Capability permission grants | Capability presence and eligibility are distinct | Grant issuer, subject/scope/action model, expiry, revocation, delegation, and verifier | Inventory presence or employee configuration must not authorize use. |
-| General policy decisions | Restrictions are cumulative and may eliminate but not reorder | Policy definition, decision evidence, and enforcement interface outside current resolution facts | A policy engine must not become a second ranking or resolution authority. |
+| General authorization decisions | Authorization Authority owns the canonical subject/action/resource decision interface; restrictions are cumulative and may eliminate but not reorder | Policy definition, policy issuer, grant sources, durable service/API, and enforcement integration outside current resolution facts | Authorization evidence does not select providers, invoke work, or become a second ranking or resolution authority. |
 | Tool identity and operation catalog | Dispatcher is invocation authority | Tool identity, schema, risk, side-effect, idempotency, and catalog owner | Tool Runtime or adapters must not invoke outside Dispatcher. |
-| Approval grants | Explicit verifiable grants are required | Issuer, schema, authentication, verification, expiry, revocation, and consumption | Caller Boolean or opaque reference existence never authorizes. |
-| Secret resolution | Only opaque references may enter governed records | Secret authority, backend interface, authorization, transient injection, rotation, and audit | Raw secrets are forbidden in source, contracts, fixtures, logs, prompts, events, and memory. |
+| Approval service implementation and approver policy | Approval Authority, contracts, lifecycle boundary, and verifier outcomes are accepted | Durable service/API, approver-policy source, notification, atomic verification/consumption, and availability strategy | No other service may issue, mutate, or self-verify grants. |
+| Secret resolution | Secret Authority and opaque Secret Reference identity are accepted | Backend interface, use authorization, transient lease/injection, rotation, redaction, deletion, and production implementation | Raw secrets are forbidden in source, contracts, fixtures, logs, prompts, events, and memory. |
 | Sandbox/workspace lifecycle | Side-effecting work requires governed isolation | Profile, workspace, filesystem, network, process, secret, artifact, cleanup, and attestation owner | Container use alone must not be claimed as canonical sandboxing. |
 | Team Template lifecycle | Team Templates are mandatory publishing objects | Definition, validation, published version, installed instance, simulation, activation, upgrade, and rollback authority | A template may not grant permissions, provide secrets, approve, or self-activate. |
 | Team Architect apply protocol | Team Architect is a mandatory guided employee | Proposal/apply handoff contract and any durable coordination owner | Team Architect never becomes publisher, installer, approver, secret, workflow, scheduler, or activation authority. |
@@ -154,8 +164,8 @@ These terms are normative even where the final contract is **OPEN**.
 | Workflow | Versioned process definition and instance coordinating governed work | Workflow authority remains **OPEN** and cannot absorb Scheduler or Dispatcher. |
 | Team Template | Immutable publishable organization blueprint | Separate from its installed instance, created Team, and active organization. |
 | Approval request | Request for an authorized human/authority decision | Not a grant. |
-| Approval grant | Explicit verifiable scoped authorization | Authority remains **OPEN**; caller-provided evidence is not self-verifying. |
-| Secret reference | Opaque identifier for protected material | Never contains or implies authorization to retrieve the secret value. |
+| Approval grant | Explicit verifiable scoped authorization | Approval Authority owns lifecycle and verification; caller-provided evidence is not self-verifying. |
+| Secret reference | Opaque identifier for protected material | Secret Authority owns identity; the reference never contains or implies authorization to retrieve the secret value. |
 | Artifact | Durable output with identity, ownership, provenance, and derivation | General artifact authority remains **OPEN**. |
 | Memory/knowledge item | Governed retained information with scope, provenance, trust, and lifecycle | Exact taxonomy and authority remain **OPEN**. |
 | Outcome evidence | Externally grounded evidence of productive value | Observational input to reporting only; not selection authority. |
@@ -181,7 +191,7 @@ Lifecycle families must not be collapsed.
 | Organization/Department/Team lifecycle | Definitions, revisions, membership, activation, archive, and deletion remain **OPEN**. |
 | Workflow lifecycle | Definition revision and workflow-instance state are separate from projected Scheduler jobs; exact states remain **OPEN**. |
 | Permission lifecycle | Request/grant/verify/expire/revoke semantics remain **OPEN** and separate from capability inventory. |
-| Approval lifecycle | Request/decision/grant/verify/consume/expire/revoke semantics remain **OPEN**. |
+| Approval lifecycle | Approval Authority owns request/decision/grant/verify/consume/expire/revoke; durable implementation and approver-policy integration remain **OPEN**. |
 | Memory/knowledge lifecycle | Capture/review/trust/correct/supersede/deprecate/delete semantics remain **OPEN**. |
 
 No lifecycle transition may be inferred solely from:
@@ -211,9 +221,8 @@ No lifecycle transition may be inferred solely from:
    **OPEN**.
 5. Correlation identifies related work but does not authorize it. The current
    execution contracts govern the implemented correlation envelope.
-6. Causation must eventually distinguish the actor/request that caused a
-   transition from the producer that recorded it. The canonical event envelope
-   and principal model remain **OPEN**.
+6. Causation distinguishes the actor/request that caused a transition from the
+   producer that recorded it under `leos.event-envelope.v1`.
 7. Events, logs, diagnostics, and audit records must not carry raw secrets or
    unnecessary prompt/memory content.
 8. Service-local event formats are not automatically public contracts.
@@ -231,7 +240,7 @@ Established correlation ownership includes:
 | `model_id`, model-binding revision | Model Registry |
 | effective-ranking identity/revision | Ranking Policy Authority |
 | `workflow_id`, `step_id` | **OPEN** Workflow authority |
-| `approval_grant_id` | **OPEN** Approval authority |
+| `approval_grant_id` | Approval Authority |
 
 ## Contract, revision, and compatibility rules
 

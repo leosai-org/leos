@@ -172,20 +172,24 @@ prove that the remote operation did not occur.
 
 ## Deferred contracts
 
-This foundation intentionally does not define:
+This execution-contract foundation intentionally does not embed:
 
 - intelligence-ranking content or precedence encoding;
-- approval grants, issuance, verification, revocation, or delegation;
+- approval grant content or live verification; canonical identity/trust
+  contracts now live in `approval-request.v1.schema.json`,
+  `approval-grant.v1.schema.json`, and
+  `approval-verification-result.v1.schema.json`;
 - secret resolution or credential injection;
 - resolution integrity, expiry, or revalidation rules;
 - retry and escalation policy or failure taxonomy;
 - provider request/response adaptation;
 - raw provider audit storage.
 
-Approval and intelligence policy are represented only by opaque governed
-references. Provider credentials, when needed, are likewise represented only
-by opaque references. Caller-supplied approval Booleans are never approval
-evidence. The reserved compatibility names `allow_approval_required`,
+Execution contracts represent approval and intelligence policy through
+governed references rather than copying their authority records. Provider
+credentials, when needed, are likewise represented only by opaque references.
+Caller-supplied approval Booleans are never approval evidence. The reserved
+compatibility names `allow_approval_required`,
 `approval_granted`, `approved`, and `has_approval` are invalid in
 authority-bearing policy or constraint structures.
 

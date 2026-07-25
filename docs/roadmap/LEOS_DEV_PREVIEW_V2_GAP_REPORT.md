@@ -26,6 +26,8 @@ The governing sources for this report are:
 - `docs/architecture/v2/EXECUTION_PLANE_DECISIONS.md`
 - `docs/architecture/v2/INTELLIGENCE_PLANE.md`
 - `docs/architecture/v2/INTELLIGENCE_PLANE_DECISIONS.md`
+- `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`
+- `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md`
 - `docs/roadmap/DEV_PREVIEW_V2_GOALS.md`
 - `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`
 - `docs/architecture/REPOSITORY_ARCHITECTURE.md`
@@ -52,9 +54,13 @@ facts, employee lifecycle, resource admission, installation planning, First
 Run state, operator inspection, security checks, observability fixtures, and a
 reference research employee. Those foundations should be preserved.
 
-The organization-first product layer is not yet internally complete. Core has
-no canonical Organization, Department, Team, Workflow, Plugin, Tool, Team
-Template, approval-grant, secret-resolution, or sandbox lifecycle. It also
+The organization-first product layer is not yet internally complete. Epic 4.0
+establishes canonical principal, actor, exactly-one-owner, authorization-
+decision, Approval Grant/verification, Artifact Trust, Secret Reference, and
+Event Envelope foundations, but does not implement their production services
+or migrate existing callers. Core still has no canonical Organization,
+Department, Team, Workflow, Plugin, Tool, Team Template, secret-resolution, or
+sandbox lifecycle. It also
 lacks a governed model activation/onboarding path, organization-first guided
 console, Team Architect protocol, and unified memory/knowledge/provenance
 authority. These are architecture and contract gaps, not merely missing UI.
@@ -93,6 +99,7 @@ intelligence authorities without creating peers.
 
 | Foundation | Classification | Current evidence | Boundary that must be preserved |
 |---|---|---|---|
+| Identity, ownership, and trust contracts | **Implemented** for the Epic 4.0 contract-foundation scope | `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`, `contracts/principal.v1.schema.json`, `contracts/actor-context.v1.schema.json`, `contracts/resource-identity.v1.schema.json`, trust evidence contracts, and `tests/v2/test_identity_trust_contracts.py` | Logical evidence authorities are accepted; production authenticators/services and domain migrations remain unimplemented. Contract validity never creates trust. |
 | Execution contracts and correlation | **Implemented** | `contracts/execution.v1.schema.json`, `contracts/execution-result.v1.schema.json`, `contracts/execution-correlation.v1.schema.json`, `tests/v2/test_execution_contracts.py` | Resolution authorizes; Dispatcher invokes; non-invoked outcomes remain truthful. |
 | Execution Dispatcher | **Implemented** for current conformance scope | `services/execution-dispatcher-service/app/main.py`, `services/execution-dispatcher-service/tests/test_execution_dispatcher_conformance.py`, `docs/architecture/v2/DISPATCHER_CONFORMANCE.md` | Sole governed provider/tool invocation authority; no selection. |
 | Capability resolution | **Implemented** for provider capability resolution | `services/capability-manager-service/app/main.py`, `services/capability-manager-service/tests/test_capability_manager_conformance.py`, `contracts/capability-resolution-result.v1.schema.json` | Inventory, eligibility, and first-ranked-valid resolution only; no invocation or approval self-verification. |
@@ -119,8 +126,8 @@ intelligence authorities without creating peers.
 | 5 | Plugin manifest, SDK, trust, lifecycle, isolation | **Documentation Only / Missing** | **Lucy Donor Evidence Only / Conflicting Authority** | Public plugin layer is a v2 must-have but Lucy cannot be copied unchanged. |
 | 6 | Capability grants, permissions, revocation, audit | **Missing** | **Lucy Donor Evidence Only / Conflicting Authority** | Distinguish declarations, inventory, grants, policy, and resolution. |
 | 7 | Tool identity, schemas, side effects, idempotency, dispatch | **Missing** | **Lucy Donor Evidence Only / Conflicting Authority** | Define Tool contract; retain Dispatcher as invocation authority. |
-| 8 | Approval verification authority | **Missing** | **Lucy Donor Evidence Only / Experimental** | A verifiable scoped grant is a v2 security prerequisite. |
-| 9 | Secrets and credential resolution | **Missing** | **Lucy Donor Evidence Only / Experimental** | Define opaque references and transient resolution before cloud/plugin activation. |
+| 8 | Approval verification authority | **Partially Implemented** | **Lucy Donor Evidence Only / Experimental** | Approval Authority, grant lifecycle, and fail-closed verification contracts are canonical; durable authenticated implementation remains required. |
+| 9 | Secrets and credential resolution | **Partially Implemented** | **Lucy Donor Evidence Only / Experimental** | Secret Authority and opaque-reference identity are canonical; backend authorization and transient resolution remain required before cloud/plugin activation. |
 | 10 | Sandboxing and execution boundaries | **Missing** | **Experimental** | Required before arbitrary tools or development employees perform side effects. |
 | 11 | Team Template lifecycle | **Missing** | **Missing** | First-class immutable definition and installed-instance contracts are required. |
 | 12 | Team Architect plan/review/apply | **Missing** | **Missing** | Required core employee and guided setup protocol; must not become an authority service. |
@@ -424,29 +431,40 @@ intelligence authorities without creating peers.
 
 ### G-08 — Approval verification authority
 
-- **Classification:** **Missing** in Core; **Lucy Donor Evidence Only /
-  Experimental**.
-- **Current evidence:** Execution architecture requires an explicit verifiable
-  grant. Capability Manager preserves opaque approval references but does not
-  treat them as authority. `APPROVAL_PENDING` is a canonical non-invoked
-  outcome.
+- **Classification:** **Partially Implemented** in Core; **Lucy Donor Evidence
+  Only / Experimental**.
+- **Current evidence:** Epic 4.0 establishes Approval Authority ownership,
+  request/grant/verification contracts, exact subject/action/resource/context
+  scope, expiry, revocation, consumption, and fail-closed nonverified
+  outcomes. Capability Manager preserves opaque approval references but does
+  not treat them as authority. `APPROVAL_PENDING` remains a canonical
+  non-invoked outcome. No durable authenticated Approval Authority service is
+  implemented.
 - **Authoritative files:** `docs/architecture/v2/EXECUTION_PLANE_DECISIONS.md`,
+  `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`,
+  `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md`,
   `docs/architecture/v2/EXECUTION_CONTRACTS.md`,
+  `contracts/approval-request.v1.schema.json`,
+  `contracts/approval-grant.v1.schema.json`,
+  `contracts/approval-verification-result.v1.schema.json`,
   `contracts/capability-resolution-result.v1.schema.json`, and
   `contracts/execution-result.v1.schema.json`.
 - **Lucy donor evidence:** `../lucy-runtime-reference/approval-service/app.py`
   creates, lists, approves, denies, and records approval history.
   `../lucy-runtime-reference/workflow-engine-service/app/main.py` also stores
   step approvals.
-- **Missing contracts:** Approval request; immutable decision; verifiable
-  grant; subject/action/resource scope; approver identity and authority;
-  issued/expiry times; one-time versus reusable use; revocation; consumed
-  state; challenge/context digest; verification result.
+- **Missing contracts:** Authenticated approval-decision input, atomic
+  verification/consumption protocol, notification delivery, and service API
+  remain **OPEN**; the canonical request, grant, and verification-result
+  evidence contracts now exist.
 - **Missing services:** Authenticated Approval Authority and read-only
   verification endpoint usable by eligibility and execution boundaries.
-- **Missing tests:** Forged references; caller Boolean rejection; expired,
-  revoked, wrong-scope, wrong-subject, replayed, and modified grants;
-  concurrent decisions; audit provenance; fail-closed verifier outage.
+- **Missing service/integration tests:** Durable concurrent decisions,
+  authoritative verification and consumption, notification delivery, audit
+  persistence, and fail-closed verifier outage. Contract tests cover forged
+  or modified evidence, invalid lifecycle state, expiry, scope/subject
+  mismatch, and replay-use binding; caller Boolean rejection remains covered
+  at the Capability Manager boundary.
 - **Dependencies:** Identity/authentication, policy, organization roles,
   capability grants, Tool risk, cloud permission, secrets, Workflow, and
   Dispatcher.
@@ -461,13 +479,17 @@ intelligence authorities without creating peers.
 
 ### G-09 — Secrets and credential resolution
 
-- **Classification:** **Missing** in Core; **Lucy Donor Evidence Only /
-  Experimental**.
-- **Current evidence:** Architecture forbids secret values in definitions,
-  logs, prompts, events, and memory. First Run and security tooling can report
-  posture, but no canonical secret reference, grant, resolver, or rotation
-  lifecycle exists.
+- **Classification:** **Partially Implemented** in Core; **Lucy Donor Evidence
+  Only / Experimental**.
+- **Current evidence:** Epic 4.0 establishes Secret Authority and the closed
+  opaque `leos.secret-reference.v1` identity/lifecycle contract. Architecture
+  forbids secret values in definitions, logs, prompts, events, and memory.
+  First Run and security tooling can report posture, but no backend,
+  use-authorization, transient resolver/lease, injection, rotation, or
+  redaction implementation exists.
 - **Authoritative files:** `AGENTS.md`,
+  `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`,
+  `contracts/secret-reference.v1.schema.json`,
   `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`,
   `contracts/secret-exposure-report.v1.schema.json`, and
   `tools/security_observability.py`.
@@ -476,9 +498,11 @@ intelligence authorities without creating peers.
   `../lucy-runtime-reference/config-service/app.py` stores configuration.
   Several runtime services read broad environment API keys. These are
   implementation clues, not a secret authority.
-- **Missing contracts:** Opaque secret reference; provider/backend; requesting
-  subject; allowed operation/target; scope; lease/expiry; rotation/version;
-  resolution audit; redaction; unavailable/revoked result; deletion.
+- **Missing contracts:** Requesting subject; allowed operation/target; use
+  scope; lease/expiry; resolution outcome/audit; redaction;
+  unavailable/revoked result; and deletion. Opaque identity, backend
+  reference, value-version reference, class, ownership, status, and audit now
+  exist.
 - **Missing services:** Secret Authority adapter layer supporting at least a
   safe local backend and transient injection into governed invocations.
 - **Missing tests:** No plaintext persistence; log/prompt/event/memory
@@ -891,42 +915,50 @@ reasoner, resolver, invoker, scheduler, or transport selector.
    - Canonical outputs:
      `docs/architecture/v2/AUTHORITY_REGISTRY.md` and
      `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md`.
-2. **Epic 3.1 — Publishing Authority and Artifact Contracts**
+2. **Epic 4.0 — Identity, Ownership, and Trust Foundation**
+   - Establish Principal, Actor Context, exactly-one-owner resource identity,
+     authorization-decision, Approval Authority, Artifact Trust Authority,
+     Secret Reference, and Event Envelope contracts and boundaries.
+   - Production authenticators, durable trust services, and existing-service
+     migration remain follow-on work.
+3. **Epic 3.1 — Publishing Authority and Artifact Contracts**
    - Define artifact, version, publisher, dependency, provenance, signature,
      compatibility, and public/private protocol boundaries.
-3. **Epic 3.2 — Local Artifact Verification and Lifecycle**
+4. **Epic 3.2 — Local Artifact Verification and Lifecycle**
    - Implement later, after contract review: inspect, install, update,
      rollback, revoke, remove, and evidence.
 
 ### Organization and work definition
 
-4. **Epic 3.3 — Organization, Department, and Team Domain**
+5. **Epic 3.3 — Organization, Department, and Team Domain**
    - Definitions, revisions, lifecycle, membership, policy references, and
      audit.
-5. **Epic 3.4 — Organizational Policy Boundary**
+6. **Epic 3.4 — Organizational Policy Boundary**
    - Decide restriction inheritance and whether any new ranking scope is
      allowed; preserve current precedence until accepted.
-6. **Epic 3.5 — Workflow Definition and Lifecycle**
+7. **Epic 3.5 — Workflow Definition and Lifecycle**
    - Definition, validation, scheduler projection, correlation, approval wait,
      cancellation, compensation, and resume.
 
 ### Extension and governance plane
 
-7. **Epic 3.6 — Plugin Contract and Public SDK**
+8. **Epic 3.6 — Plugin Contract and Public SDK**
    - Manifest, declarations, configuration, compatibility, trust,
      dependencies, and validation.
-8. **Epic 3.7 — Capability Grants and Permission Authority**
+9. **Epic 3.7 — Capability Grants and Permission Authority**
    - Separate declaration/inventory/grant/eligibility/resolution.
-9. **Epic 3.8 — Tool Contract and Dispatcher Adapter Boundary**
+10. **Epic 3.8 — Tool Contract and Dispatcher Adapter Boundary**
    - Tool operations, schemas, side effects, idempotency, results, and audit.
-10. **Epic 3.9 — Verifiable Approval Authority**
-    - Authenticated scoped grants, verification, expiry, revocation, and use.
-11. **Epic 3.10 — Secret Authority and Transient Resolution**
-    - Opaque references, least-privilege resolution, rotation, redaction.
-12. **Epic 3.11 — Sandbox and Workspace Authority**
+11. **Epic 3.9 — Durable Verifiable Approval Authority**
+    - Implement the accepted authenticated scoped grant, verification, expiry,
+      revocation, and use boundaries.
+12. **Epic 3.10 — Secret Backend and Transient Resolution**
+    - Implement least-privilege resolution, rotation, injection, and
+      redaction over accepted opaque Secret References.
+13. **Epic 3.11 — Sandbox and Workspace Authority**
     - Filesystem, network, process, resource, secret, artifact, and cleanup
       boundaries.
-13. **Epic 3.12 — Governed Plugin Installation and Isolation**
+14. **Epic 3.12 — Governed Plugin Installation and Isolation**
     - Implement only after Epics 3.6 through 3.11 define the safety envelope.
 
 ### Knowledge and intelligence onboarding
@@ -944,46 +976,46 @@ reasoner, resolver, invoker, scheduler, or transport selector.
 - Keep configuration, persistence, and temporary authority records isolated
   and removable without production migration obligations.
 
-14. **Epic 3.13 — Knowledge, Artifact, Memory, and Provenance Authority**
+15. **Epic 3.13 — Knowledge, Artifact, Memory, and Provenance Authority**
     - Define canonical objects, review/trust, retention, retrieval, correction,
       and scope. Acceptance includes deterministic fixture conformance,
       optional real local embedding/reranking integration, truthful failure
       behavior, retained provenance/scope, and no fixture state in production.
-15. **Epic 3.14 — Model/Provider Onboarding and Activation**
+16. **Epic 3.14 — Model/Provider Onboarding and Activation**
     - Complete local and explicit-permission cloud paths using existing
       ranking, registry, resolution, dispatch, and transport authorities, then
       rerun the same Phase 5 knowledge integration suite through this
       production onboarding path.
-16. **Epic 3.15 — Specialized Intelligence Providers**
+17. **Epic 3.15 — Specialized Intelligence Providers**
     - Deliberately promote embedding and reranking first, then OCR, vision, and
       speech according to product acceptance needs.
 
 ### Organization-first product
 
-17. **Epic 3.16 — Team Template Contract and Validation**
+18. **Epic 3.16 — Team Template Contract and Validation**
     - Immutable definitions, dependencies, parameters, policies, tests, and
       compatibility.
-18. **Epic 3.17 — Team Template Install, Simulate, Activate, Upgrade, Rollback**
+19. **Epic 3.17 — Team Template Install, Simulate, Activate, Upgrade, Rollback**
     - Separate published definition from installed and active instances.
-19. **Epic 3.18 — Team Architect Plan/Review/Apply**
+20. **Epic 3.18 — Team Architect Plan/Review/Apply**
     - Core employee plus explicit proposal and approved-apply handoff.
-20. **Epic 3.19 — Guided Organization-First Console and Core Employees**
+21. **Epic 3.19 — Guided Organization-First Console and Core Employees**
     - Non-coder onboarding, dependency disclosure, simulation, approvals,
       activation, audit, and recovery.
 
 ### Release operability
 
-21. **Epic 3.20 — First Run Activation and Recovery**
+22. **Epic 3.20 — First Run Activation and Recovery**
     - Join installation, runtime/model/plugin onboarding, backup/restore, and
       update rollback.
-22. **Epic 3.21 — Usage, Cost, and Production-per-Token Accounting**
+23. **Epic 3.21 — Usage, Cost, and Production-per-Token Accounting**
     - Correlate tokens, provider cost, latency, resources, and accepted
       externally grounded production outcomes. PPT is observational reporting
       only, never selection, eligibility, ranking, resolution, fallback,
       retry, re-resolution, or escalation authority. Attribution includes
       retrieval, embedding, reranking, revision, verification, and resources,
       and reports expose underlying evidence rather than only a composite.
-23. **Epic 3.22 — Dev Preview v2 Organization Acceptance**
+24. **Epic 3.22 — Dev Preview v2 Organization Acceptance**
     - Clean-machine install to a simulated and approved active flagship team,
       with audit, recovery, and no Lucy runtime dependency.
 

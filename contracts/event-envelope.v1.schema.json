@@ -1,0 +1,90 @@
+{
+  "$id": "https://leosai.org/contracts/event-envelope.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Canonical Event Envelope v1",
+  "description": "Immutable authority-produced event evidence. Delivery or possession never transfers state authority or grants permission.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.event-envelope.v1"
+    },
+    "identity": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[a-z][a-z0-9]*(?:[._:-][a-z0-9]+)*$"
+    },
+    "event_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"
+    },
+    "producer": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"
+    },
+    "actor": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"
+    },
+    "actor_context_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"
+    },
+    "subject": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"
+    },
+    "correlation_id": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"
+    },
+    "causation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "ROOT_ACTION",
+            "EVENT"
+          ]
+        },
+        "reference_id": {
+          "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"
+        }
+      },
+      "required": [
+        "kind",
+        "reference_id"
+      ]
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "contract_version",
+    "identity",
+    "event_type",
+    "event_revision",
+    "source",
+    "producer",
+    "actor",
+    "actor_context_ref",
+    "subject",
+    "correlation_id",
+    "causation",
+    "occurred_at",
+    "recorded_at",
+    "payload"
+  ]
+}

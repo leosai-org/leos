@@ -165,8 +165,11 @@ Unsettled details are marked **OPEN**.
   governed policy may permit skipping such a candidate. Dispatcher verifies
   approval for the concrete invocation. Cognitive service may request and
   await approval but cannot self-grant it.
-- **OPEN:** Approval authority, grant schema, verification mechanism, expiry,
-  revocation, delegation, and action-scope comparison.
+- **Resolution:** `IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md` establishes
+  Approval Authority, canonical grant/verification contracts, exact
+  subject/action/resource/context comparison, expiry, revocation, and use
+  evidence. Durable service/API, approver policy, delegation, and atomic
+  verification/consumption remain **OPEN**.
 
 ## ADR-010: Resolution and invocation use separate audit authorities
 
@@ -250,7 +253,8 @@ The following require later decisions or contracts:
 3. cognitive-run states, checkpoints, and restart recovery;
 4. event versus polling delivery for assignment availability;
 5. resolution issuance, integrity, expiry, and revalidation;
-6. approval authority and grant verification;
+6. Approval Authority durable implementation, approver policy, delegation,
+   and atomic grant verification/consumption;
 7. idempotency classification and provider idempotency-key support;
 8. provider result and ambiguous-outcome normalization;
 9. artifact, company-knowledge, and learned-memory authorities;

@@ -16,3 +16,10 @@ An installed package outside that verified source layout must set
 `LEOS_CONTRACT_ROOT`; it never falls back to a nearby environment or virtual
 environment `contracts/` directory. Missing, incomplete, or malformed
 governed roots raise `ContractRootError`.
+
+The validator supports the canonical execution, effective-ranking, and Epic
+4.0 identity/trust contracts. It validates schemas and deterministic
+cross-field invariants only. It does not authenticate principals, authorize
+actions, verify a live Approval Grant or artifact signature, resolve a secret,
+or establish event truth. Those operations require the recognized authority
+over an authenticated boundary.

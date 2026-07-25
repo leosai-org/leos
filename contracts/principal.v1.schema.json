@@ -1,0 +1,45 @@
+{
+  "$id": "https://leosai.org/contracts/principal.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Principal v1",
+  "description": "Canonical principal identity. A valid document is not proof that its principal is authenticated.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.principal.v1"
+    },
+    "identity": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"
+    },
+    "principal_type": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalType"
+    },
+    "status": {
+      "enum": [
+        "ACTIVE",
+        "SUSPENDED",
+        "REVOKED",
+        "ARCHIVED"
+      ]
+    },
+    "subject_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/resourceRef"
+    },
+    "authentication_policy_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"
+      }
+    }
+  },
+  "required": [
+    "contract_version",
+    "identity",
+    "principal_type",
+    "status",
+    "subject_ref",
+    "authentication_policy_refs"
+  ]
+}

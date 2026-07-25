@@ -1,0 +1,44 @@
+{
+  "$id": "https://leosai.org/contracts/approval-request.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Approval Request v1",
+  "description": "A request for an approval decision. An approval request is never itself authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.approval-request.v1"
+    },
+    "identity": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"
+    },
+    "requested_by_actor_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"
+    },
+    "scope": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actionScope"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "contract_version",
+    "identity",
+    "requested_by_actor_ref",
+    "scope",
+    "reason",
+    "requested_at",
+    "expires_at"
+  ]
+}

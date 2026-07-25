@@ -1,0 +1,140 @@
+{
+  "$id": "https://leosai.org/contracts/approval-grant.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Approval Grant v1",
+  "description": "A scoped Approval Authority record. Callers must obtain a current trusted verification result; possession or structural validity does not authorize.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.approval-grant.v1"
+    },
+    "identity": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"
+    },
+    "request_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"
+    },
+    "issuer": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/authorityRef"
+    },
+    "approved_by_actor_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"
+    },
+    "recipient": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"
+    },
+    "scope": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actionScope"
+    },
+    "status": {
+      "enum": [
+        "ACTIVE",
+        "REVOKED",
+        "CONSUMED",
+        "EXPIRED"
+      ]
+    },
+    "use_policy": {
+      "enum": [
+        "SINGLE_USE",
+        "MULTI_USE"
+      ]
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "revoked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked_by_actor_ref": {
+          "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "required": [
+        "revoked_at",
+        "revoked_by_actor_ref",
+        "reason"
+      ]
+    },
+    "consumption_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"
+    }
+  },
+  "required": [
+    "contract_version",
+    "identity",
+    "request_ref",
+    "issuer",
+    "approved_by_actor_ref",
+    "recipient",
+    "scope",
+    "status",
+    "use_policy",
+    "issued_at",
+    "valid_from",
+    "expires_at"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "revocation"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "revocation"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "CONSUMED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "consumption_ref"
+        ]
+      }
+    }
+  ]
+}

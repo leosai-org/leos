@@ -149,6 +149,30 @@ class ValidationApiTests(unittest.TestCase):
         ):
             self.assertIsNone(validate_contract(contract, self.example(example)))
 
+    def test_identity_and_trust_contract_examples_validate(self):
+        for contract, example in (
+            ("leos.resource-identity.v1", "resource-identity.v1.json"),
+            ("leos.principal.v1", "principal.v1.json"),
+            ("leos.actor-context.v1", "actor-context.v1.json"),
+            (
+                "leos.authorization-decision.v1",
+                "authorization-decision.v1.json",
+            ),
+            ("leos.approval-request.v1", "approval-request.v1.json"),
+            ("leos.approval-grant.v1", "approval-grant.v1.json"),
+            (
+                "leos.approval-verification-result.v1",
+                "approval-verification-result.v1.json",
+            ),
+            (
+                "leos.artifact-trust-evidence.v1",
+                "artifact-trust-evidence.v1.json",
+            ),
+            ("leos.secret-reference.v1", "secret-reference.v1.json"),
+            ("leos.event-envelope.v1", "event-envelope.v1.json"),
+        ):
+            self.assertIsNone(validate_contract(contract, self.example(example)))
+
     def test_undefined_effective_ranking_has_no_source_authority(self):
         value = {
             "contract_version": "leos.effective-ranking-result.v1",
@@ -279,6 +303,10 @@ class ValidationApiTests(unittest.TestCase):
     def test_unsupported_contract_is_rejected(self):
         with self.assertRaises(KeyError):
             validate_contract("leos.unknown.v1", {})
+
+    def test_common_definition_schema_is_not_a_document_contract(self):
+        with self.assertRaises(KeyError):
+            validate_contract("trust-common.v1.schema.json", {})
 
 
 if __name__ == "__main__":

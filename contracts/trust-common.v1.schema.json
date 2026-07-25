@@ -1,0 +1,321 @@
+{
+  "$id": "https://leosai.org/contracts/trust-common.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Trust Foundation Common Definitions v1",
+  "description": "Reusable closed definitions for canonical identity, ownership, actor, authority, and scope evidence. This schema is not itself an authority-bearing document.",
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "principalType": {
+      "enum": [
+        "HUMAN_USER",
+        "SERVICE",
+        "ORGANIZATION",
+        "DEPARTMENT",
+        "TEAM",
+        "EMPLOYEE",
+        "RUNTIME",
+        "PLUGIN",
+        "PUBLISHER"
+      ]
+    },
+    "resourceType": {
+      "enum": [
+        "USER",
+        "SERVICE",
+        "PUBLISHER",
+        "PRINCIPAL",
+        "ACTOR_CONTEXT",
+        "ORGANIZATION",
+        "DEPARTMENT",
+        "TEAM",
+        "EMPLOYEE",
+        "WORKFLOW",
+        "PLUGIN",
+        "CAPABILITY",
+        "TOOL",
+        "PROVIDER",
+        "MODEL",
+        "RUNTIME",
+        "ARTIFACT",
+        "ARTIFACT_TRUST_EVIDENCE",
+        "AUTHORIZATION_DECISION",
+        "APPROVAL_REQUEST",
+        "APPROVAL_GRANT",
+        "APPROVAL_VERIFICATION",
+        "SECRET_REFERENCE",
+        "EVENT",
+        "EVENT_SOURCE",
+        "SCHEDULER_JOB",
+        "KNOWLEDGE_OBJECT",
+        "MEMORY_OBJECT"
+      ]
+    },
+    "principalRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "principal_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "principal_type": {
+          "$ref": "#/$defs/principalType"
+        }
+      },
+      "required": [
+        "principal_id",
+        "principal_type"
+      ]
+    },
+    "resourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {
+          "$ref": "#/$defs/resourceType"
+        },
+        "resource_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "resource_type",
+        "resource_id"
+      ]
+    },
+    "revisionedResourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {
+          "$ref": "#/$defs/resourceType"
+        },
+        "resource_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "resource_type",
+        "resource_id",
+        "revision"
+      ]
+    },
+    "authorityRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "principal": {
+          "$ref": "#/$defs/principalRef"
+        },
+        "authority_revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "authority_id",
+        "principal",
+        "authority_revision"
+      ]
+    },
+    "ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": {
+          "$ref": "#/$defs/principalRef"
+        },
+        "creator": {
+          "$ref": "#/$defs/principalRef"
+        },
+        "steward": {
+          "$ref": "#/$defs/principalRef"
+        },
+        "lifecycle_authority": {
+          "$ref": "#/$defs/authorityRef"
+        }
+      },
+      "required": [
+        "owner",
+        "creator",
+        "steward",
+        "lifecycle_authority"
+      ]
+    },
+    "managedIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {
+          "$ref": "#/$defs/resourceType"
+        },
+        "resource_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "ownership": {
+          "$ref": "#/$defs/ownership"
+        },
+        "creation_actor_context_ref": {
+          "$ref": "#/$defs/revisionedResourceRef"
+        },
+        "creation_authority_evidence_ref": {
+          "$ref": "#/$defs/authorityEvidenceRef"
+        },
+        "audit_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "resource_type",
+        "resource_id",
+        "display_name",
+        "revision",
+        "ownership",
+        "creation_actor_context_ref",
+        "creation_authority_evidence_ref",
+        "audit_id",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "evidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "$ref": "#/$defs/authorityRef"
+        },
+        "reference_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "authority",
+        "reference_id",
+        "revision"
+      ]
+    },
+    "actorContextEvidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "evidence_type": {
+          "const": "ACTOR_CONTEXT"
+        },
+        "authority": {
+          "$ref": "#/$defs/authorityRef"
+        },
+        "reference_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "evidence_type",
+        "authority",
+        "reference_id",
+        "revision"
+      ]
+    },
+    "authorityEvidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "reference_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "authority_id",
+        "reference_id",
+        "revision"
+      ]
+    },
+    "actionScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/principalRef"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[a-z][a-z0-9]*(?:[._:-][a-z0-9]+)*$"
+        },
+        "resource": {
+          "$ref": "#/$defs/revisionedResourceRef"
+        },
+        "context_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "context_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "context_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "context_digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "subject",
+        "action",
+        "resource",
+        "context_type",
+        "context_id",
+        "context_revision",
+        "context_digest"
+      ]
+    }
+  }
+}

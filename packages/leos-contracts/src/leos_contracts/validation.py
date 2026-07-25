@@ -12,7 +12,20 @@ from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
 CONTRACT_ROOT_ENV = "LEOS_CONTRACT_ROOT"
+SCHEMA_RESOURCES = (
+    "trust-common.v1.schema.json",
+)
 SUPPORTED_CONTRACTS = (
+    "resource-identity.v1.schema.json",
+    "principal.v1.schema.json",
+    "actor-context.v1.schema.json",
+    "authorization-decision.v1.schema.json",
+    "approval-request.v1.schema.json",
+    "approval-grant.v1.schema.json",
+    "approval-verification-result.v1.schema.json",
+    "artifact-trust-evidence.v1.schema.json",
+    "secret-reference.v1.schema.json",
+    "event-envelope.v1.schema.json",
     "execution-correlation.v1.schema.json",
     "execution.v1.schema.json",
     "capability-resolution-request.v1.schema.json",
@@ -22,6 +35,19 @@ SUPPORTED_CONTRACTS = (
     "effective-ranking-result.v1.schema.json",
 )
 CONTRACT_VERSIONS = {
+    "leos.resource-identity.v1": "resource-identity.v1.schema.json",
+    "leos.principal.v1": "principal.v1.schema.json",
+    "leos.actor-context.v1": "actor-context.v1.schema.json",
+    "leos.authorization-decision.v1":
+        "authorization-decision.v1.schema.json",
+    "leos.approval-request.v1": "approval-request.v1.schema.json",
+    "leos.approval-grant.v1": "approval-grant.v1.schema.json",
+    "leos.approval-verification-result.v1":
+        "approval-verification-result.v1.schema.json",
+    "leos.artifact-trust-evidence.v1":
+        "artifact-trust-evidence.v1.schema.json",
+    "leos.secret-reference.v1": "secret-reference.v1.schema.json",
+    "leos.event-envelope.v1": "event-envelope.v1.schema.json",
     "leos.execution-correlation.v1": "execution-correlation.v1.schema.json",
     "leos.execution.v1": "execution.v1.schema.json",
     "leos.capability-resolution-request.v1":
@@ -71,7 +97,9 @@ def _validate_contract_root(root: Path) -> Path:
     if not root.is_dir():
         raise ContractRootError(f"LEOS contract root does not exist: {root}")
     missing = [
-        name for name in SUPPORTED_CONTRACTS if not (root / name).is_file()
+        name
+        for name in (*SCHEMA_RESOURCES, *SUPPORTED_CONTRACTS)
+        if not (root / name).is_file()
     ]
     if missing:
         raise ContractRootError(
@@ -132,7 +160,7 @@ def _schema_name(contract_id: str) -> str:
 def _load_schemas() -> dict[str, dict[str, Any]]:
     root = contract_root()
     schemas = {}
-    for name in SUPPORTED_CONTRACTS:
+    for name in (*SCHEMA_RESOURCES, *SUPPORTED_CONTRACTS):
         try:
             schemas[name] = json.loads(
                 (root / name).read_text(encoding="utf-8")
@@ -213,6 +241,418 @@ def validate_semantics(
                 valid = False
         if not valid:
             add(path, "must be RFC3339 date-time")
+
+    def parsed_timestamp(value: Any) -> datetime | None:
+        if not isinstance(value, str) or not RFC3339.fullmatch(value):
+            return None
+        try:
+            parsed = datetime.fromisoformat(
+                value[:-1] + "+00:00"
+                if value.endswith("Z")
+                else value
+            )
+        except ValueError:
+            return None
+        return parsed if parsed.tzinfo is not None else None
+
+    def require_chronology(
+        earlier: Any,
+        later: Any,
+        path: str,
+        description: str,
+        *,
+        allow_equal: bool = True,
+    ) -> None:
+        earlier_value = parsed_timestamp(earlier)
+        later_value = parsed_timestamp(later)
+        if earlier_value is None or later_value is None:
+            return
+        valid = (
+            earlier_value <= later_value
+            if allow_equal
+            else earlier_value < later_value
+        )
+        if not valid:
+            add(path, description)
+
+    foundation_identity_types = {
+        "principal.v1.schema.json": "PRINCIPAL",
+        "actor-context.v1.schema.json": "ACTOR_CONTEXT",
+        "authorization-decision.v1.schema.json": "AUTHORIZATION_DECISION",
+        "approval-request.v1.schema.json": "APPROVAL_REQUEST",
+        "approval-grant.v1.schema.json": "APPROVAL_GRANT",
+        "approval-verification-result.v1.schema.json":
+            "APPROVAL_VERIFICATION",
+        "artifact-trust-evidence.v1.schema.json":
+            "ARTIFACT_TRUST_EVIDENCE",
+        "secret-reference.v1.schema.json": "SECRET_REFERENCE",
+        "event-envelope.v1.schema.json": "EVENT",
+    }
+    foundation_contracts = {
+        "resource-identity.v1.schema.json",
+        *foundation_identity_types,
+    }
+    if name in foundation_contracts:
+        identity = document.get("identity")
+        if isinstance(identity, dict):
+            expected_type = foundation_identity_types.get(name)
+            if (
+                expected_type is not None
+                and identity.get("resource_type") != expected_type
+            ):
+                add(
+                    "$.identity.resource_type",
+                    f"must be {expected_type} for this contract",
+                )
+            for field in ("created_at", "updated_at"):
+                if field in identity:
+                    validate_timestamp(
+                        identity[field],
+                        f"$.identity.{field}",
+                    )
+            require_chronology(
+                identity.get("created_at"),
+                identity.get("updated_at"),
+                "$.identity.updated_at",
+                "updated_at must not precede created_at",
+            )
+            creation_actor = identity.get("creation_actor_context_ref")
+            if (
+                isinstance(creation_actor, dict)
+                and creation_actor.get("resource_type") != "ACTOR_CONTEXT"
+            ):
+                add(
+                    "$.identity.creation_actor_context_ref.resource_type",
+                    "must reference an ACTOR_CONTEXT",
+                )
+
+    if name == "principal.v1.schema.json":
+        principal_type = document.get("principal_type")
+        subject = document.get("subject_ref")
+        expected_subject_types = {
+            "HUMAN_USER": "USER",
+            "SERVICE": "SERVICE",
+            "ORGANIZATION": "ORGANIZATION",
+            "DEPARTMENT": "DEPARTMENT",
+            "TEAM": "TEAM",
+            "EMPLOYEE": "EMPLOYEE",
+            "RUNTIME": "RUNTIME",
+            "PLUGIN": "PLUGIN",
+            "PUBLISHER": "PUBLISHER",
+        }
+        if isinstance(subject, dict):
+            expected_subject_type = expected_subject_types.get(principal_type)
+            if (
+                expected_subject_type is not None
+                and subject.get("resource_type") != expected_subject_type
+            ):
+                add(
+                    "$.subject_ref.resource_type",
+                    f"a {principal_type} principal subject must be "
+                    f"{expected_subject_type}",
+                )
+        elif principal_type != "HUMAN_USER":
+            add(
+                "$.subject_ref",
+                "non-human principals require a governed subject resource",
+            )
+
+    if name == "actor-context.v1.schema.json":
+        authentication = document.get("authentication")
+        if isinstance(authentication, dict):
+            equal_when_present(
+                document.get("actor"),
+                authentication.get("subject"),
+                "$.authentication.subject",
+                "actor and authenticated subject",
+            )
+            identity = document.get("identity")
+            ownership = (
+                identity.get("ownership")
+                if isinstance(identity, dict)
+                else None
+            )
+            if isinstance(ownership, dict):
+                equal_when_present(
+                    authentication.get("issuer"),
+                    ownership.get("lifecycle_authority"),
+                    "$.authentication.issuer",
+                    "authentication issuer and Actor Context "
+                    "lifecycle authority",
+                )
+            if "authenticated_at" in authentication:
+                validate_timestamp(
+                    authentication["authenticated_at"],
+                    "$.authentication.authenticated_at",
+                )
+            require_chronology(
+                authentication.get("authenticated_at"),
+                document.get("issued_at"),
+                "$.issued_at",
+                "issued_at must not precede authentication",
+            )
+        for field in ("issued_at", "expires_at"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("issued_at"),
+            document.get("expires_at"),
+            "$.expires_at",
+            "expires_at must be later than issued_at",
+            allow_equal=False,
+        )
+
+    if name == "authorization-decision.v1.schema.json":
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        if isinstance(ownership, dict):
+            equal_when_present(
+                document.get("authority"),
+                ownership.get("lifecycle_authority"),
+                "$.authority",
+                "decision authority and lifecycle authority",
+            )
+        for field in ("decided_at", "valid_until"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("decided_at"),
+            document.get("valid_until"),
+            "$.valid_until",
+            "valid_until must be later than decided_at",
+            allow_equal=False,
+        )
+
+    if name == "approval-request.v1.schema.json":
+        for field in ("requested_at", "expires_at"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("requested_at"),
+            document.get("expires_at"),
+            "$.expires_at",
+            "expires_at must be later than requested_at",
+            allow_equal=False,
+        )
+
+    if name == "approval-grant.v1.schema.json":
+        request_ref = document.get("request_ref")
+        if (
+            isinstance(request_ref, dict)
+            and request_ref.get("resource_type") != "APPROVAL_REQUEST"
+        ):
+            add(
+                "$.request_ref.resource_type",
+                "must reference an APPROVAL_REQUEST",
+            )
+        scope = document.get("scope")
+        if isinstance(scope, dict):
+            equal_when_present(
+                document.get("recipient"),
+                scope.get("subject"),
+                "$.scope.subject",
+                "recipient and approval subject",
+            )
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        if isinstance(ownership, dict):
+            equal_when_present(
+                document.get("issuer"),
+                ownership.get("lifecycle_authority"),
+                "$.issuer",
+                "issuer and grant lifecycle authority",
+            )
+        for field in ("issued_at", "valid_from", "expires_at"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("issued_at"),
+            document.get("valid_from"),
+            "$.valid_from",
+            "valid_from must not precede issued_at",
+        )
+        require_chronology(
+            document.get("valid_from"),
+            document.get("expires_at"),
+            "$.expires_at",
+            "expires_at must be later than valid_from",
+            allow_equal=False,
+        )
+        revocation = document.get("revocation")
+        if isinstance(revocation, dict) and "revoked_at" in revocation:
+            validate_timestamp(
+                revocation["revoked_at"],
+                "$.revocation.revoked_at",
+            )
+            require_chronology(
+                document.get("issued_at"),
+                revocation.get("revoked_at"),
+                "$.revocation.revoked_at",
+                "revoked_at must not precede issued_at",
+            )
+
+    if name == "approval-verification-result.v1.schema.json":
+        grant_ref = document.get("grant_ref")
+        if (
+            isinstance(grant_ref, dict)
+            and grant_ref.get("resource_type") != "APPROVAL_GRANT"
+        ):
+            add(
+                "$.grant_ref.resource_type",
+                "must reference an APPROVAL_GRANT",
+            )
+        if document.get("outcome") == "VERIFIED":
+            equal_when_present(
+                grant_ref.get("revision")
+                if isinstance(grant_ref, dict)
+                else None,
+                document.get("verified_grant_revision"),
+                "$.verified_grant_revision",
+                "grant_ref revision and verified grant revision",
+            )
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        if isinstance(ownership, dict):
+            equal_when_present(
+                document.get("authority"),
+                ownership.get("lifecycle_authority"),
+                "$.authority",
+                "verification authority and lifecycle authority",
+            )
+        for field in ("verified_at", "valid_until"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("verified_at"),
+            document.get("valid_until"),
+            "$.valid_until",
+            "valid_until must be later than verified_at",
+            allow_equal=False,
+        )
+
+    if name == "artifact-trust-evidence.v1.schema.json":
+        artifact_ref = document.get("artifact_ref")
+        if (
+            isinstance(artifact_ref, dict)
+            and artifact_ref.get("resource_type") != "ARTIFACT"
+        ):
+            add(
+                "$.artifact_ref.resource_type",
+                "must reference an ARTIFACT",
+            )
+        publisher = document.get("publisher")
+        if (
+            isinstance(publisher, dict)
+            and publisher.get("principal_type") != "PUBLISHER"
+        ):
+            add(
+                "$.publisher.principal_type",
+                "artifact publisher must be a PUBLISHER principal",
+            )
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        if isinstance(ownership, dict):
+            equal_when_present(
+                document.get("verifier"),
+                ownership.get("lifecycle_authority"),
+                "$.verifier",
+                "artifact verifier and lifecycle authority",
+            )
+        for field in ("verified_at", "valid_until"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("verified_at"),
+            document.get("valid_until"),
+            "$.valid_until",
+            "valid_until must be later than verified_at",
+            allow_equal=False,
+        )
+
+    if name == "secret-reference.v1.schema.json":
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        if isinstance(ownership, dict):
+            equal_when_present(
+                document.get("secret_authority"),
+                ownership.get("lifecycle_authority"),
+                "$.secret_authority",
+                "Secret Authority and lifecycle authority",
+            )
+        for field in (
+            "created_at",
+            "rotated_at",
+            "revoked_at",
+            "deleted_at",
+        ):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        for field in ("rotated_at", "revoked_at", "deleted_at"):
+            if field in document:
+                require_chronology(
+                    document.get("created_at"),
+                    document.get(field),
+                    f"$.{field}",
+                    f"{field} must not precede created_at",
+                )
+
+    if name == "event-envelope.v1.schema.json":
+        source = document.get("source")
+        if (
+            isinstance(source, dict)
+            and source.get("resource_type") != "EVENT_SOURCE"
+        ):
+            add(
+                "$.source.resource_type",
+                "must reference an EVENT_SOURCE",
+            )
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        lifecycle_authority = (
+            ownership.get("lifecycle_authority")
+            if isinstance(ownership, dict)
+            else None
+        )
+        if isinstance(lifecycle_authority, dict):
+            equal_when_present(
+                document.get("producer"),
+                lifecycle_authority.get("principal"),
+                "$.producer",
+                "producer and event lifecycle-authority principal",
+            )
+        for field in ("occurred_at", "recorded_at"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("occurred_at"),
+            document.get("recorded_at"),
+            "$.recorded_at",
+            "recorded_at must not precede occurred_at",
+        )
 
     if name == "capability-resolution-request.v1.schema.json":
         if "requested_at" in document:

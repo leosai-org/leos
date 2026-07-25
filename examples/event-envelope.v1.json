@@ -1,0 +1,88 @@
+{
+  "contract_version": "leos.event-envelope.v1",
+  "identity": {
+    "resource_type": "EVENT",
+    "resource_id": "event:provider-registered:001",
+    "display_name": "Provider registered",
+    "revision": "sha256:event-provider-registered-001",
+    "ownership": {
+      "owner": {
+        "principal_id": "principal:user:brett",
+        "principal_type": "HUMAN_USER"
+      },
+      "creator": {
+        "principal_id": "principal:service:capability-manager",
+        "principal_type": "SERVICE"
+      },
+      "steward": {
+        "principal_id": "principal:service:capability-manager",
+        "principal_type": "SERVICE"
+      },
+      "lifecycle_authority": {
+        "authority_id": "capability-manager",
+        "principal": {
+          "principal_id": "principal:service:capability-manager",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:capability-manager-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:capability-manager:event-001",
+      "revision": "sha256:actor-context-capability-manager-event-001"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "capability-manager",
+      "reference_id": "provider-transition:registered:001",
+      "revision": "sha256:authorization-event-produce-001"
+    },
+    "audit_id": "audit:event:provider-registered:001",
+    "created_at": "2026-07-25T12:40:00Z",
+    "updated_at": "2026-07-25T12:40:00Z"
+  },
+  "event_type": "provider.registered",
+  "event_revision": 1,
+  "source": {
+    "resource_type": "EVENT_SOURCE",
+    "resource_id": "event-source:capability-manager",
+    "revision": "sha256:event-source-capability-manager-v1"
+  },
+  "producer": {
+    "principal_id": "principal:service:capability-manager",
+    "principal_type": "SERVICE"
+  },
+  "actor": {
+    "principal_id": "principal:user:brett",
+    "principal_type": "HUMAN_USER"
+  },
+  "actor_context_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {
+        "principal_id": "principal:service:identity-authority",
+        "principal_type": "SERVICE"
+      },
+      "authority_revision": "sha256:identity-authority-policy-v1"
+    },
+    "reference_id": "actor-context:brett:session-001",
+    "revision": "sha256:actor-context-brett-session-001"
+  },
+  "subject": {
+    "resource_type": "PROVIDER",
+    "resource_id": "provider:local:synthetic",
+    "revision": "sha256:provider-local-synthetic-v1"
+  },
+  "correlation_id": "correlation:provider-registration:001",
+  "causation": {
+    "kind": "ROOT_ACTION",
+    "reference_id": "action:provider-registration:001"
+  },
+  "occurred_at": "2026-07-25T12:40:00Z",
+  "recorded_at": "2026-07-25T12:40:00Z",
+  "payload": {
+    "provider_id": "provider:local:synthetic",
+    "provider_revision": "sha256:provider-local-synthetic-v1"
+  }
+}

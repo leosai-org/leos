@@ -1,0 +1,99 @@
+{
+  "contract_version": "leos.authorization-decision.v1",
+  "identity": {
+    "resource_type": "AUTHORIZATION_DECISION",
+    "resource_id": "authorization-decision:provider-invoke:001",
+    "display_name": "Provider invocation authorization decision",
+    "revision": "sha256:authorization-decision-provider-invoke-001",
+    "ownership": {
+      "owner": {
+        "principal_id": "principal:user:brett",
+        "principal_type": "HUMAN_USER"
+      },
+      "creator": {
+        "principal_id": "principal:service:authorization-authority",
+        "principal_type": "SERVICE"
+      },
+      "steward": {
+        "principal_id": "principal:service:authorization-authority",
+        "principal_type": "SERVICE"
+      },
+      "lifecycle_authority": {
+        "authority_id": "authorization-authority",
+        "principal": {
+          "principal_id": "principal:service:authorization-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:authorization-authority-policy-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:authorization-authority:evaluation-001",
+      "revision": "sha256:actor-context-authorization-evaluation-001"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authority-mandate:authorization-evaluation",
+      "revision": "sha256:authorization-authority-evaluate-001"
+    },
+    "audit_id": "audit:authorization-decision:provider-invoke:001",
+    "created_at": "2026-07-25T12:15:00Z",
+    "updated_at": "2026-07-25T12:15:00Z"
+  },
+  "actor_context_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {
+        "principal_id": "principal:service:identity-authority",
+        "principal_type": "SERVICE"
+      },
+      "authority_revision": "sha256:identity-authority-policy-v1"
+    },
+    "reference_id": "actor-context:brett:session-001",
+    "revision": "sha256:actor-context-brett-session-001"
+  },
+  "scope": {
+    "subject": {
+      "principal_id": "principal:user:brett",
+      "principal_type": "HUMAN_USER"
+    },
+    "action": "provider.invoke",
+    "resource": {
+      "resource_type": "PROVIDER",
+      "resource_id": "provider:local:synthetic",
+      "revision": "sha256:provider-local-synthetic-v1"
+    },
+    "context_type": "execution",
+    "context_id": "execution:synthetic:001",
+    "context_revision": "sha256:execution-synthetic-request-v1",
+    "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "decision": "ALLOW",
+  "authority": {
+    "authority_id": "authorization-authority",
+    "principal": {
+      "principal_id": "principal:service:authorization-authority",
+      "principal_type": "SERVICE"
+    },
+    "authority_revision": "sha256:authorization-authority-policy-v1"
+  },
+  "authority_evidence_refs": [
+    {
+      "authority": {
+        "authority_id": "authorization-authority",
+        "principal": {
+          "principal_id": "principal:service:authorization-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:authorization-authority-policy-v1"
+      },
+      "reference_id": "owner-policy:provider-local-synthetic",
+      "revision": "sha256:owner-policy-provider-local-synthetic-v1"
+    }
+  ],
+  "reasons": [],
+  "decided_at": "2026-07-25T12:15:00Z",
+  "valid_until": "2026-07-25T12:20:00Z"
+}

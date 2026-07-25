@@ -72,6 +72,11 @@ Every must-have below is governed by these invariants:
 16. PPT is observational evidence only and never influences selection,
     eligibility, ranking, resolution, fallback, retry, re-resolution, or
     escalation.
+17. Every authority-bearing action has exactly one authenticated actor, and
+    every managed resource has one immutable identity, exactly one owner, and
+    one lifecycle authority.
+18. Contract validity, events, projections, observations, plans, audits, logs,
+    examples, Lucy records, and fixtures never authenticate or authorize.
 
 The complete accepted and **OPEN** boundaries are indexed by
 `../architecture/v2/AUTHORITY_REGISTRY.md`.
@@ -382,11 +387,18 @@ These are permanently prohibited rather than deferred:
 
 The scope lock does not resolve the **OPEN** items in the Authority Registry.
 The following decisions are prerequisites to their respective implementation
-packages:
+packages. Epic 4.0 accepted the common principal, Actor Context, resource
+identity, exactly-one-owner, event-envelope/producer, Approval Authority,
+Artifact Trust Authority, and Secret Reference boundaries in
+`../architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`. The remaining
+implementation decisions are:
 
-1. principal identity, authentication, and actor evidence;
-2. common resource identity, ownership, and organization scope;
-3. canonical event, causation, revision, replay, and delivery semantics;
+1. production authenticators, workload identity, trust bootstrap, and
+   recovery;
+2. domain ownership transfer, inheritance, visibility, archive, and
+   cross-authority reconciliation;
+3. event outbox, broker, ordering, acknowledgement, replay, retention, and
+   schema evolution;
 4. publishing artifact and installed-instance authority;
 5. Organization, Department, and Team lifecycle ownership;
 6. employee-to-job assignment proposal/selection and Scheduler handoff;
@@ -395,8 +407,10 @@ packages:
 9. Plugin lifecycle and public/private publishing boundary;
 10. capability declaration, grant, eligibility, and resolution split;
 11. Tool identity/catalog and risk/idempotency vocabulary;
-12. approval request/grant issuer and verification;
-13. secret resolution and transient injection;
+12. Approval Authority durable service/API, approver policy, notification,
+    and atomic verification/consumption;
+13. Secret Authority backend, use authorization, transient lease/injection,
+    rotation, redaction, and deletion;
 14. sandbox/workspace lifecycle and isolation level;
 15. Team Template definition, instance, simulation, and activation;
 16. memory/knowledge/artifact taxonomy and authority;

@@ -1,0 +1,20 @@
+{
+  "$id": "https://leosai.org/contracts/resource-identity.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Resource Identity v1",
+  "description": "Canonical common identity, revision, ownership, lifecycle-authority, and audit evidence for one managed resource.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.resource-identity.v1"
+    },
+    "identity": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"
+    }
+  },
+  "required": [
+    "contract_version",
+    "identity"
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "$id": "https://leosai.org/contracts/authorization-decision.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Authorization Decision v1",
+  "description": "A subject-action-resource authorization decision. It does not resolve a capability or authorize provider selection.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.authorization-decision.v1"
+    },
+    "identity": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"
+    },
+    "actor_context_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"
+    },
+    "scope": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actionScope"
+    },
+    "decision": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ]
+    },
+    "authority": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/authorityRef"
+    },
+    "authority_evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"
+      }
+    },
+    "reasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "contract_version",
+    "identity",
+    "actor_context_ref",
+    "scope",
+    "decision",
+    "authority",
+    "authority_evidence_refs",
+    "reasons",
+    "decided_at",
+    "valid_until"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "ALLOW"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_evidence_refs": {
+            "minItems": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reasons": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

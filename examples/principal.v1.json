@@ -1,0 +1,65 @@
+{
+  "contract_version": "leos.principal.v1",
+  "identity": {
+    "resource_type": "PRINCIPAL",
+    "resource_id": "principal:user:brett",
+    "display_name": "Brett",
+    "revision": "sha256:principal-brett-v1",
+    "ownership": {
+      "owner": {
+        "principal_id": "principal:user:brett",
+        "principal_type": "HUMAN_USER"
+      },
+      "creator": {
+        "principal_id": "principal:user:brett",
+        "principal_type": "HUMAN_USER"
+      },
+      "steward": {
+        "principal_id": "principal:user:brett",
+        "principal_type": "HUMAN_USER"
+      },
+      "lifecycle_authority": {
+        "authority_id": "identity-authority",
+        "principal": {
+          "principal_id": "principal:service:identity-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:identity-authority-policy-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:bootstrap:principal-brett",
+      "revision": "sha256:actor-context-bootstrap-principal-brett"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "identity-authority",
+      "reference_id": "bootstrap-activation:principal-brett",
+      "revision": "sha256:authorization-bootstrap-principal-brett"
+    },
+    "audit_id": "audit:principal:user:brett:v1",
+    "created_at": "2026-07-25T12:00:00Z",
+    "updated_at": "2026-07-25T12:00:00Z"
+  },
+  "principal_type": "HUMAN_USER",
+  "status": "ACTIVE",
+  "subject_ref": {
+    "resource_type": "USER",
+    "resource_id": "user:brett",
+    "revision": "sha256:user-brett-v1"
+  },
+  "authentication_policy_refs": [
+    {
+      "authority": {
+        "authority_id": "identity-authority",
+        "principal": {
+          "principal_id": "principal:service:identity-authority",
+          "principal_type": "SERVICE"
+        },
+        "authority_revision": "sha256:identity-authority-policy-v1"
+      },
+      "reference_id": "authentication-policy:local-user",
+      "revision": "sha256:authentication-policy-local-user-v1"
+    }
+  ]
+}

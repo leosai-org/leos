@@ -248,8 +248,11 @@ The following boundaries apply while this roadmap is implemented:
 | Invocation | Execution Dispatcher | Tools, plugin operations, and Team Architect actions that perform real work use the governed execution boundary. |
 | Transport | AI Router or declared adapters | No roadmap feature may restore Router ranking, fallback, or substitution authority. |
 | Scheduling and resources | Scheduler | Workflow, Team, and Organization layers submit governed work; they do not create peer lease or admission authorities. |
-| Approval grants | **OPEN** | Team Architect and templates may request approval but cannot manufacture or self-verify grants. |
-| Secrets | **OPEN** authorized secret authority | Roadmap objects carry opaque requirements or references only, never credential values. |
+| Principal, actor, and resource ownership evidence | Identity Authority plus each domain lifecycle authority | Follow `../architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`; contract validity and caller strings never authenticate. |
+| Authorization decisions | Authorization Authority | Subject/action/resource/context decisions do not rank, resolve, or invoke; policy and grant sources remain partly **OPEN**. |
+| Approval grants | Approval Authority | Team Architect and templates may request approval but cannot manufacture or self-verify grants; only trusted current `VERIFIED` evidence authorizes. |
+| Artifact trust | Artifact Trust Authority | Trust verification never publishes, installs, grants permissions for, or activates an artifact. |
+| Secrets | Secret Authority for opaque reference identity; backend and transient resolution remain **OPEN** | Roadmap objects carry opaque requirements or references only, never credential values. |
 | Workflow lifecycle | **OPEN** | `workflow-engine-service` is cataloged, and workflow correlation exists, but no canonical workflow definition/lifecycle authority is established in this repository. |
 | Team and Organization lifecycle | **OPEN** | No canonical Team or Organization contract or lifecycle authority exists yet. |
 | Plugin and Tool lifecycle | **OPEN** | Repository licensing anticipates a public plugin SDK/manifest, but canonical package, install, grant, tool, and runtime contracts are not yet established. |
@@ -477,6 +480,41 @@ operations; they do not authorize changing the target of an active invocation.
 - system health
 - activity history
 - cost visibility
+
+## Phase 4 — Identity, Ownership, and Trust Foundation
+
+Epic 4.0 establishes the common trust vocabulary required by every later
+organization-first subsystem.
+
+Canonical outputs are:
+
+- `../architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`;
+- `../architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md`;
+- common Principal, Actor Context, resource identity, authorization decision,
+  Approval Grant/verification, Artifact Trust, Secret Reference, and Event
+  Envelope contracts under `../../contracts/`; and
+- canonical semantic validation and negative conformance tests.
+
+Phase 4 establishes logical authorities and contract boundaries. It does not
+implement production authenticators, durable trust services, secret backends,
+artifact publishing, organization lifecycle, or migrations into existing
+services.
+
+Every later epic must:
+
+- identify the authenticated actor at each mutation;
+- persist one canonical owner with the domain object;
+- preserve creator, steward, lifecycle-authority, revision, and audit
+  evidence;
+- obtain authorization, approval, artifact trust, and secret use only from
+  their recognized authorities;
+- publish canonical transition events only from the state owner; and
+- fail closed when trust evidence is absent, stale, revoked, mismatched, or
+  unavailable.
+
+Organization, Department, Team, Workflow, Plugin, Tool, Runtime, Artifact,
+Knowledge, and Memory lifecycle owners that remain **OPEN** are not silently
+assigned by Phase 4.
 
 ## Phase 5.0 — Non-authoritative Intelligence Test Fixture
 

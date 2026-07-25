@@ -10,6 +10,8 @@ Read before implementation:
 - `docs/architecture/v2/EXECUTION_PLANE_DECISIONS.md`
 - `docs/architecture/v2/INTELLIGENCE_PLANE.md`
 - `docs/architecture/v2/INTELLIGENCE_PLANE_DECISIONS.md`
+- `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`
+- `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md`
 - `docs/architecture/v2/AUTHORITY_REGISTRY.md`
 - `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md`
 - `docs/roadmap/DEV_PREVIEW_V2_GOALS.md` when present
@@ -75,6 +77,11 @@ adapted, or retired rather than blindly copied or rewritten.
 - Never place credentials or secret values in source, fixtures, tests,
   documentation, logs, prompts, events, or memory.
 - Preserve correlation and auditability across service boundaries.
+- Require one authenticated actor and one canonical owner for every new
+  authority-bearing action or managed resource.
+- Treat schema-valid identity, actor, approval, artifact-trust, secret-
+  reference, event, and fixture documents as evidence shapes, never as
+  self-authenticating authority.
 - Do not modify public/release authority merely to make development easier.
 
 ## Frozen/public release authority
