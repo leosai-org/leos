@@ -90,6 +90,11 @@ class ExecutionContractTests(unittest.TestCase):
     def execution_result(self) -> dict[str, Any]:
         return self.example("execution-result.v1.json")
 
+    def governed_order_required_execution_result(self) -> dict[str, Any]:
+        return self.example(
+            "execution-result.governed-order-required.v1.json"
+        )
+
     def error_result(self, status: str) -> dict[str, Any]:
         value = self.execution_result()
         value["status"] = status
@@ -259,6 +264,82 @@ class ExecutionContractTests(unittest.TestCase):
             "reference_id": "approval-requirement-001",
         }
         self.assert_valid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_execution_result(self):
+        self.assert_valid(
+            "execution-result.v1.schema.json",
+            self.governed_order_required_execution_result(),
+        )
+
+    def test_governed_order_required_requires_zero_attempt_count(self):
+        value = self.governed_order_required_execution_result()
+        value["attempt_summary"]["attempt_count"] = 1
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_requires_empty_attempts(self):
+        value = self.governed_order_required_execution_result()
+        value["attempt_summary"]["attempts"] = [
+            self.execution_result()["attempt_summary"]["attempts"][0]
+        ]
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_prohibits_authorized_target(self):
+        value = self.governed_order_required_execution_result()
+        value["authorized_target"] = self.execution_result()[
+            "authorized_target"
+        ]
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_prohibits_invocation_evidence(self):
+        for field in ("invocation_attempt_id", "provider_operation_id"):
+            with self.subTest(field=field):
+                value = self.governed_order_required_execution_result()
+                value["correlation"][field] = f"{field}-unexpected"
+                self.assert_invalid("execution-result.v1.schema.json", value)
+
+        value = self.governed_order_required_execution_result()
+        value["attempt_summary"]["idempotency_key"] = "unexpected-invocation"
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_prohibits_provider_outcome_evidence(self):
+        value = self.governed_order_required_execution_result()
+        value["normalized_result"] = {"unexpected": "provider output"}
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+        value = self.governed_order_required_execution_result()
+        value["error"] = {
+            "code": "transport_error",
+            "message": "No transport occurred.",
+            "retryable_same_target": False,
+            "remote_side_effect_possible": False,
+        }
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+        value = self.governed_order_required_execution_result()
+        value["raw_provider_response"] = {"unexpected": True}
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_requires_resolution_reference(self):
+        value = self.governed_order_required_execution_result()
+        value.pop("resolution_ref")
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_preserves_resolution_correlation(self):
+        value = self.governed_order_required_execution_result()
+        value["correlation"]["resolution_id"] = "resolution-other"
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+    def test_governed_order_required_malformed_forms_fail(self):
+        value = self.governed_order_required_execution_result()
+        value["status"] = "GOVERNED_ORDER_NEEDED"
+        self.assert_invalid("execution-result.v1.schema.json", value)
+
+        value = self.governed_order_required_execution_result()
+        value["approval_requirement_ref"] = {
+            "authority": "approval-authority",
+            "reference_id": "approval-requirement-unrelated",
+        }
+        self.assert_invalid("execution-result.v1.schema.json", value)
 
     def test_malformed_contract_versions_are_rejected(self):
         for schema_name, example_name in SCHEMA_EXAMPLES.items():
