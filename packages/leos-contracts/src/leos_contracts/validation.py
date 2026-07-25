@@ -34,13 +34,6 @@ RESERVED_APPROVAL_SHORTCUTS = {
     "approved",
     "has_approval",
 }
-DATE_TIME_FIELDS = {
-    "requested_at",
-    "resolved_at",
-    "valid_until",
-    "started_at",
-    "completed_at",
-}
 RFC3339 = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
     r"(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
@@ -200,32 +193,57 @@ def validate_semantics(
         if left is not None and right is not None and left != right:
             add(path, f"{description} must match")
 
-    def validate_timestamps(item: Any, path: str = "$") -> None:
-        if isinstance(item, dict):
-            for key, child in item.items():
-                child_path = f"{path}.{key}"
-                if key in DATE_TIME_FIELDS:
-                    valid = isinstance(child, str) and bool(
-                        RFC3339.fullmatch(child)
-                    )
-                    if valid:
-                        try:
-                            parsed = datetime.fromisoformat(
-                                child[:-1] + "+00:00"
-                                if child.endswith("Z")
-                                else child
-                            )
-                            valid = parsed.tzinfo is not None
-                        except ValueError:
-                            valid = False
-                    if not valid:
-                        add(child_path, "must be RFC3339 date-time")
-                validate_timestamps(child, child_path)
-        elif isinstance(item, list):
-            for index, child in enumerate(item):
-                validate_timestamps(child, f"{path}[{index}]")
+    def validate_timestamp(value: Any, path: str) -> None:
+        valid = isinstance(value, str) and bool(RFC3339.fullmatch(value))
+        if valid:
+            try:
+                parsed = datetime.fromisoformat(
+                    value[:-1] + "+00:00"
+                    if value.endswith("Z")
+                    else value
+                )
+                valid = parsed.tzinfo is not None
+            except ValueError:
+                valid = False
+        if not valid:
+            add(path, "must be RFC3339 date-time")
 
-    validate_timestamps(document)
+    if name == "capability-resolution-request.v1.schema.json":
+        if "requested_at" in document:
+            validate_timestamp(document["requested_at"], "$.requested_at")
+
+    if name == "capability-resolution-result.v1.schema.json":
+        if "resolved_at" in document:
+            validate_timestamp(document["resolved_at"], "$.resolved_at")
+        if "valid_until" in document:
+            validate_timestamp(document["valid_until"], "$.valid_until")
+
+    if name == "execution-result.v1.schema.json":
+        if "started_at" in document:
+            validate_timestamp(document["started_at"], "$.started_at")
+        if "completed_at" in document:
+            validate_timestamp(document["completed_at"], "$.completed_at")
+        summary = document.get("attempt_summary")
+        attempts = (
+            summary.get("attempts")
+            if isinstance(summary, dict)
+            else None
+        )
+        if isinstance(attempts, list):
+            for index, attempt in enumerate(attempts):
+                if not isinstance(attempt, dict):
+                    continue
+                if "started_at" in attempt:
+                    validate_timestamp(
+                        attempt["started_at"],
+                        f"$.attempt_summary.attempts[{index}].started_at",
+                    )
+                if "completed_at" in attempt:
+                    validate_timestamp(
+                        attempt["completed_at"],
+                        f"$.attempt_summary.attempts[{index}].completed_at",
+                    )
+
     correlation_key = "trace" if name == "execution.v1.schema.json" else "correlation"
     correlation = document.get(correlation_key)
     if not isinstance(correlation, dict):

@@ -145,6 +145,75 @@ class ValidationApiTests(unittest.TestCase):
         self.assertEqual("semantic", raised.exception.issues[0].kind)
         self.assertTrue(raised.exception.issues[0].path.startswith("$"))
 
+    def test_execution_input_and_context_timestamp_names_are_opaque(self):
+        value = self.example("execution.v1.json")
+        value["input"].update(
+            {
+                "requested_at": "next Tuesday",
+                "nested": {
+                    "started_at": "business-defined-value",
+                },
+            }
+        )
+        value["context"].update(
+            {
+                "assignment": {
+                    "started_at": None,
+                    "completed_at": None,
+                },
+                "domain_object": {
+                    "requested_at": "whenever practical",
+                    "completed_at": "not-a-canonical-timestamp",
+                },
+            }
+        )
+        self.assertIsNone(validate_contract("leos.execution.v1", value))
+        self.assertEqual(
+            (),
+            validation.validate_semantics("leos.execution.v1", value),
+        )
+
+    def test_resolution_timestamp_semantics_are_path_precise(self):
+        request = self.example("capability-resolution-request.v1.json")
+        request["requested_at"] = "not-a-time"
+        issues = validation.validate_semantics(
+            "leos.capability-resolution-request.v1",
+            request,
+        )
+        self.assertEqual(["$.requested_at"], [issue.path for issue in issues])
+
+        result = self.example("capability-resolution-result.v1.json")
+        result["resolved_at"] = "not-a-time"
+        result["valid_until"] = "also-not-a-time"
+        issues = validation.validate_semantics(
+            "leos.capability-resolution-result.v1",
+            result,
+        )
+        self.assertEqual(
+            ["$.resolved_at", "$.valid_until"],
+            [issue.path for issue in issues],
+        )
+
+    def test_execution_result_timestamp_semantics_are_path_precise(self):
+        result = self.example("execution-result.v1.json")
+        result["started_at"] = "not-a-time"
+        result["completed_at"] = "also-not-a-time"
+        result["attempt_summary"]["attempts"][0]["started_at"] = "bad-start"
+        result["attempt_summary"]["attempts"][0]["completed_at"] = "bad-end"
+        issues = validation.validate_semantics(
+            "leos.execution-result.v1",
+            result,
+        )
+        self.assertEqual(
+            [
+                "$.started_at",
+                "$.completed_at",
+                "$.attempt_summary.attempts[0].started_at",
+                "$.attempt_summary.attempts[0].completed_at",
+            ],
+            [issue.path for issue in issues],
+        )
+
     def test_governed_order_required_semantics_need_two_eligible(self):
         value = self.example(
             "capability-resolution-result.governed-order-required.v1.json"

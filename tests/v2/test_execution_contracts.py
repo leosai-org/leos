@@ -114,6 +114,24 @@ class ExecutionContractTests(unittest.TestCase):
     def test_valid_execution_request(self):
         self.assert_valid("execution.v1.schema.json", self.execution_request())
 
+    def test_execution_opaque_data_does_not_gain_timestamp_semantics(self):
+        value = self.execution_request()
+        value["input"] = {
+            "requested_at": "next Tuesday",
+            "nested": {"started_at": "domain-specific"},
+        }
+        value["context"] = {
+            "assignment": {
+                "started_at": None,
+                "completed_at": None,
+            },
+            "domain_object": {
+                "requested_at": "not-a-canonical-timestamp",
+                "completed_at": "business-status",
+            },
+        }
+        self.assert_valid("execution.v1.schema.json", value)
+
     def test_missing_required_execution_fields(self):
         value = self.execution_request()
         value.pop("capability_id")
