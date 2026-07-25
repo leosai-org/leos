@@ -18,6 +18,8 @@ SUPPORTED_CONTRACTS = (
     "capability-resolution-request.v1.schema.json",
     "capability-resolution-result.v1.schema.json",
     "execution-result.v1.schema.json",
+    "effective-ranking-request.v1.schema.json",
+    "effective-ranking-result.v1.schema.json",
 )
 CONTRACT_VERSIONS = {
     "leos.execution-correlation.v1": "execution-correlation.v1.schema.json",
@@ -27,6 +29,10 @@ CONTRACT_VERSIONS = {
     "leos.capability-resolution-result.v1":
         "capability-resolution-result.v1.schema.json",
     "leos.execution-result.v1": "execution-result.v1.schema.json",
+    "leos.effective-ranking-request.v1":
+        "effective-ranking-request.v1.schema.json",
+    "leos.effective-ranking-result.v1":
+        "effective-ranking-result.v1.schema.json",
 }
 RESERVED_APPROVAL_SHORTCUTS = {
     "allow_approval_required",
@@ -212,6 +218,14 @@ def validate_semantics(
         if "requested_at" in document:
             validate_timestamp(document["requested_at"], "$.requested_at")
 
+    if name == "effective-ranking-request.v1.schema.json":
+        if "requested_at" in document:
+            validate_timestamp(document["requested_at"], "$.requested_at")
+
+    if name == "effective-ranking-result.v1.schema.json":
+        if "resolved_at" in document:
+            validate_timestamp(document["resolved_at"], "$.resolved_at")
+
     if name == "capability-resolution-result.v1.schema.json":
         if "resolved_at" in document:
             validate_timestamp(document["resolved_at"], "$.resolved_at")
@@ -319,6 +333,15 @@ def validate_semantics(
                     for candidate in candidates
                     if isinstance(candidate, dict)
                     and candidate.get("provider_id") == selected_id
+                    and (
+                        not isinstance(selected, dict)
+                        or not selected.get("model_id")
+                        or (
+                            candidate.get("model_id") == selected.get("model_id")
+                            and candidate.get("runtime_binding_id")
+                            == selected.get("runtime_binding_id")
+                        )
+                    )
                 ]
                 if len(selected_matches) != 1:
                     add(
@@ -330,20 +353,21 @@ def validate_semantics(
                         "$.selected_target.provider_id",
                         "selected target candidate must be eligible",
                     )
-                first_eligible = next(
-                    (
-                        candidate.get("provider_id")
-                        for candidate in candidates
-                        if isinstance(candidate, dict)
-                        and candidate.get("outcome") == "ELIGIBLE"
-                    ),
-                    None,
-                )
-                if selected_id is not None and selected_id != first_eligible:
-                    add(
-                        "$.selected_target.provider_id",
-                        "selected target must be the first eligible candidate",
+                if not isinstance(selected, dict) or "model_id" not in selected:
+                    first_eligible = next(
+                        (
+                            candidate.get("provider_id")
+                            for candidate in candidates
+                            if isinstance(candidate, dict)
+                            and candidate.get("outcome") == "ELIGIBLE"
+                        ),
+                        None,
                     )
+                    if selected_id is not None and selected_id != first_eligible:
+                        add(
+                            "$.selected_target.provider_id",
+                            "selected target must be the first eligible candidate",
+                        )
             if document.get("status") == "NO_ELIGIBLE_PROVIDER":
                 eligible_count = sum(
                     1
@@ -357,17 +381,18 @@ def validate_semantics(
                         "NO_ELIGIBLE_PROVIDER must not contain eligible candidates",
                     )
             if document.get("status") == "GOVERNED_ORDER_REQUIRED":
-                eligible_count = sum(
+                governable_count = sum(
                     1
                     for candidate in candidates
                     if isinstance(candidate, dict)
-                    and candidate.get("outcome") == "ELIGIBLE"
+                    and candidate.get("outcome")
+                    in {"ELIGIBLE", "APPROVAL_REQUIRED"}
                 )
-                if eligible_count < 2:
+                if governable_count < 2:
                     add(
                         "$.candidate_evaluations",
                         "GOVERNED_ORDER_REQUIRED needs at least two "
-                        "eligible candidates",
+                        "otherwise-governable candidates",
                     )
                 rationale = document.get("rationale")
                 if not isinstance(rationale, dict) or not rationale:

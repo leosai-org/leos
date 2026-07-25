@@ -92,22 +92,28 @@ carries a selected target.
 `APPROVAL_PENDING` carries an external approval-requirement reference and does
 not silently select a lower-ranked candidate.
 `NO_ELIGIBLE_PROVIDER` means hard eligibility filtering left no eligible
-candidate. `GOVERNED_ORDER_REQUIRED` means at least two candidates remain
-eligible but no governed ordering exists, so LEOS refuses to invent selection
-authority. It retains those candidates as `ELIGIBLE`, returns no selected
-target, and authorizes no invocation.
+candidate. `GOVERNED_ORDER_REQUIRED` means at least two otherwise-governable
+candidates remain but no governed ordering exists, so LEOS refuses to invent
+selection authority. A candidate may still carry `APPROVAL_REQUIRED`;
+ordering ambiguity is resolved before approval can authorize one target. No
+selected target or invocation authority is returned.
 
 Candidate positions and eligibility outcomes may be recorded, but these
-contracts do not define candidate ranking. User-governed effective ranking is
-referenced through an extension point for a future intelligence-policy
-contract. Candidate positions preserve that supplied order; they are not
-scores. Rejected and approval-required candidates carry at least one reason.
-For a resolved outcome, the selected provider is the first eligible candidate
-in ascending evaluation order.
+contracts do not own candidate ranking. Provider and model effective rankings
+come from Ranking Policy Authority. Provider-only compatibility positions
+preserve a supplied exact order. Model-aware candidate positions are
+presentation positions, not scores or a hidden primary dimension; selection
+uses independent-dimension dominance. Rejected and approval-required
+candidates carry at least one reason. For a provider-only resolved outcome,
+the selected provider is the first eligible candidate in ascending evaluation
+order.
 Every `RESOLVED` selected target carries an immutable target-reference
 revision. Dispatcher must match both provider identity and that exact revision
 against inventory before invocation; identifier equality alone is not
 invocation authority.
+Model-aware targets additionally carry model identity and revision,
+runtime-binding identity and revision, runtime type, and the runtime-native
+model reference.
 
 Dispatcher transport retry remains limited to the same authorized target.
 Provider/model re-resolution, model escalation, and validation-triggered

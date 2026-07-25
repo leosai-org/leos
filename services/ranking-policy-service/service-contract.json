@@ -1,0 +1,23 @@
+{
+  "service": "ranking-policy-service",
+  "authority": "explicit-user-ranking",
+  "version": "0.2.0-dev-preview-v2",
+  "contracts": [
+    "leos.effective-ranking-request.v1",
+    "leos.effective-ranking-result.v1"
+  ],
+  "service_local_record": "ranking-policy.record.provisional-v1",
+  "endpoints": [
+    "GET /health",
+    "POST /rankings",
+    "GET /rankings",
+    "GET /rankings/{ranking_id}",
+    "PATCH /rankings/{ranking_id}",
+    "POST /effective",
+    "GET /events"
+  ],
+  "explicitly_absent": [
+    "eligibility", "provider facts", "model facts", "scoring",
+    "fallback", "selection", "execution", "provider endpoints"
+  ]
+}

@@ -1,0 +1,38 @@
+services:
+  ranking-policy:
+    build:
+      context: ../../..
+      dockerfile: services/ranking-policy-service/Dockerfile
+    environment:
+      RANKING_POLICY_DB: /data/rankings.db
+    tmpfs: [/data]
+
+  capability-manager:
+    build:
+      context: ../../..
+      dockerfile: services/capability-manager-service/Dockerfile
+    environment:
+      CAPABILITY_MANAGER_DATA_DIR: /data
+      RANKING_AUTHORITY_URL: http://ranking-policy:8000
+      MODEL_REGISTRY_URL: http://model-registry:8000
+    tmpfs: [/data]
+
+  model-registry:
+    build:
+      context: ../../..
+      dockerfile: services/model-registry-service/Dockerfile
+    environment:
+      MODEL_REGISTRY_DATA_DIR: /data
+      MODEL_REGISTRY_DB: /data/models.db
+      CAPABILITY_MANAGER_URL: http://capability-manager:8000
+    tmpfs: [/data]
+
+  integration-test:
+    image: python:3.12-slim@sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd04266317710de
+    depends_on:
+      - ranking-policy
+      - capability-manager
+      - model-registry
+    volumes:
+      - ./run.py:/run.py:ro
+    command: ["python", "/run.py"]

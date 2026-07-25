@@ -1,0 +1,59 @@
+{
+  "$id": "https://leosai.org/contracts/effective-ranking-result.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Effective Ranking Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.effective-ranking-result.v1"},
+    "dimension": {"enum": ["provider", "model"]},
+    "status": {"enum": ["DEFINED", "UNDEFINED"]},
+    "ordered_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/id"}
+    },
+    "source_scope": {"enum": ["global", "capability", "employee", "job"]},
+    "source_scope_id": {"$ref": "#/$defs/id"},
+    "ranking_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority": {"const": "ranking-policy-authority"},
+        "reference_id": {"$ref": "#/$defs/id"},
+        "revision": {"$ref": "#/$defs/id"}
+      },
+      "required": ["authority", "reference_id", "revision"]
+    },
+    "resolved_at": {"type": "string", "format": "date-time"}
+  },
+  "required": ["contract_version", "dimension", "status", "ordered_ids", "resolved_at"],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "DEFINED"}}, "required": ["status"]},
+      "then": {
+        "properties": {"ordered_ids": {"minItems": 1}},
+        "required": ["source_scope", "ranking_ref"]
+      },
+      "else": {
+        "properties": {"ordered_ids": {"maxItems": 0}},
+        "not": {"anyOf": [
+          {"required": ["source_scope"]},
+          {"required": ["source_scope_id"]},
+          {"required": ["ranking_ref"]}
+        ]}
+      }
+    },
+    {
+      "if": {"properties": {"source_scope": {"const": "global"}}, "required": ["source_scope"]},
+      "then": {"not": {"required": ["source_scope_id"]}},
+      "else": {
+        "if": {"required": ["source_scope"]},
+        "then": {"required": ["source_scope_id"]}
+      }
+    }
+  ],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 256}
+  }
+}

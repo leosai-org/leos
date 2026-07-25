@@ -157,7 +157,7 @@
             "contains": {
               "properties": {
                 "outcome": {
-                  "const": "ELIGIBLE"
+                  "enum": ["ELIGIBLE", "APPROVAL_REQUIRED"]
                 }
               },
               "required": [
@@ -249,11 +249,46 @@
         },
         "credential_ref": {
           "$ref": "#/$defs/governed_reference"
+        },
+        "model_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "model_ref": {
+          "allOf": [
+            {"$ref": "#/$defs/governed_reference"},
+            {"required": ["revision"]}
+          ]
+        },
+        "runtime_binding_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "runtime_binding_ref": {
+          "allOf": [
+            {"$ref": "#/$defs/governed_reference"},
+            {"required": ["revision"]}
+          ]
+        },
+        "runtime_type": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "runtime_model_ref": {
+          "$ref": "#/$defs/identifier"
         }
       },
       "required": [
         "provider_id"
-      ]
+      ],
+      "dependentRequired": {
+        "model_id": [
+          "model_ref", "runtime_binding_id", "runtime_binding_ref",
+          "runtime_type", "runtime_model_ref"
+        ],
+        "runtime_binding_id": [
+          "model_id", "model_ref", "runtime_binding_ref",
+          "runtime_type", "runtime_model_ref"
+        ]
+      }
     },
     "candidate_evaluation": {
       "type": "object",
@@ -264,6 +299,12 @@
           "minimum": 1
         },
         "provider_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "model_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "runtime_binding_id": {
           "$ref": "#/$defs/identifier"
         },
         "outcome": {

@@ -61,10 +61,31 @@ details are marked **OPEN**.
   and audit.
 - **Consequences:** A job list is evaluated as authored rather than interleaved
   with employee, capability, or global alternatives. An explicitly empty
-  more-specific ranking replaces
-  less-specific rankings and yields explicit resolution failure. If no ranking
-  exists at any scope, resolution fails. There is no implicit emergency or
-  unranked candidate pool.
+  more-specific ranking replaces less-specific rankings. Defined rankings are
+  non-empty; absence or inactivity means inheritance. An empty list has no
+  implicit inheritance or deny-all meaning. If no ranking exists, that
+  dimension is `UNDEFINED` and supplies no order. There is no implicit
+  emergency or unranked candidate pool.
+- **Supersession note:** This non-empty/undefined rule supersedes the earlier
+  provisional wording that treated an explicitly empty list as a defined
+  failure. Empty ordering is invalid in this v2 phase; disabling or removing a
+  ranking resumes inheritance.
+
+## ADR-IP-020: Provider and model rankings resolve independently by dominance
+
+- **Status:** Accepted
+- **Decision:** Provider and model rankings derive their effective scopes
+  independently. An eligible provider/model binding candidate governably
+  outranks another only when it is no worse in every defined dimension and
+  strictly better in at least one. If multiple non-dominated candidates
+  remain, resolution returns `GOVERNED_ORDER_REQUIRED`.
+- **Context:** Making provider or model preference implicitly primary would
+  invent user policy when the two exact rankings express a tradeoff.
+- **Consequences:** No rank sum, weight, score, benchmark, identifier order,
+  or provider-first/model-first tie breaker may select between incomparable
+  candidates. With only one defined dimension, candidates tied in that
+  dimension remain unordered. With no defined dimension, only a single
+  eligible candidate can resolve.
 
 ## ADR-IP-005: Capability Manager is canonical provider and resolution authority
 

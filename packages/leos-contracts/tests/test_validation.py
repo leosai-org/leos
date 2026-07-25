@@ -136,6 +136,32 @@ class ValidationApiTests(unittest.TestCase):
         self.assertIsNone(validate_contract("leos.execution.v1", value))
         self.assertIsNone(validate_contract("execution.v1.schema.json", value))
 
+    def test_ranking_contract_examples_validate(self):
+        for contract, example in (
+            (
+                "leos.effective-ranking-request.v1",
+                "effective-ranking-request.v1.json",
+            ),
+            (
+                "leos.effective-ranking-result.v1",
+                "effective-ranking-result.v1.json",
+            ),
+        ):
+            self.assertIsNone(validate_contract(contract, self.example(example)))
+
+    def test_undefined_effective_ranking_has_no_source_authority(self):
+        value = {
+            "contract_version": "leos.effective-ranking-result.v1",
+            "dimension": "provider",
+            "status": "UNDEFINED",
+            "ordered_ids": [],
+            "resolved_at": "2026-07-25T12:00:00Z",
+        }
+        self.assertIsNone(validate_contract("leos.effective-ranking-result.v1", value))
+        value["source_scope"] = "global"
+        with self.assertRaises(ContractValidationError):
+            validate_contract("leos.effective-ranking-result.v1", value)
+
     def test_validation_failure_is_structured(self):
         value = self.example("execution.v1.json")
         value["trace"]["execution_id"] = "different"
@@ -167,6 +193,24 @@ class ValidationApiTests(unittest.TestCase):
                 },
             }
         )
+        self.assertIsNone(validate_contract("leos.execution.v1", value))
+        self.assertEqual(
+            (),
+            validation.validate_semantics("leos.execution.v1", value),
+        )
+
+    def test_ranking_and_model_names_in_opaque_payloads_remain_opaque(self):
+        value = self.example("execution.v1.json")
+        value["input"]["ranking"] = {
+            "provider_order": ["invented-first"],
+            "model_order": [],
+        }
+        value["context"]["model_id"] = "not-canonical-policy"
+        value["context"]["metadata"] = {
+            "provider_order": ["p9", "p1"],
+            "model_order": ["m9", "m1"],
+            "ranking": {"score": 999},
+        }
         self.assertIsNone(validate_contract("leos.execution.v1", value))
         self.assertEqual(
             (),
@@ -214,7 +258,7 @@ class ValidationApiTests(unittest.TestCase):
             [issue.path for issue in issues],
         )
 
-    def test_governed_order_required_semantics_need_two_eligible(self):
+    def test_governed_order_required_needs_two_governable_candidates(self):
         value = self.example(
             "capability-resolution-result.governed-order-required.v1.json"
         )
@@ -227,7 +271,7 @@ class ValidationApiTests(unittest.TestCase):
         self.assertTrue(
             any(
                 issue.kind == "semantic"
-                and "at least two eligible" in issue.message
+                and "at least two otherwise-governable" in issue.message
                 for issue in raised.exception.issues
             )
         )

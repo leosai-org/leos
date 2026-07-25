@@ -1,0 +1,8 @@
+{
+  "contract_version": "leos.effective-ranking-request.v1",
+  "dimension": "model",
+  "capability_id": "text.reason",
+  "employee_id": "researcher-1",
+  "job_id": "job-1",
+  "requested_at": "2026-07-25T12:00:00Z"
+}

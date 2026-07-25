@@ -259,13 +259,15 @@ For a resolution request, the effective ranking is constructed as follows:
 7. attach ranking scope, policy revision, owner, and provenance to the
    resolution input.
 
-An explicitly defined empty ranking is a defined more-specific ranking and
-therefore replaces less-specific rankings. It yields explicit resolution
-failure; it does not fall back.
+A defined ranking contains at least one unique ordered stable identifier.
+An empty list is invalid and is not overloaded to mean inheritance or
+deny-all. Absence or inactivity of a ranking record means inheritance.
 
-If no ranking exists at job, employee, capability, or global scope,
-intelligence resolution fails explicitly. There is no implicit emergency or
-unranked candidate pool, and LEOS must not invent a provider/model choice.
+If no ranking exists at job, employee, capability, or global scope, the
+dimension is explicitly `UNDEFINED`. It supplies no ordering. Zero eligible
+candidates fail normally, one may resolve without comparative ordering, and
+multiple unordered candidates require governed ordering. There is no implicit
+emergency candidate pool.
 First Run normally seeds an initial global ranking after successful governed
 runtime/model registration.
 

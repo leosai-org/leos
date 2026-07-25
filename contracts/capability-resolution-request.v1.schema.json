@@ -39,6 +39,22 @@
     "requested_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "ranking_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "employee_id": {"$ref": "#/$defs/identifier"},
+        "job_id": {"$ref": "#/$defs/identifier"}
+      }
+    },
+    "target_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model_required": {"const": true}
+      },
+      "required": ["model_required"]
     }
   },
   "required": [

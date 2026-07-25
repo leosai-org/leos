@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import sqlite3
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
+import httpx
 from fastapi import FastAPI, HTTPException, Query
 from leos_contracts import (
     ContractRootError,
@@ -24,6 +26,12 @@ REQUEST_CONTRACT = "leos.capability-resolution-request.v1"
 RESULT_CONTRACT = "leos.capability-resolution-result.v1"
 CORRELATION_CONTRACT = "leos.execution-correlation.v1"
 PROVIDER_ORDER_CONSTRAINT = "provider_preference_order"
+RANKING_AUTHORITY_URL = os.getenv(
+    "RANKING_AUTHORITY_URL", "http://ranking-policy-service:8000"
+).rstrip("/")
+MODEL_REGISTRY_URL = os.getenv(
+    "MODEL_REGISTRY_URL", "http://model-registry-service:8000"
+).rstrip("/")
 RAW_CREDENTIAL_KEYS = {
     "access_token",
     "api_key",
@@ -624,6 +632,199 @@ def provider_target(row: sqlite3.Row) -> dict[str, Any]:
     return target
 
 
+async def authority_json(
+    method: str, url: str, *, json_body: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            response = await client.request(method, url, json=json_body)
+            response.raise_for_status()
+            value = response.json()
+    except (httpx.HTTPError, ValueError) as error:
+        raise HTTPException(
+            503,
+            {"code": "intelligence_authority_unavailable", "authority_url": url},
+        ) from error
+    if not isinstance(value, dict):
+        raise HTTPException(
+            502, {"code": "intelligence_authority_invalid_response"}
+        )
+    return value
+
+
+async def effective_ranking(
+    dimension: str, request: dict[str, Any]
+) -> dict[str, Any]:
+    context = request.get("ranking_context", {})
+    payload = {
+        "contract_version": "leos.effective-ranking-request.v1",
+        "dimension": dimension,
+        "capability_id": request["capability_id"],
+        "requested_at": request["requested_at"],
+        **context,
+    }
+    result = await authority_json(
+        "POST", f"{RANKING_AUTHORITY_URL}/effective", json_body=payload
+    )
+    try:
+        validate_contract("leos.effective-ranking-result.v1", result)
+    except ContractValidationError as error:
+        raise HTTPException(
+            502, {"code": "effective_ranking_invalid"}
+        ) from error
+    return result
+
+
+def dominates(
+    left: dict[str, Any],
+    right: dict[str, Any],
+    provider_rank: dict[str, int] | None,
+    model_rank: dict[str, int] | None,
+) -> bool:
+    comparisons = []
+    if provider_rank is not None:
+        comparisons.append(
+            provider_rank[left["provider_id"]]
+            <= provider_rank[right["provider_id"]]
+        )
+        strictly = (
+            provider_rank[left["provider_id"]]
+            < provider_rank[right["provider_id"]]
+        )
+    else:
+        strictly = False
+    if model_rank is not None:
+        comparisons.append(
+            model_rank[left["model_id"]] <= model_rank[right["model_id"]]
+        )
+        strictly = strictly or (
+            model_rank[left["model_id"]] < model_rank[right["model_id"]]
+        )
+    return bool(comparisons) and all(comparisons) and strictly
+
+
+async def resolve_model_candidates(
+    request: dict[str, Any],
+    rows: dict[str, sqlite3.Row],
+) -> tuple[
+    list[dict[str, Any]], dict[str, Any] | None, str, dict[str, Any]
+]:
+    provider_policy = await effective_ranking("provider", request)
+    model_policy = await effective_ranking("model", request)
+    models_payload = await authority_json(
+        "GET", f"{MODEL_REGISTRY_URL}/models?enabled=true"
+    )
+    bindings_payload = await authority_json(
+        "GET", f"{MODEL_REGISTRY_URL}/bindings?enabled=true"
+    )
+    models = {
+        item["model_id"]: item
+        for item in models_payload.get("models", [])
+        if isinstance(item, dict) and item.get("enabled") is True
+    }
+    bindings = [
+        item for item in bindings_payload.get("bindings", [])
+        if isinstance(item, dict) and item.get("enabled") is True
+    ]
+    provider_ids = (
+        provider_policy["ordered_ids"]
+        if provider_policy["status"] == "DEFINED"
+        else list(rows)
+    )
+    model_ids = (
+        model_policy["ordered_ids"]
+        if model_policy["status"] == "DEFINED"
+        else list(models)
+    )
+    provider_set, model_set = set(provider_ids), set(model_ids)
+    candidates = []
+    for binding in bindings:
+        provider_id, model_id = binding.get("provider_id"), binding.get("model_id")
+        if provider_id not in provider_set or model_id not in model_set:
+            continue
+        row, model = rows.get(provider_id), models.get(model_id)
+        outcome, reasons = candidate_disposition(row)
+        if model is None:
+            outcome, reasons = "REJECTED", ["model_disabled_or_unknown"]
+        elif request["capability_id"] not in model.get("capabilities", []):
+            outcome, reasons = "REJECTED", ["model_lacks_required_capability"]
+        elif (
+            row is not None
+            and (
+                binding.get("provider_ref", {}).get("reference_id")
+                != provider_id
+                or binding.get("provider_ref", {}).get("revision")
+                != row["updated_at"]
+            )
+        ):
+            outcome, reasons = "REJECTED", ["binding_provider_revision_stale"]
+        elif binding.get("availability", {}).get("state") == "unavailable":
+            outcome, reasons = "REJECTED", ["runtime_binding_unavailable"]
+        candidates.append(
+            {
+                "provider_id": provider_id,
+                "model_id": model_id,
+                "runtime_binding_id": binding["binding_id"],
+                "outcome": outcome,
+                "reasons": reasons,
+                "_row": row,
+                "_model": model,
+                "_binding": binding,
+            }
+        )
+    # Identifier order is presentation-only. Selection below uses dominance.
+    candidates.sort(
+        key=lambda item: (
+            item["provider_id"], item["model_id"], item["runtime_binding_id"]
+        )
+    )
+    eligible_or_approval = [
+        item for item in candidates
+        if item["outcome"] in {"ELIGIBLE", "APPROVAL_REQUIRED"}
+    ]
+    provider_rank = (
+        {value: index for index, value in enumerate(provider_ids)}
+        if provider_policy["status"] == "DEFINED" else None
+    )
+    model_rank = (
+        {value: index for index, value in enumerate(model_ids)}
+        if model_policy["status"] == "DEFINED" else None
+    )
+    best = [
+        item for item in eligible_or_approval
+        if not any(
+            dominates(other, item, provider_rank, model_rank)
+            for other in eligible_or_approval if other is not item
+        )
+    ]
+    status = "NO_ELIGIBLE_PROVIDER"
+    selected = None
+    if len(best) > 1:
+        status = "GOVERNED_ORDER_REQUIRED"
+    elif len(best) == 1 and best[0]["outcome"] == "APPROVAL_REQUIRED":
+        status, selected = "APPROVAL_PENDING", best[0]
+    elif len(best) == 1:
+        status, selected = "RESOLVED", best[0]
+    public = [
+        {
+            "position": index,
+            "provider_id": item["provider_id"],
+            "model_id": item["model_id"],
+            "runtime_binding_id": item["runtime_binding_id"],
+            "outcome": item["outcome"],
+            "reasons": item["reasons"],
+        }
+        for index, item in enumerate(candidates, start=1)
+    ]
+    evidence = {
+        "provider_effective_ranking": provider_policy,
+        "model_effective_ranking": model_policy,
+        "ordering_rule": "independent-dimension-dominance",
+        "non_dominated_candidate_count": len(best),
+    }
+    return public, selected, status, evidence
+
+
 def persist_resolution(
     request: dict[str, Any],
     result: dict[str, Any],
@@ -666,13 +867,23 @@ def resolve(request: dict[str, Any]) -> dict[str, Any]:
     correlation = dict(request["correlation"])
     correlation["resolution_id"] = resolution_id
     rows = candidate_rows(request["capability_id"])
+    model_required = bool(request.get("target_requirements", {}).get("model_required"))
     ordered_ids, governed_order_supplied = ordered_provider_ids(request, rows)
     evaluations: list[dict[str, Any]] = []
     selected: Optional[sqlite3.Row] = None
     approval_provider_id: Optional[str] = None
     governed_order_required = False
 
+    model_selected: dict[str, Any] | None = None
+    ranking_evidence: dict[str, Any] | None = None
+    model_status: str | None = None
+    if model_required:
+        evaluations, model_selected, model_status, ranking_evidence = (
+            asyncio.run(resolve_model_candidates(request, rows))
+        )
     for position, provider_id in enumerate(ordered_ids, start=1):
+        if model_required:
+            break
         row = rows.get(provider_id)
         outcome, reasons = candidate_disposition(row)
         evaluations.append(
@@ -734,7 +945,42 @@ def resolve(request: dict[str, Any]) -> dict[str, Any]:
         "resolved_at": timestamp,
     }
 
-    if governed_order_required:
+    if model_required:
+        result["status"] = model_status
+        result["rationale"] = ranking_evidence
+        if model_status == "RESOLVED" and model_selected is not None:
+            binding = model_selected["_binding"]
+            model = model_selected["_model"]
+            target = provider_target(model_selected["_row"])
+            target.update(
+                model_id=model["model_id"],
+                model_ref={
+                    "authority": "model-registry",
+                    "reference_id": model["model_id"],
+                    "revision": model["revision"],
+                },
+                runtime_binding_id=binding["binding_id"],
+                runtime_binding_ref={
+                    "authority": "model-registry",
+                    "reference_id": binding["binding_id"],
+                    "revision": binding["revision"],
+                },
+                runtime_type=binding["runtime_type"],
+                runtime_model_ref=binding["runtime_model_ref"],
+            )
+            result["selected_target"] = target
+        elif model_status == "APPROVAL_PENDING" and model_selected is not None:
+            result["approval_requirement_ref"] = {
+                "authority": "capability-manager",
+                "reference_id": (
+                    f"{resolution_id}:{model_selected['provider_id']}:"
+                    f"{model_selected['model_id']}:approval"
+                ),
+            }
+
+    if model_required:
+        pass
+    elif governed_order_required:
         result["status"] = "GOVERNED_ORDER_REQUIRED"
         result["rationale"]["outcome"] = "governed_order_required"
         result["rationale"]["eligible_candidate_count"] = sum(

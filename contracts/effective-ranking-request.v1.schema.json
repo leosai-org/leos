@@ -1,0 +1,19 @@
+{
+  "$id": "https://leosai.org/contracts/effective-ranking-request.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Effective Ranking Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.effective-ranking-request.v1"},
+    "dimension": {"enum": ["provider", "model"]},
+    "capability_id": {"$ref": "#/$defs/id"},
+    "employee_id": {"$ref": "#/$defs/id"},
+    "job_id": {"$ref": "#/$defs/id"},
+    "requested_at": {"type": "string", "format": "date-time"}
+  },
+  "required": ["contract_version", "dimension", "requested_at"],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 256}
+  }
+}

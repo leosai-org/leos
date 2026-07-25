@@ -1,0 +1,14 @@
+{
+  "contract_version": "leos.effective-ranking-result.v1",
+  "dimension": "model",
+  "status": "DEFINED",
+  "ordered_ids": ["qwen-7b", "qwen-3b"],
+  "source_scope": "employee",
+  "source_scope_id": "researcher-1",
+  "ranking_ref": {
+    "authority": "ranking-policy-authority",
+    "reference_id": "ranking-model-researcher-1",
+    "revision": "sha256:example"
+  },
+  "resolved_at": "2026-07-25T12:00:00Z"
+}
