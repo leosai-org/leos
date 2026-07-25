@@ -1,0 +1,35 @@
+{
+  "authority": "model-facts",
+  "contract_status": "service-local-provisional",
+  "service": "model-registry-service",
+  "service_contract": "model-registry.inventory.provisional-v1",
+  "version": "0.2.0-dev-preview-v2",
+  "mutation_concurrency": "required expected_revision compare-and-swap",
+  "model_identity": "one concrete deployable model variant",
+  "binding_identity": [
+    "provider_id",
+    "runtime_type",
+    "runtime_model_ref"
+  ],
+  "endpoints": [
+    "GET /health",
+    "POST /models",
+    "GET /models",
+    "GET /models/{model_id}",
+    "PATCH /models/{model_id}",
+    "POST /bindings",
+    "GET /bindings",
+    "GET /bindings/{binding_id}",
+    "PATCH /bindings/{binding_id}",
+    "GET /events"
+  ],
+  "explicitly_absent": [
+    "model selection",
+    "provider selection",
+    "ranking",
+    "fallback",
+    "invocation",
+    "provider endpoints",
+    "credentials"
+  ]
+}
