@@ -11,6 +11,7 @@ Read before implementation:
 - `docs/architecture/v2/INTELLIGENCE_PLANE.md`
 - `docs/architecture/v2/INTELLIGENCE_PLANE_DECISIONS.md`
 - `docs/roadmap/DEV_PREVIEW_V2_GOALS.md` when present
+- `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`
 
 If an implementation request conflicts with these documents, stop and report
 the conflict. Do not silently change the architecture.

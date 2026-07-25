@@ -5,6 +5,20 @@
 **Status:** Planning baseline  
 **Purpose:** Capture the goals, architectural decisions, priorities, and development strategy established during this session so future development can continue without reconstructing the discussion.
 
+## Reconciliation note
+
+This document preserves the original Dev Preview v2 product goals and examples.
+The accepted execution- and intelligence-plane architecture and decisions
+govern implementation where later evidence refined this planning baseline. In
+particular, local-first is a user-governed option rather than implicit
+selection priority; Ranking Policy Authority establishes provider/model order;
+Capability Manager resolves; Dispatcher invokes; Router transports; and retry,
+re-resolution, and escalation remain distinct. Examples below that use
+“fallback,” automatic local-first selection, provider scoring/priority, or
+Router-owned selection are historical product intent and must not be
+implemented as authority. The organization-first direction is recorded in
+`LEOS_ORGANIZATION_FIRST_ROADMAP.md`.
+
 ---
 
 ## 1. Core Direction
