@@ -1,0 +1,49 @@
+{
+  "contract_version": "leos.work-state-transition.v1",
+  "identity": {
+    "resource_type": "WORK_STATE_TRANSITION",
+    "resource_id": "work-transition:acme:research:ready",
+    "display_name": "Research task became ready",
+    "revision": "sha256:work-transition-acme-research-ready-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "steward": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:task-lifecycle-authority",
+        "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-task-lifecycle-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:task-create", "revision": "sha256:actor-context-brett-task-create"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:task-create", "revision": "sha256:authorization-task-create"},
+    "audit_id": "audit:work-transition:acme:research:ready:v1",
+    "created_at": "2026-07-25T18:10:00Z",
+    "updated_at": "2026-07-25T18:10:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:task-lifecycle-authority",
+      "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-task-lifecycle-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:task-create", "revision": "sha256:actor-context-brett-task-create"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:task-create", "revision": "sha256:authorization-task-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:task:research:ready", "revision": "sha256:event-task-research-ready"},
+    "transitioned_at": "2026-07-25T18:10:00Z"
+  },
+  "subject_ref": {"resource_type": "TASK", "resource_id": "task:acme:market-brief:research", "revision": "sha256:task-acme-market-brief-research-v1"},
+  "from_state": "DRAFT",
+  "to_state": "READY",
+  "expected_revision": "sha256:task-acme-market-brief-research-v0",
+  "resulting_revision": "sha256:task-acme-market-brief-research-v1",
+  "reason": "The governed task definition is ready for assignment.",
+  "result_refs": [],
+  "verification_evidence_refs": [],
+  "history_refs": [{"authority": {"authority_id": "OPEN:task-lifecycle-authority", "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-task-lifecycle-authority-v1"}, "reference_id": "task-history:research:v0", "revision": "sha256:task-history-research-v0"}],
+  "rollback_behavior": "NONE",
+  "occurred_at": "2026-07-25T18:10:00Z"
+}

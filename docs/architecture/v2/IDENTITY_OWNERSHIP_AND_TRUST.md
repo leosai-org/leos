@@ -520,3 +520,18 @@ accepted the logical Organization Domain boundary in
 No implementation may fill these gaps by caller convention, fixture state,
 identifier spelling, Lucy behavior, or the first component that persists a
 record.
+
+## Work Domain integration
+
+Work Request, Workflow Definition/Revision, Job, Task, Assignment, Delegation,
+Dependency, Result, State Transition, Retry Intent, and Escalation Intent use
+the managed identity and exactly-one-owner model. Each is scoped to one
+Organization and pins Actor Context, Authorization Decision, applicable
+Approval Verification, Event, lifecycle authority, revision, and audit
+evidence.
+
+These references are evidence shapes, not self-authenticating authority.
+Assignment and Delegation never authorize; Result never verifies; Event never
+writes state; and an `OPEN:` lifecycle-authority reference never constitutes
+an accepted production owner. See
+`WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN.md`.

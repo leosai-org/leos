@@ -1,0 +1,57 @@
+{
+  "contract_version": "leos.task-definition.v1",
+  "identity": {
+    "resource_type": "TASK",
+    "resource_id": "task:acme:market-brief:research",
+    "display_name": "Research market evidence",
+    "revision": "sha256:task-acme-market-brief-research-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:task-lifecycle-authority",
+        "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-task-lifecycle-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:task-create", "revision": "sha256:actor-context-brett-task-create"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:task-create", "revision": "sha256:authorization-task-create"},
+    "audit_id": "audit:task:acme:market-brief:research:v1",
+    "created_at": "2026-07-25T18:10:00Z",
+    "updated_at": "2026-07-25T18:10:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:task-lifecycle-authority",
+      "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-task-lifecycle-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:task-create", "revision": "sha256:actor-context-brett-task-create"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:task-create", "revision": "sha256:authorization-task-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:task:research:ready", "revision": "sha256:event-task-research-ready"},
+    "transitioned_at": "2026-07-25T18:10:00Z"
+  },
+  "parent_job_ref": {"resource_type": "SCHEDULER_JOB", "resource_id": "job:acme:market-brief", "revision": "sha256:job-acme-market-brief-v1"},
+  "source_workflow_revision_ref": {"resource_type": "WORKFLOW_REVISION", "resource_id": "workflow-revision:acme:market-brief:1.0.0", "revision": "sha256:workflow-revision-acme-market-brief-1-0-0"},
+  "source_workflow_step_id": "research",
+  "title": "Research market evidence",
+  "objective": "Collect cited evidence for the market brief.",
+  "description": "Use governed capabilities to collect relevant public evidence.",
+  "status": "READY",
+  "priority": 50,
+  "due_window": {"not_before": "2026-07-25T18:10:00Z", "due_at": "2026-07-27T18:00:00Z"},
+  "required_capability_refs": [],
+  "input_refs": [],
+  "expected_outputs": [{"output_id": "research-notes", "description": "Cited research notes", "required": true}],
+  "dependency_refs": [],
+  "assignment_constraints": {"allowed_target_types": ["EMPLOYEE", "TEAM"], "role_refs": [], "position_refs": [], "exclusive_assignment": true, "policy_refs": []},
+  "governance": {"approval_required": false, "approval_policy_refs": [], "verification_required": false, "verification_criteria_refs": [], "required_evidence_refs": []},
+  "retry_limit": 1,
+  "escalation_policy_refs": [],
+  "result_refs": [],
+  "verification_evidence_refs": []
+}

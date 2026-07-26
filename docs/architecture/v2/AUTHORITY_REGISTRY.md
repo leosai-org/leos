@@ -18,6 +18,8 @@ It consolidates decisions already accepted in:
 - `ORGANIZATION_DOMAIN_DECISIONS.md`
 - `CAPABILITY_PLUGIN_AND_TOOL_DOMAIN.md`
 - `CAPABILITY_PLUGIN_AND_TOOL_DOMAIN_DECISIONS.md`
+- `WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN.md`
+- `WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN_DECISIONS.md`
 - `EFFECTIVE_RANKING_AND_MODEL_RESOLUTION.md`
 - `../../roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`
 - `../../roadmap/LEOS_DEV_PREVIEW_V2_GAP_REPORT.md`
@@ -61,6 +63,7 @@ authority may still be incomplete, while a working Lucy service may remain
 | Secret-reference identity | Secret Authority | Opaque reference identity and protected-value lifecycle boundary | Reference possession never authorizes resolution; backend, transient injection, and production implementation remain **OPEN**. |
 | Canonical event production | Authority that owns the represented state transition | Immutable event identity, source, producer, actor, subject revision, correlation, causation, time, and schema revision | Broker/delivery/event projections remain non-authoritative; outbox, ordering, replay, and retention remain **OPEN**. |
 | Job lifecycle | Scheduler | Jobs and scheduler-owned job transitions | Does not own employee reasoning, provider resolution, or assignment working state. |
+| Job target contract | Scheduler | Organization-scoped instantiated work identity, source Work Request/Workflow revision, state, outputs, governance, and closure evidence after explicit service adoption | `leos.job-definition.v1` is a target contract; Epic 7.0 does not migrate Scheduler APIs or storage. |
 | Worker lease | Scheduler | Lease identity, acquisition, renewal, and release | No workflow, runtime, or coordinator may create a peer lease authority. |
 | Compute/resource admission | Scheduler | Admission decisions and resource reservations | Employee resource profiles supply governed inputs; they do not admit work. |
 | Employee resource profile | Employee Resource Profile Service | Canonical employee resource requirement/profile records | Does not select models or providers and does not replace Scheduler admission. |
@@ -71,6 +74,7 @@ authority may still be incomplete, while a working Lucy service may remain
 | Position Occupancy lifecycle | Logical Organization Domain Authority | Employee-to-Position relationships, effective periods, revisions, and history | Occupancy is neither Membership nor work Assignment. |
 | Durable employee presence and mailbox | Persistent Employee Runtime | Durable employee presence, mailbox, and working-state storage | No reasoning, provider invocation, or scheduler lease ownership. |
 | Assignment projection and transitions | Persistent Employee Runtime | Assignment identity, durable projection, and runtime-owned transitions | Scheduler remains job/lease authority; Cognitive Service remains reasoning authority. |
+| Assignment target contract | Persistent Employee Runtime | Durable responsibility projection for exact Job/Task scope after explicit service adoption | Assignment decision/selection and acceptance remain **OPEN**; Assignment never authorizes or executes. |
 | Cognitive run | Employee Cognitive Service | Cognitive runs, attempts, checkpoints, observations, and cognitive results | No direct scheduler mutation, durable assignment ownership, or provider invocation. |
 | Provider/model ranking | Ranking Policy Authority | User-authored ranking policies, scope resolution, and effective-ranking evidence | Ranking establishes order only. It does not evaluate provider eligibility or invoke targets. |
 | Model facts | Model Registry | Normalized model identity, model facts, lifecycle, and revisions | No provider inventory, ranking, resolution, credentials, or invocation. |
@@ -94,6 +98,7 @@ authority may still be incomplete, while a working Lucy service may remain
 | Lucy donor behavior | None | None | **DONOR EVIDENCE ONLY** until deliberately promoted under canonical contracts and tests. |
 | Production per Token | No runtime authority | Observational/reporting evidence only | Never selection, eligibility, ranking, resolution, fallback, retry, re-resolution, or escalation authority. |
 | Phase 5.0 intelligence fixtures | None | Isolated test state only | Test/reference-only and removable; no production model, provider, ranking, health, or activation authority. |
+| Work Domain reference conformance | None | Deterministic in-memory schema, reference, revision, scope, DAG, lifecycle, responsibility, and lineage checks | **DONOR/TEST EVIDENCE ONLY**; no selection, assignment, scheduling, approval, verification, persistence, or execution authority. |
 
 ## Explicitly OPEN authorities
 
@@ -114,6 +119,15 @@ seek approval for the authority; it may not silently choose one.
 | Employee-to-job assignment decision | Scheduler accepts a job identifying an employee; Employee Registry owns definition, eligibility, and assignment-policy inputs | Who proposes/selects the employee for a job, applicable policy, and the governed handoff into Scheduler | Legacy scoring, identifier order, caller `force`, or a second job store must not become canonical assignment authority. |
 | Organizational policy | Current ranking precedence remains `job > employee > capability > global` | Restriction inheritance and whether organization/team ranking scopes ever exist | Organizational policy may not silently add ranking precedence or reorder candidates. |
 | Workflow definition and lifecycle | Workflow correlation fields exist; Workflow submits governed work | Definition, validation, lifecycle, compensation, projection, and persistence owner | Workflow engines must not create peer scheduler, assignment, or invocation authority. |
+| Work Request definition and acceptance | Target contract and governed transition evidence are defined | Production definition, review, acceptance, conversion, and lifecycle owner | Work Request may not select an Employee, authorize, approve, verify, or become a Job without a governed transition. |
+| Workflow Definition and Revision publication | Stable definition identity, immutable revision structure, exact linkage, and acyclic step dependencies are defined | Production definition lifecycle, publication, revocation, persistence, and projection owner | No Core or Lucy Workflow engine gains authority from contract presence. |
+| Task definition and lifecycle | Target contract, lifecycle vocabulary, result requirements, and exact Workflow/Job linkage are defined | Production Task creation, lifecycle, completion, cancellation, persistence, and event owner | Task is neither Assignment nor execution. |
+| Assignment decision and acceptance | Persistent Runtime's durable projection boundary and target contract are defined | Proposal/selection decision, acceptance evidence, cross-target policy, and adoption protocol | Public Assignment Service remains conflicting; no scoring, ranking, or implicit selection. |
+| Delegation lifecycle | Scope-preserving, acyclic responsibility-chain target contract is defined | Production Delegation decision, acceptance, persistence, and event owner | Delegation cannot expand scope, cross Organizations, authorize, approve, or execute. |
+| Dependency lifecycle and validation | Revision-pinned DAG and readiness semantics are defined | Production declaration, waiver, satisfaction, and state authority | Dependency never schedules work. |
+| Work Result creation and acceptance | Producer, Assignment, work, output, Artifact, provenance, and Organization lineage are defined | Production Result issuer/acceptor and artifact-link verification owner | Result does not self-verify or close work. |
+| Work verification and closure | Evidence linkage and distinct completion/verification/closure states are defined | Verification and closure policy, issuer, persistence, and event owner | Approval Authority remains approval-only; caller evidence never self-verifies. |
+| Work retry and escalation intents | History-preserving target contracts are defined | Production intent issuer, evaluator, lifecycle, and consumer | Intent does not retry, reassign, select, schedule, or execute. |
 | Plugin lifecycle | Plugin Definition, Manifest, Installation, Activation, Runtime Requirement, Permission Declaration, Compatibility Evidence, Capability Profile, and Revocation target contracts are defined | Production definition, manifest, publishing, install, activation, update, rollback, removal, dependency, revocation, runtime, and isolation owners | Lucy Plugin Platform/Registry and Module Registry are not canonical; `OPEN:` example references appoint no authority. |
 | Capability declaration | Capability Manager owns canonical inventory/resolution and the target Capability Definition contract is defined | Boundary and migration among publisher declaration, installed inventory, canonical ingestion, and current Capability Manager APIs/storage | A Plugin Manifest or Capability Profile must not directly grant, rank, resolve, or authorize capability use. |
 | Capability permission grants | Capability presence and eligibility are distinct | Grant issuer, subject/scope/action model, expiry, revocation, delegation, and verifier | Inventory presence or employee configuration must not authorize use. |
@@ -173,8 +187,16 @@ These terms are normative even where the final contract is **OPEN**.
 | Tool | Versioned bounded operation with explicit schemas and side-effect/idempotency declarations | Tool identity/catalog authority remains **OPEN**; invocation remains Dispatcher authority. |
 | Plugin | Installable extension package declaring integrations, capabilities, tools, requirements, and configuration | Declaration does not grant, register, approve, or activate by itself. |
 | Employee | Governed worker definition and lifecycle identity | Employee Registry owns definition; runtime and cognition own separate operational state. |
-| Assignment | Durable projection of employee work associated with a scheduler job | Persistent Runtime owns assignment state; it does not own the job lease. |
-| Workflow | Versioned process definition and instance coordinating governed work | Workflow authority remains **OPEN** and cannot absorb Scheduler or Dispatcher. |
+| Work Request | Governed expression of demand | Not selection, authorization, approval, Job, or execution. |
+| Workflow Definition | Stable reusable work-blueprint identity | Not a running instance or Job. |
+| Workflow Revision | Immutable versioned workflow structure | Not mutable run state or Job. |
+| Job | One instantiated body of work | Scheduler owns lifecycle; not a reusable definition, Assignment, or execution runtime. |
+| Task | One work unit within a Job or standalone context | May exist without Assignment; not execution. |
+| Assignment | Durable responsibility projection for exact Job/Task scope | Persistent Runtime owns projection; decision origin remains OPEN; no authorization or execution. |
+| Delegation | Governed responsibility sub-allocation preserving source Assignment and full chain | Never scope expansion, authority transfer, or execution. |
+| Dependency | Revision-pinned structural/readiness constraint | Never scheduling authority. |
+| Work Result | Immutable producer-linked outcome evidence | Not verification, closure, Artifact Trust, or lifecycle authority. |
+| Workflow | Collective domain term for Definition/Revision and separately instantiated governed work | No generic running instance may absorb Scheduler or Dispatcher authority. |
 | Team Template | Immutable publishable organization blueprint | Separate from its installed instance, created Team, and active organization. |
 | Approval request | Request for an authorized human/authority decision | Not a grant. |
 | Approval grant | Explicit verifiable scoped authorization | Approval Authority owns lifecycle and verification; caller-provided evidence is not self-verifying. |
@@ -202,7 +224,11 @@ Lifecycle families must not be collapsed.
 | Installed-instance lifecycle | Inspect/plan/install/configure/enable/update/rollback/remove semantics require future contracts. Installation is never activation. |
 | Runtime lifecycle | Desired/observed activation, health, placement, and rollback authority remain **OPEN**. |
 | Organization Domain lifecycle | The logical Organization Domain Authority owns Organization, Department, Team, Role, Position, Membership, and Position Occupancy definitions and lifecycle. Production topology, persistence, ownership transfer, child-transition transactions, and event delivery remain **OPEN**. |
-| Workflow lifecycle | Definition revision and workflow-instance state are separate from projected Scheduler jobs; exact states remain **OPEN**. |
+| Workflow lifecycle | Definition identity and immutable Revision are separate from instantiated Job/Task state; production owners remain **OPEN**. |
+| Work Request lifecycle | Target states and governed transition evidence are defined; production acceptance/conversion owner remains **OPEN**. |
+| Task lifecycle | Target states and evidence requirements are defined; production owner remains **OPEN**. |
+| Delegation lifecycle | Scope, chain, acceptance, effective period, supersession, and terminal states are defined; production owner remains **OPEN**. |
+| Work Result lifecycle | Immutable outcome and lineage shape is defined; production creation/acceptance owner remains **OPEN**. |
 | Permission lifecycle | Request/grant/verify/expire/revoke semantics remain **OPEN** and separate from capability inventory. |
 | Approval lifecycle | Approval Authority owns request/decision/grant/verify/consume/expire/revoke; durable implementation and approver-policy integration remain **OPEN**. |
 | Memory/knowledge lifecycle | Capture/review/trust/correct/supersede/deprecate/delete semantics remain **OPEN**. |

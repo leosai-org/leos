@@ -417,3 +417,15 @@ The following Lucy behaviors are not promoted:
 Lucy Plugin Platform, Module Registry, Capability Registry, Tool Runtime, and
 Adapter Manager remain **CONFLICTING / INVESTIGATE** wherever their running
 behavior overlaps these accepted boundaries.
+
+## Work Domain integration
+
+Jobs, Tasks, and Workflow steps may declare exact capability requirements.
+Those declarations do not identify a provider or Tool, establish candidate
+order, grant permission, activate a Plugin, satisfy approval, or authorize
+execution. Assignment and Delegation do not change capability eligibility.
+
+Capability Manager remains the resolution authority and Dispatcher remains
+the sole invocation authority. Work Results may link execution and Artifact
+evidence, but neither Work Domain contracts nor their reference validator may
+invoke Capability Manager, Dispatcher, a Tool, or a provider.

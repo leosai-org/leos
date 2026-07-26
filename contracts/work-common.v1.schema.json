@@ -1,0 +1,903 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leosai.org/contracts/work-common.v1.schema.json",
+  "title": "LEOS Work Domain Common Definitions v1",
+  "$defs": {
+    "typedRefBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"type": "string"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "workRequestRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORK_REQUEST"}}}
+      ]
+    },
+    "workflowDefinitionRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORKFLOW_DEFINITION"}}}
+      ]
+    },
+    "workflowRevisionRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORKFLOW_REVISION"}}}
+      ]
+    },
+    "jobRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "SCHEDULER_JOB"}}}
+      ]
+    },
+    "taskRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "TASK"}}}
+      ]
+    },
+    "workRef": {
+      "oneOf": [
+        {"$ref": "#/$defs/jobRef"},
+        {"$ref": "#/$defs/taskRef"}
+      ]
+    },
+    "assignmentRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORK_ASSIGNMENT"}}}
+      ]
+    },
+    "delegationRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORK_DELEGATION"}}}
+      ]
+    },
+    "dependencyRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORK_DEPENDENCY"}}}
+      ]
+    },
+    "resultRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORK_RESULT"}}}
+      ]
+    },
+    "transitionRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "WORK_STATE_TRANSITION"}}}
+      ]
+    },
+    "retryIntentRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "RETRY_INTENT"}}}
+      ]
+    },
+    "escalationIntentRef": {
+      "allOf": [
+        {"$ref": "#/$defs/typedRefBase"},
+        {"properties": {"resource_type": {"const": "ESCALATION_INTENT"}}}
+      ]
+    },
+    "workTarget": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "target_type": {"const": "PRINCIPAL"},
+            "principal": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"}
+          },
+          "required": ["target_type", "principal"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "target_type": {"const": "EMPLOYEE"},
+            "resource": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/employeeRef"}
+          },
+          "required": ["target_type", "resource"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "target_type": {"const": "TEAM"},
+            "resource": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/teamRef"}
+          },
+          "required": ["target_type", "resource"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "target_type": {"const": "POSITION"},
+            "resource": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/positionRef"}
+          },
+          "required": ["target_type", "resource"]
+        }
+      ]
+    },
+    "recordMode": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"kind": {"const": "CANONICAL_TARGET"}},
+          "required": ["kind"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "DEVELOPMENT_FIXTURE"},
+            "authoritative": {"const": false},
+            "production_eligible": {"const": false}
+          },
+          "required": ["kind", "authoritative", "production_eligible"]
+        }
+      ]
+    },
+    "stateEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "transition_authority": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/authorityRef"},
+        "actor_context_ref": {
+          "allOf": [
+            {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"},
+            {"properties": {"resource_type": {"const": "ACTOR_CONTEXT"}}}
+          ]
+        },
+        "authorization_decision_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/authorizationDecisionRef"},
+        "approval_verification_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/approvalVerificationRef"}
+        },
+        "event_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/eventRef"},
+        "transitioned_at": {"type": "string", "format": "date-time"}
+      },
+      "required": [
+        "transition_authority",
+        "actor_context_ref",
+        "authorization_decision_ref",
+        "approval_verification_refs",
+        "event_ref",
+        "transitioned_at"
+      ]
+    },
+    "effectivePeriod": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "effective_from": {"type": "string", "format": "date-time"},
+        "effective_until": {"type": "string", "format": "date-time"}
+      },
+      "required": ["effective_from"]
+    },
+    "dueWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "not_before": {"type": "string", "format": "date-time"},
+        "due_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "governanceRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "approval_required": {"type": "boolean"},
+        "approval_policy_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+        },
+        "verification_required": {"type": "boolean"},
+        "verification_criteria_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+        },
+        "required_evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+        }
+      },
+      "required": [
+        "approval_required",
+        "approval_policy_refs",
+        "verification_required",
+        "verification_criteria_refs",
+        "required_evidence_refs"
+      ]
+    },
+    "outputExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "description": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "required": {"type": "boolean"},
+        "contract_ref": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/contractReference"}
+      },
+      "required": ["output_id", "description", "required"]
+    },
+    "artifactLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_ref": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/artifactRef"},
+        "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+        "output_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "producer_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+        "provenance_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+        }
+      },
+      "required": [
+        "artifact_ref",
+        "organization_ref",
+        "output_id",
+        "producer_ref",
+        "provenance_refs"
+      ]
+    },
+    "assignmentConstraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allowed_target_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["PRINCIPAL", "EMPLOYEE", "TEAM", "POSITION"]}
+        },
+        "role_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/roleRef"}
+        },
+        "position_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/positionRef"}
+        },
+        "exclusive_assignment": {"type": "boolean"},
+        "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"}
+      },
+      "required": [
+        "allowed_target_types",
+        "role_refs",
+        "position_refs",
+        "exclusive_assignment",
+        "policy_refs"
+      ]
+    },
+    "workflowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 512},
+        "objective": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "task_template_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"},
+        "required_capability_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/capabilityRef"}
+        },
+        "expected_outputs": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/outputExpectation"}
+        },
+        "governance": {"$ref": "#/$defs/governanceRequirements"},
+        "retry_limit": {"type": "integer", "minimum": 0},
+        "cancellation_mode": {"enum": ["STOP", "COMPENSATE", "FINISH_CURRENT"]},
+        "branch_condition_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+        }
+      },
+      "required": [
+        "step_id",
+        "title",
+        "objective",
+        "required_capability_refs",
+        "expected_outputs",
+        "governance",
+        "retry_limit",
+        "cancellation_mode",
+        "branch_condition_refs"
+      ]
+    },
+    "workflowStepDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_step_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "depends_on_step_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "relationship": {"enum": ["FINISH_TO_START", "START_TO_START", "FINISH_TO_FINISH", "BLOCKING", "INFORMATIONAL", "CONDITIONAL"]},
+        "join": {"enum": ["NONE", "REQUIRED", "OPTIONAL"]},
+        "condition_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+      },
+      "required": ["source_step_id", "depends_on_step_id", "relationship", "join"]
+    },
+    "managedDocumentBase": {
+      "type": "object",
+      "properties": {
+        "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+        "record_mode": {"$ref": "#/$defs/recordMode"},
+        "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+        "state_evidence": {"$ref": "#/$defs/stateEvidence"}
+      },
+      "required": ["identity", "record_mode", "organization_ref", "state_evidence"]
+    },
+    "workRequestDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.work-request.v1"},
+            "requesting_principal": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+            "submitting_principal": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+            "title": {"type": "string", "minLength": 1, "maxLength": 512},
+            "description": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "desired_outcome": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "requested_deliverables": {"type": "array", "items": {"$ref": "#/$defs/outputExpectation"}},
+            "constraints": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "urgency": {"enum": ["LOW", "NORMAL", "HIGH", "CRITICAL"]},
+            "requested_due_window": {"$ref": "#/$defs/dueWindow"},
+            "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+            "required_capability_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/capabilityRef"}},
+            "source_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"},
+            "status": {"enum": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "WITHDRAWN", "CONVERTED", "CLOSED"]},
+            "acceptance_transition_ref": {"$ref": "#/$defs/transitionRef"},
+            "conversion_job_ref": {"$ref": "#/$defs/jobRef"}
+          },
+          "required": [
+            "contract_version",
+            "requesting_principal",
+            "submitting_principal",
+            "title",
+            "description",
+            "desired_outcome",
+            "requested_deliverables",
+            "constraints",
+            "urgency",
+            "requested_due_window",
+            "policy_refs",
+            "required_capability_refs",
+            "status"
+          ],
+          "allOf": [
+            {
+              "if": {"properties": {"status": {"enum": ["ACCEPTED", "CONVERTED"]}}, "required": ["status"]},
+              "then": {"required": ["acceptance_transition_ref"]}
+            },
+            {
+              "if": {"properties": {"status": {"const": "CONVERTED"}}, "required": ["status"]},
+              "then": {"required": ["conversion_job_ref"]}
+            }
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "workflowDefinitionDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.workflow-definition.v1"},
+            "description": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "semantic_version": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/semanticVersion"},
+            "current_revision_ref": {"$ref": "#/$defs/workflowRevisionRef"},
+            "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+            "status": {"enum": ["DRAFT", "ACTIVE", "DEPRECATED", "RETIRED"]}
+          },
+          "required": ["contract_version", "description", "semantic_version", "current_revision_ref", "policy_refs", "status"]
+        }
+      ],
+      "type": "object"
+    },
+    "workflowRevisionDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.workflow-revision.v1"},
+            "workflow_definition_ref": {"$ref": "#/$defs/workflowDefinitionRef"},
+            "semantic_version": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/semanticVersion"},
+            "immutable": {"const": true},
+            "parameters_contract_ref": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/contractReference"},
+            "steps": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/workflowStep"}},
+            "dependencies": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/workflowStepDependency"}},
+            "entry_criteria_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "completion_criteria_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "parallelism": {"enum": ["SEQUENTIAL", "DECLARED_DAG"]},
+            "compensation_policy_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "status": {"enum": ["DRAFT", "PUBLISHED", "SUPERSEDED", "REVOKED"]}
+          },
+          "required": [
+            "contract_version",
+            "workflow_definition_ref",
+            "semantic_version",
+            "immutable",
+            "parameters_contract_ref",
+            "steps",
+            "dependencies",
+            "entry_criteria_refs",
+            "completion_criteria_refs",
+            "parallelism",
+            "compensation_policy_refs",
+            "status"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "jobDefinitionDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.job-definition.v1"},
+            "source_work_request_ref": {"$ref": "#/$defs/workRequestRef"},
+            "source_workflow_definition_ref": {"$ref": "#/$defs/workflowDefinitionRef"},
+            "source_workflow_revision_ref": {"$ref": "#/$defs/workflowRevisionRef"},
+            "title": {"type": "string", "minLength": 1, "maxLength": 512},
+            "objective": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "responsible_scope": {
+              "oneOf": [
+                {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+                {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/departmentRef"},
+                {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/teamRef"}
+              ]
+            },
+            "status": {"enum": ["DRAFT", "READY", "ACTIVE", "BLOCKED", "PAUSED", "COMPLETED", "FAILED", "CANCELLED", "AWAITING_VERIFICATION", "VERIFIED", "CLOSED"]},
+            "priority": {"type": "integer", "minimum": 0, "maximum": 100},
+            "due_window": {"$ref": "#/$defs/dueWindow"},
+            "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+            "required_capability_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/capabilityRef"}},
+            "expected_outputs": {"type": "array", "items": {"$ref": "#/$defs/outputExpectation"}},
+            "governance": {"$ref": "#/$defs/governanceRequirements"},
+            "assignment_constraints": {"$ref": "#/$defs/assignmentConstraints"},
+            "result_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/resultRef"}},
+            "verification_evidence_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "closure_transition_ref": {"$ref": "#/$defs/transitionRef"}
+          },
+          "required": [
+            "contract_version",
+            "title",
+            "objective",
+            "responsible_scope",
+            "status",
+            "priority",
+            "due_window",
+            "policy_refs",
+            "required_capability_refs",
+            "expected_outputs",
+            "governance",
+            "assignment_constraints",
+            "result_refs",
+            "verification_evidence_refs"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "taskDefinitionDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.task-definition.v1"},
+            "parent_job_ref": {"$ref": "#/$defs/jobRef"},
+            "source_workflow_revision_ref": {"$ref": "#/$defs/workflowRevisionRef"},
+            "source_workflow_step_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+            "title": {"type": "string", "minLength": 1, "maxLength": 512},
+            "objective": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "description": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "status": {"enum": ["DRAFT", "READY", "ACTIVE", "BLOCKED", "PAUSED", "COMPLETED", "FAILED", "CANCELLED", "AWAITING_VERIFICATION", "VERIFIED", "CLOSED"]},
+            "priority": {"type": "integer", "minimum": 0, "maximum": 100},
+            "due_window": {"$ref": "#/$defs/dueWindow"},
+            "required_capability_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/capabilityRef"}},
+            "input_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "expected_outputs": {"type": "array", "items": {"$ref": "#/$defs/outputExpectation"}},
+            "dependency_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/dependencyRef"}},
+            "assignment_constraints": {"$ref": "#/$defs/assignmentConstraints"},
+            "governance": {"$ref": "#/$defs/governanceRequirements"},
+            "retry_limit": {"type": "integer", "minimum": 0},
+            "escalation_policy_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "result_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/resultRef"}},
+            "verification_evidence_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "closure_transition_ref": {"$ref": "#/$defs/transitionRef"}
+          },
+          "required": [
+            "contract_version",
+            "title",
+            "objective",
+            "description",
+            "status",
+            "priority",
+            "due_window",
+            "required_capability_refs",
+            "input_refs",
+            "expected_outputs",
+            "dependency_refs",
+            "assignment_constraints",
+            "governance",
+            "retry_limit",
+            "escalation_policy_refs",
+            "result_refs",
+            "verification_evidence_refs"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "workAssignmentDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.work-assignment.v1"},
+            "work_ref": {"$ref": "#/$defs/workRef"},
+            "assignee": {"$ref": "#/$defs/workTarget"},
+            "assigning_principal": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+            "assignment_decision_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"},
+            "assignment_reason": {"enum": ["INITIAL", "REASSIGNMENT", "REPLACEMENT", "ESCALATION", "MANUAL"]},
+            "role_context_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/roleRef"},
+            "position_context_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/positionRef"},
+            "accepted_scope_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/workRef"}},
+            "effective_period": {"$ref": "#/$defs/effectivePeriod"},
+            "status": {"enum": ["PROPOSED", "ACTIVE", "SUSPENDED", "COMPLETED", "SUPERSEDED", "REVOKED", "EXPIRED", "CANCELLED"]},
+            "acceptance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "required": {"type": "boolean"},
+                "state": {"enum": ["NOT_REQUIRED", "PENDING", "ACCEPTED", "DECLINED"]},
+                "evidence_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+              },
+              "required": ["required", "state"]
+            },
+            "exclusive": {"type": "boolean"},
+            "supersedes_assignment_ref": {"$ref": "#/$defs/assignmentRef"}
+          },
+          "required": [
+            "contract_version",
+            "work_ref",
+            "assignee",
+            "assigning_principal",
+            "assignment_decision_ref",
+            "assignment_reason",
+            "accepted_scope_refs",
+            "effective_period",
+            "status",
+            "acceptance",
+            "exclusive"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "workDelegationDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.work-delegation.v1"},
+            "source_assignment_ref": {"$ref": "#/$defs/assignmentRef"},
+            "parent_delegation_ref": {"$ref": "#/$defs/delegationRef"},
+            "delegating_target": {"$ref": "#/$defs/workTarget"},
+            "delegate_target": {"$ref": "#/$defs/workTarget"},
+            "delegated_scope_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/workRef"}},
+            "delegation_reason": {"type": "string", "minLength": 1, "maxLength": 2048},
+            "delegation_kind": {"enum": ["FULL", "PARTIAL", "SUBTASK", "TEMPORARY", "ESCALATION", "REASSIGNMENT"]},
+            "retained_responsibility": {"type": "boolean"},
+            "source_responsibility_preserved": {"const": true},
+            "effective_period": {"$ref": "#/$defs/effectivePeriod"},
+            "status": {"enum": ["PROPOSED", "ACTIVE", "COMPLETED", "SUPERSEDED", "REVOKED", "EXPIRED", "CANCELLED"]},
+            "acceptance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "required": {"type": "boolean"},
+                "state": {"enum": ["NOT_REQUIRED", "PENDING", "ACCEPTED", "DECLINED"]},
+                "evidence_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+              },
+              "required": ["required", "state"]
+            },
+            "supersedes_delegation_ref": {"$ref": "#/$defs/delegationRef"}
+          },
+          "required": [
+            "contract_version",
+            "source_assignment_ref",
+            "delegating_target",
+            "delegate_target",
+            "delegated_scope_refs",
+            "delegation_reason",
+            "delegation_kind",
+            "retained_responsibility",
+            "source_responsibility_preserved",
+            "effective_period",
+            "status",
+            "acceptance"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "workDependencyDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.work-dependency.v1"},
+            "source_work_ref": {"$ref": "#/$defs/workRef"},
+            "depends_on_work_ref": {"$ref": "#/$defs/workRef"},
+            "relationship": {"enum": ["FINISH_TO_START", "START_TO_START", "FINISH_TO_FINISH", "BLOCKING", "INFORMATIONAL", "CONDITIONAL"]},
+            "join": {"enum": ["NONE", "REQUIRED", "OPTIONAL"]},
+            "condition_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"},
+            "status": {"enum": ["ACTIVE", "SATISFIED", "WAIVED", "REVOKED"]},
+            "satisfaction_evidence_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}}
+          },
+          "required": [
+            "contract_version",
+            "source_work_ref",
+            "depends_on_work_ref",
+            "relationship",
+            "join",
+            "status",
+            "satisfaction_evidence_refs"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "workResultDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.work-result.v1"},
+            "work_ref": {"$ref": "#/$defs/workRef"},
+            "producing_principal": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+            "producing_assignment_ref": {"$ref": "#/$defs/assignmentRef"},
+            "execution_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"},
+            "outcome": {"enum": ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"]},
+            "summary": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "deliverables": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "output_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+                  "status": {"enum": ["PRODUCED", "OMITTED", "FAILED"]},
+                  "artifact_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/artifactRef"}},
+                  "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}}
+                },
+                "required": ["output_id", "status", "artifact_refs", "evidence_refs"]
+              }
+            },
+            "artifact_links": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/artifactLink"}},
+            "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "completed_at": {"type": "string", "format": "date-time"}
+          },
+          "required": [
+            "contract_version",
+            "work_ref",
+            "producing_principal",
+            "outcome",
+            "summary",
+            "deliverables",
+            "artifact_links",
+            "evidence_refs",
+            "completed_at"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "workStateTransitionDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.work-state-transition.v1"},
+            "subject_ref": {
+              "oneOf": [
+                {"$ref": "#/$defs/workRequestRef"},
+                {"$ref": "#/$defs/workflowDefinitionRef"},
+                {"$ref": "#/$defs/workflowRevisionRef"},
+                {"$ref": "#/$defs/jobRef"},
+                {"$ref": "#/$defs/taskRef"},
+                {"$ref": "#/$defs/assignmentRef"},
+                {"$ref": "#/$defs/delegationRef"}
+              ]
+            },
+            "from_state": {"type": "string", "minLength": 1},
+            "to_state": {"type": "string", "minLength": 1},
+            "expected_revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"},
+            "resulting_revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 4096},
+            "result_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/resultRef"}},
+            "verification_evidence_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "closure_authority_evidence_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"},
+            "history_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}},
+            "rollback_behavior": {"enum": ["NONE", "COMPENSATING_TRANSITION", "REOPEN_PROHIBITED"]},
+            "occurred_at": {"type": "string", "format": "date-time"}
+          },
+          "required": [
+            "contract_version",
+            "subject_ref",
+            "from_state",
+            "to_state",
+            "expected_revision",
+            "resulting_revision",
+            "reason",
+            "result_refs",
+            "verification_evidence_refs",
+            "history_refs",
+            "rollback_behavior",
+            "occurred_at"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "retryIntentDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.retry-intent.v1"},
+            "work_ref": {"$ref": "#/$defs/workRef"},
+            "retry_scope": {"enum": ["JOB", "TASK", "ASSIGNMENT", "COGNITIVE", "EXECUTION"]},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 4096},
+            "prior_attempt_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"}},
+            "requested_attempt_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"},
+            "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+            "preserves_history": {"const": true},
+            "status": {"enum": ["REQUESTED", "AUTHORIZED", "REJECTED", "CONSUMED", "CANCELLED"]}
+          },
+          "required": [
+            "contract_version",
+            "work_ref",
+            "retry_scope",
+            "reason",
+            "prior_attempt_refs",
+            "requested_attempt_ref",
+            "policy_refs",
+            "preserves_history",
+            "status"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "escalationIntentDocument": {
+      "allOf": [
+        {"$ref": "#/$defs/managedDocumentBase"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+            "record_mode": {"$ref": "#/$defs/recordMode"},
+            "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+            "state_evidence": {"$ref": "#/$defs/stateEvidence"},
+            "contract_version": {"const": "leos.escalation-intent.v1"},
+            "work_ref": {"$ref": "#/$defs/workRef"},
+            "source_assignment_ref": {"$ref": "#/$defs/assignmentRef"},
+            "escalating_principal": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+            "escalation_target": {"$ref": "#/$defs/workTarget"},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 4096},
+            "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+            "creates_assignment": {"const": false},
+            "status": {"enum": ["REQUESTED", "ACKNOWLEDGED", "REJECTED", "RESOLVED", "CANCELLED"]}
+          },
+          "required": [
+            "contract_version",
+            "work_ref",
+            "escalating_principal",
+            "escalation_target",
+            "reason",
+            "policy_refs",
+            "creates_assignment",
+            "status"
+          ]
+        }
+      ],
+      "type": "object"
+    }
+  }
+}

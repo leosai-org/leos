@@ -1,0 +1,72 @@
+{
+  "contract_version": "leos.workflow-revision.v1",
+  "identity": {
+    "resource_type": "WORKFLOW_REVISION",
+    "resource_id": "workflow-revision:acme:market-brief:1.0.0",
+    "display_name": "Market brief workflow 1.0.0",
+    "revision": "sha256:workflow-revision-acme-market-brief-1-0-0",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:workflow-revision-publishing-authority",
+        "principal": {"principal_id": "principal:service:open-workflow-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-workflow-revision-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:workflow-revision", "revision": "sha256:actor-context-brett-workflow-revision"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:workflow-revision-publish", "revision": "sha256:authorization-workflow-revision-publish"},
+    "audit_id": "audit:workflow-revision:acme:market-brief:1.0.0",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:workflow-revision-publishing-authority",
+      "principal": {"principal_id": "principal:service:open-workflow-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-workflow-revision-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:workflow-revision", "revision": "sha256:actor-context-brett-workflow-revision"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:workflow-revision-publish", "revision": "sha256:authorization-workflow-revision-publish"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:workflow-revision:market-brief:published", "revision": "sha256:event-workflow-revision-market-brief-published"},
+    "transitioned_at": "2026-07-25T18:00:00Z"
+  },
+  "workflow_definition_ref": {"resource_type": "WORKFLOW_DEFINITION", "resource_id": "workflow-definition:acme:market-brief", "revision": "sha256:workflow-definition-acme-market-brief-v1"},
+  "semantic_version": "1.0.0",
+  "immutable": true,
+  "parameters_contract_ref": {"contract_id": "market-brief-input.v1", "schema_ref": "https://leosai.org/contracts/examples/market-brief-input.v1.schema.json", "revision": "sha256:market-brief-input-v1"},
+  "steps": [
+    {
+      "step_id": "research",
+      "title": "Research",
+      "objective": "Collect cited evidence.",
+      "required_capability_refs": [],
+      "expected_outputs": [{"output_id": "research-notes", "description": "Cited research notes", "required": true}],
+      "governance": {"approval_required": false, "approval_policy_refs": [], "verification_required": false, "verification_criteria_refs": [], "required_evidence_refs": []},
+      "retry_limit": 1,
+      "cancellation_mode": "STOP",
+      "branch_condition_refs": []
+    },
+    {
+      "step_id": "review",
+      "title": "Review",
+      "objective": "Review the research evidence.",
+      "required_capability_refs": [],
+      "expected_outputs": [{"output_id": "market-brief", "description": "Reviewed market brief", "required": true}],
+      "governance": {"approval_required": false, "approval_policy_refs": [], "verification_required": true, "verification_criteria_refs": [{"authority": {"authority_id": "OPEN:work-verification-authority", "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-work-verification-authority-v1"}, "reference_id": "criteria:market-brief-review", "revision": "sha256:criteria-market-brief-review-v1"}], "required_evidence_refs": []},
+      "retry_limit": 1,
+      "cancellation_mode": "STOP",
+      "branch_condition_refs": []
+    }
+  ],
+  "dependencies": [{"source_step_id": "review", "depends_on_step_id": "research", "relationship": "FINISH_TO_START", "join": "REQUIRED"}],
+  "entry_criteria_refs": [],
+  "completion_criteria_refs": [{"authority": {"authority_id": "OPEN:work-verification-authority", "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-work-verification-authority-v1"}, "reference_id": "criteria:market-brief-complete", "revision": "sha256:criteria-market-brief-complete-v1"}],
+  "parallelism": "DECLARED_DAG",
+  "compensation_policy_refs": [],
+  "status": "PUBLISHED"
+}

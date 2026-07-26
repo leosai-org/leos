@@ -1,0 +1,49 @@
+{
+  "contract_version": "leos.work-delegation.v1",
+  "identity": {
+    "resource_type": "WORK_DELEGATION",
+    "resource_id": "delegation:acme:market-brief:research:1",
+    "display_name": "Research responsibility delegation",
+    "revision": "sha256:delegation-acme-market-brief-research-1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:work-delegation-authority",
+        "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-work-delegation-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:researcher:delegation", "revision": "sha256:actor-context-researcher-delegation"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:delegation-create", "revision": "sha256:authorization-delegation-create"},
+    "audit_id": "audit:delegation:acme:market-brief:research:1",
+    "created_at": "2026-07-25T18:20:00Z",
+    "updated_at": "2026-07-25T18:20:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:work-delegation-authority",
+      "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-work-delegation-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:researcher:delegation", "revision": "sha256:actor-context-researcher-delegation"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:delegation-create", "revision": "sha256:authorization-delegation-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:delegation:research:active", "revision": "sha256:event-delegation-research-active"},
+    "transitioned_at": "2026-07-25T18:20:00Z"
+  },
+  "source_assignment_ref": {"resource_type": "WORK_ASSIGNMENT", "resource_id": "assignment:acme:market-brief:research:1", "revision": "sha256:assignment-acme-market-brief-research-1"},
+  "delegating_target": {"target_type": "EMPLOYEE", "resource": {"resource_type": "EMPLOYEE", "resource_id": "employee:acme:researcher", "revision": "sha256:employee-acme-researcher-v3"}},
+  "delegate_target": {"target_type": "TEAM", "resource": {"resource_type": "TEAM", "resource_id": "team:acme:market-research", "revision": "sha256:team-acme-market-research-v1"}},
+  "delegated_scope_refs": [{"resource_type": "TASK", "resource_id": "task:acme:market-brief:research", "revision": "sha256:task-acme-market-brief-research-v1"}],
+  "delegation_reason": "Share evidence collection responsibility with the research team.",
+  "delegation_kind": "PARTIAL",
+  "retained_responsibility": true,
+  "source_responsibility_preserved": true,
+  "effective_period": {"effective_from": "2026-07-25T18:20:00Z", "effective_until": "2026-07-27T18:00:00Z"},
+  "status": "ACTIVE",
+  "acceptance": {"required": false, "state": "NOT_REQUIRED"}
+}

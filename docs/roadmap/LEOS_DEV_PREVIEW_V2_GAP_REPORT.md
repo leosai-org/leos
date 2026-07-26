@@ -276,15 +276,22 @@ intelligence authorities without creating peers.
 
 ### G-04 — Workflow definition and lifecycle authority
 
-- **Classification:** **Missing** in Core; **Lucy Donor Evidence Only /
-  Conflicting Authority**.
-- **Current evidence:** `config/service-catalog.json` names a workflow engine,
-  and execution correlation can carry workflow identifiers, but no canonical
-  workflow definition, state machine, scheduler projection, or compensation
-  contract exists.
-- **Authoritative files:** `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`,
-  `docs/architecture/v2/EXECUTION_PLANE.md`, and
-  `contracts/execution-correlation.v1.schema.json`.
+- **Classification:** **Partially Implemented** logical contract foundation in
+  Core; **Lucy Donor Evidence Only / Conflicting Authority** for production
+  behavior.
+- **Current evidence:** Epic 7.0 defines Work Request, immutable Workflow
+  Definition/Revision, Job, Task, Assignment, Delegation, Dependency, Result,
+  State Transition, Retry Intent, and Escalation Intent target contracts,
+  examples, lifecycle vocabularies, and deterministic non-authoritative
+  cross-record conformance. No production Workflow/Task authority,
+  persistence, scheduler projection worker, compensation runtime, or service
+  adoption exists.
+- **Authoritative files:**
+  `docs/architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN.md`,
+  `docs/architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN_DECISIONS.md`,
+  `docs/architecture/v2/AUTHORITY_REGISTRY.md`,
+  `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`, and the Epic 7 contracts
+  under `contracts/`.
 - **Lucy donor evidence:** `../lucy-runtime-reference/workflow-engine/app.py`
   is a small JSON-backed engine.
   `../lucy-runtime-reference/workflow-engine-service/app/main.py` contains
@@ -294,25 +301,32 @@ intelligence authorities without creating peers.
   `../lucy-runtime-reference/planning-engine-service/app/lifecycle.py`, and
   `../lucy-runtime-reference/planning-engine-service/app/autonomous_continuation.py`
   also control workflow/plan lifecycle and continuation.
-- **Missing contracts:** Immutable workflow definition/revision; parameters;
-  step identity; dependencies; triggers; outputs/artifacts; state machine;
-  scheduler job projection; approval wait; retry versus compensation;
-  cancellation; simulation; resumability; correlation; version migration.
+- **Missing contracts:** Production trigger/event subscription, Scheduler
+  projection protocol, approval-wait consumption, compensation execution,
+  durable workflow-instance recovery, simulation, service adoption, and
+  version migration. Epic 7 target contracts cover immutable definitions,
+  steps, dependencies, outputs/Artifacts, governed state evidence,
+  responsibility, Results, cancellation history, retry intent, and escalation
+  intent.
 - **Missing services:** One canonical Workflow authority and, only if needed,
   a projection/orchestration worker that submits jobs to Scheduler without
   owning leases or execution.
-- **Missing tests:** DAG validation; cycles; deterministic projection;
-  restart/resume; duplicate events; approval waits; cancellation;
-  compensation; assignment correlation; version upgrades; cross-team access.
-  No directly scoped first-party tests were found alongside the examined Lucy
+- **Missing tests:** Epic 7 covers deterministic schema/reference validation,
+  exact revisions, DAG/delegation cycles, scope, assignment exclusivity,
+  readiness, lifecycle evidence, Result/Artifact lineage, and history
+  preservation. Production gaps remain for deterministic Scheduler
+  projection, restart/resume, duplicate events, live approval waits,
+  compensation, version upgrades, and authenticated cross-team access. No
+  directly scoped first-party tests were found alongside the examined Lucy
   workflow services.
 - **Dependencies:** Organization/Team, Scheduler, assignments, approval,
   permissions, tools, artifacts, publishing, and Team Templates.
 - **Security implications:** Direct step execution or caller-supplied approval
   can bypass Dispatcher and approval verification. Competing lifecycle owners
   can duplicate work after restart.
-- **Recommended epic:** **P0 — Canonical Workflow Definition, Lifecycle, and
-  Scheduler Projection**.
+- **Recommended epic:** **P0 — Adopt Epic 7 Work Contracts and Implement the
+  Accepted Workflow/Task Authority and Scheduler Projection**, after the
+  remaining OPEN owners are decided.
 - **Recommended priority:** **P0** for any useful Team Template.
 - **Migration or compatibility concerns:** Preserve useful Lucy step,
   dependency, artifact, and event concepts only after mapping them to one
@@ -968,9 +982,13 @@ reasoner, resolver, invoker, scheduler, or transport selector.
 6. **Epic 3.4 — Organizational Policy Boundary**
    - Decide restriction inheritance and whether any new ranking scope is
      allowed; preserve current precedence until accepted.
-7. **Epic 3.5 — Workflow Definition and Lifecycle**
-   - Definition, validation, scheduler projection, correlation, approval wait,
-     cancellation, compensation, and resume.
+7. **Epic 3.5 / Epic 7.0 — Work Domain Foundation and Production Workflow**
+   - **Completed foundation:** Work Request, immutable Workflow
+     Definition/Revision, Job/Task, Assignment/Delegation, Dependency, Result,
+     lifecycle, retry/escalation intent, and non-authoritative conformance.
+   - **Follow-on:** decide remaining OPEN owners, adopt Scheduler/Persistent
+     Runtime target contracts, and implement governed projection, approval
+     wait, cancellation, compensation, resume, and persistence.
 
 ### Extension and governance plane
 

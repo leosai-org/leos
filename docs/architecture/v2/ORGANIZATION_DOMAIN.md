@@ -458,3 +458,17 @@ a document contract.
 9. Employee-to-job selection and Scheduler handoff.
 10. Team Template installation and organization activation protocol.
 11. Knowledge/Memory reference scope verification and removal behavior.
+
+## Work Domain integration
+
+All Work Domain resources are scoped to and owned by exactly one Organization
+Principal. Employee, Team, and Position may be Assignment or Delegation
+responsibility targets only when exact revisions and Organization scope
+match. Membership and Position Occupancy remain separate relationships and do
+not create Assignment.
+
+Team remains collaboration/responsibility scope, never execution authority.
+Position hierarchy remains the canonical supervisory hierarchy. Cross-
+Organization work, Assignment, Delegation, Dependency, Result, and Artifact
+linkage fail closed until an accepted collaboration policy and authority
+exist. Employee-to-job and Team-to-job selection remain OPEN.

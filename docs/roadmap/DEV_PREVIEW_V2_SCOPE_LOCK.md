@@ -141,6 +141,19 @@ Required outcome:
 - governed Scheduler projection without peer job, lease, assignment, or
   invocation authority.
 
+Epic 7.0 establishes the logical Work Domain target contracts for Work
+Request, Workflow Definition/Revision, Job, Task, Assignment, Delegation,
+Dependency, Result, State Transition, Retry Intent, and Escalation Intent,
+with deterministic non-authoritative conformance. Scheduler remains Job
+lifecycle authority and Persistent Runtime remains Assignment projection
+authority. Production Work Request, Workflow publication, Task lifecycle,
+assignment decision/acceptance, Delegation, Result acceptance, verification,
+closure, retry-intent, and escalation-intent owners remain **OPEN**.
+
+This foundation does not satisfy the remaining production workflow-instance,
+persistence, projection/orchestration, restart recovery, approval wait,
+compensation, or service-adoption release gates.
+
 ### 5. Public Plugin layer
 
 Required outcome:

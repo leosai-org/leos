@@ -128,3 +128,12 @@ records contain opaque provider target references, not invocation behavior.
 Future intelligence resolution may supply an effective ranking policy and
 consume Model Registry facts. Capability Manager does not implement that
 policy or absorb Model Registry authority in this phase.
+
+## Work Domain boundary
+
+Workflow steps, Jobs, and Tasks may provide revision-pinned capability
+requirements as resolution inputs through an authorized caller. Work Request,
+Assignment, Delegation, Team, Position, and Capability Profile do not grant
+eligibility or selection authority. Capability Manager does not select an
+Employee/Team, write work state, create an Assignment, accept a Result,
+verify work, or close work.

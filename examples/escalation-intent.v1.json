@@ -1,0 +1,46 @@
+{
+  "contract_version": "leos.escalation-intent.v1",
+  "identity": {
+    "resource_type": "ESCALATION_INTENT",
+    "resource_id": "escalation-intent:acme:research:1",
+    "display_name": "Research task escalation intent",
+    "revision": "sha256:escalation-intent-acme-research-1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:escalation-intent-authority",
+        "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-escalation-intent-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:researcher:escalation", "revision": "sha256:actor-context-researcher-escalation"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:escalation-request", "revision": "sha256:authorization-escalation-request"},
+    "audit_id": "audit:escalation-intent:acme:research:1",
+    "created_at": "2026-07-26T19:00:00Z",
+    "updated_at": "2026-07-26T19:00:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:escalation-intent-authority",
+      "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-escalation-intent-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:researcher:escalation", "revision": "sha256:actor-context-researcher-escalation"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:escalation-request", "revision": "sha256:authorization-escalation-request"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:escalation-intent:research:requested", "revision": "sha256:event-escalation-intent-research-requested"},
+    "transitioned_at": "2026-07-26T19:00:00Z"
+  },
+  "work_ref": {"resource_type": "TASK", "resource_id": "task:acme:market-brief:research", "revision": "sha256:task-acme-market-brief-research-v1"},
+  "source_assignment_ref": {"resource_type": "WORK_ASSIGNMENT", "resource_id": "assignment:acme:market-brief:research:1", "revision": "sha256:assignment-acme-market-brief-research-1"},
+  "escalating_principal": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+  "escalation_target": {"target_type": "POSITION", "resource": {"resource_type": "POSITION", "resource_id": "position:acme:market-researcher-1", "revision": "sha256:position-acme-market-researcher-1-v1"}},
+  "reason": "Request supervisory review without creating or changing an assignment.",
+  "policy_refs": [],
+  "creates_assignment": false,
+  "status": "REQUESTED"
+}

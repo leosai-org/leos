@@ -1,0 +1,48 @@
+{
+  "contract_version": "leos.work-assignment.v1",
+  "identity": {
+    "resource_type": "WORK_ASSIGNMENT",
+    "resource_id": "assignment:acme:market-brief:research:1",
+    "display_name": "Market research responsibility",
+    "revision": "sha256:assignment-acme-market-brief-research-1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "persistent-employee-runtime-service",
+        "principal": {"principal_id": "principal:service:persistent-employee-runtime", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:persistent-employee-runtime-service-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:assignment", "revision": "sha256:actor-context-brett-assignment"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:assignment-create", "revision": "sha256:authorization-assignment-create"},
+    "audit_id": "audit:assignment:acme:market-brief:research:1",
+    "created_at": "2026-07-25T18:15:00Z",
+    "updated_at": "2026-07-25T18:15:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "persistent-employee-runtime-service",
+      "principal": {"principal_id": "principal:service:persistent-employee-runtime", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:persistent-employee-runtime-service-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:assignment", "revision": "sha256:actor-context-brett-assignment"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:assignment-create", "revision": "sha256:authorization-assignment-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:assignment:research:active", "revision": "sha256:event-assignment-research-active"},
+    "transitioned_at": "2026-07-25T18:15:00Z"
+  },
+  "work_ref": {"resource_type": "TASK", "resource_id": "task:acme:market-brief:research", "revision": "sha256:task-acme-market-brief-research-v1"},
+  "assignee": {"target_type": "EMPLOYEE", "resource": {"resource_type": "EMPLOYEE", "resource_id": "employee:acme:researcher", "revision": "sha256:employee-acme-researcher-v3"}},
+  "assigning_principal": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+  "assignment_decision_ref": {"authority": {"authority_id": "OPEN:assignment-decision-authority", "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-assignment-decision-authority-v1"}, "reference_id": "assignment-decision:research:1", "revision": "sha256:assignment-decision-research-1"},
+  "assignment_reason": "MANUAL",
+  "accepted_scope_refs": [{"resource_type": "TASK", "resource_id": "task:acme:market-brief:research", "revision": "sha256:task-acme-market-brief-research-v1"}],
+  "effective_period": {"effective_from": "2026-07-25T18:15:00Z", "effective_until": "2026-07-27T18:00:00Z"},
+  "status": "ACTIVE",
+  "acceptance": {"required": false, "state": "NOT_REQUIRED"},
+  "exclusive": true
+}

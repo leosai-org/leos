@@ -997,3 +997,18 @@ Migration occurs through reviewed changes to `leos-v2`.
     rollback when First Run coordinates establishment?
 17. How long do Provider Registry and Router compatibility surfaces remain?
 18. How are Lucy persisted provider/model facts migrated with provenance?
+
+## Work Domain boundary
+
+Employee-to-job and Team-to-job selection, assignment optimization,
+autonomous task decomposition, and autonomous planning remain OPEN. User model
+ranking does not rank workers or work. Capability requirements on Jobs,
+Tasks, and Workflow steps enter the existing ranking → eligibility →
+first-ranked-valid resolution path only through an authorized execution
+request.
+
+Cognitive Service reasons about an existing governed Assignment; it does not
+create or accept Assignments, mutate Scheduler Job state directly, publish
+Workflow Revisions, or self-declare work verification/closure. Retry Intent,
+cognitive retry, execution retry, assignment retry, re-resolution, and
+escalation remain distinct.

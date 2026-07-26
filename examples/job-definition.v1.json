@@ -1,0 +1,54 @@
+{
+  "contract_version": "leos.job-definition.v1",
+  "identity": {
+    "resource_type": "SCHEDULER_JOB",
+    "resource_id": "job:acme:market-brief",
+    "display_name": "Market brief job",
+    "revision": "sha256:job-acme-market-brief-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "execution-scheduler-service",
+        "principal": {"principal_id": "principal:service:execution-scheduler", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:execution-scheduler-service-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:job-create", "revision": "sha256:actor-context-brett-job-create"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:job-create", "revision": "sha256:authorization-job-create"},
+    "audit_id": "audit:job:acme:market-brief:v1",
+    "created_at": "2026-07-25T18:05:00Z",
+    "updated_at": "2026-07-25T18:05:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "execution-scheduler-service",
+      "principal": {"principal_id": "principal:service:execution-scheduler", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:execution-scheduler-service-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:job-create", "revision": "sha256:actor-context-brett-job-create"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:job-create", "revision": "sha256:authorization-job-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:job:market-brief:ready", "revision": "sha256:event-job-market-brief-ready"},
+    "transitioned_at": "2026-07-25T18:05:00Z"
+  },
+  "source_work_request_ref": {"resource_type": "WORK_REQUEST", "resource_id": "work-request:acme:market-brief", "revision": "sha256:work-request-acme-market-brief-v1"},
+  "source_workflow_definition_ref": {"resource_type": "WORKFLOW_DEFINITION", "resource_id": "workflow-definition:acme:market-brief", "revision": "sha256:workflow-definition-acme-market-brief-v1"},
+  "source_workflow_revision_ref": {"resource_type": "WORKFLOW_REVISION", "resource_id": "workflow-revision:acme:market-brief:1.0.0", "revision": "sha256:workflow-revision-acme-market-brief-1-0-0"},
+  "title": "Produce market brief",
+  "objective": "Produce and verify a cited market brief.",
+  "responsible_scope": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "status": "READY",
+  "priority": 50,
+  "due_window": {"not_before": "2026-07-25T18:05:00Z", "due_at": "2026-07-28T18:00:00Z"},
+  "policy_refs": [],
+  "required_capability_refs": [],
+  "expected_outputs": [{"output_id": "market-brief", "description": "Reviewed market brief", "required": true}],
+  "governance": {"approval_required": false, "approval_policy_refs": [], "verification_required": true, "verification_criteria_refs": [{"authority": {"authority_id": "OPEN:work-verification-authority", "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-work-verification-authority-v1"}, "reference_id": "criteria:market-brief-review", "revision": "sha256:criteria-market-brief-review-v1"}], "required_evidence_refs": []},
+  "assignment_constraints": {"allowed_target_types": ["EMPLOYEE", "TEAM"], "role_refs": [], "position_refs": [], "exclusive_assignment": true, "policy_refs": []},
+  "result_refs": [],
+  "verification_evidence_refs": []
+}

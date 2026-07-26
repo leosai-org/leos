@@ -1,0 +1,46 @@
+{
+  "contract_version": "leos.retry-intent.v1",
+  "identity": {
+    "resource_type": "RETRY_INTENT",
+    "resource_id": "retry-intent:acme:research:2",
+    "display_name": "Research task retry intent",
+    "revision": "sha256:retry-intent-acme-research-2",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:retry-intent-authority",
+        "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-retry-intent-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:retry", "revision": "sha256:actor-context-brett-retry"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:retry-request", "revision": "sha256:authorization-retry-request"},
+    "audit_id": "audit:retry-intent:acme:research:2",
+    "created_at": "2026-07-26T19:00:00Z",
+    "updated_at": "2026-07-26T19:00:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:retry-intent-authority",
+      "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-retry-intent-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:retry", "revision": "sha256:actor-context-brett-retry"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:retry-request", "revision": "sha256:authorization-retry-request"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:retry-intent:research:requested", "revision": "sha256:event-retry-intent-research-requested"},
+    "transitioned_at": "2026-07-26T19:00:00Z"
+  },
+  "work_ref": {"resource_type": "TASK", "resource_id": "task:acme:market-brief:research", "revision": "sha256:task-acme-market-brief-research-v1"},
+  "retry_scope": "TASK",
+  "reason": "Request a new governed task attempt after preserving the failed attempt.",
+  "prior_attempt_refs": [{"resource_type": "WORK_ATTEMPT", "resource_id": "work-attempt:research:1", "revision": "sha256:work-attempt-research-1"}],
+  "requested_attempt_ref": {"resource_type": "WORK_ATTEMPT", "resource_id": "work-attempt:research:2", "revision": "sha256:work-attempt-research-2"},
+  "policy_refs": [],
+  "preserves_history": true,
+  "status": "REQUESTED"
+}

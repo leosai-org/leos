@@ -220,6 +220,28 @@ class ValidationApiTests(unittest.TestCase):
         ):
             self.assertIsNone(validate_contract(contract, self.example(example)))
 
+    def test_work_domain_contract_examples_validate(self):
+        for name in (
+            "work-request",
+            "workflow-definition",
+            "workflow-revision",
+            "job-definition",
+            "task-definition",
+            "work-assignment",
+            "work-delegation",
+            "work-dependency",
+            "work-result",
+            "work-state-transition",
+            "retry-intent",
+            "escalation-intent",
+        ):
+            self.assertIsNone(
+                validate_contract(
+                    f"leos.{name}.v1",
+                    self.example(f"{name}.v1.json"),
+                )
+            )
+
     def test_undefined_effective_ranking_has_no_source_authority(self):
         value = {
             "contract_version": "leos.effective-ranking-result.v1",

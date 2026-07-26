@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leosai.org/contracts/escalation-intent.v1.schema.json",
+  "title": "LEOS Escalation Intent v1",
+  "$ref": "https://leosai.org/contracts/work-common.v1.schema.json#/$defs/escalationIntentDocument"
+}

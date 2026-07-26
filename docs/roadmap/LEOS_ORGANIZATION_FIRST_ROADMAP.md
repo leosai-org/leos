@@ -573,6 +573,39 @@ Definition/Manifest publishing, installation, activation, dependency
 resolution, revocation, Tool catalog, runtime compatibility observation, and
 Capability Profile production owners remain **OPEN**.
 
+## Epic 7.0 — Work, Workflow, Job, Task, Assignment, and Delegation Foundation
+
+Epic 7.0 establishes the logical, contract-governed Work Domain foundation:
+Work Request, Workflow Definition, immutable Workflow Revision, Scheduler Job
+target, Task, Persistent Runtime Assignment target, Delegation, Dependency,
+Result and Artifact linkage, lifecycle transition evidence, Retry Intent, and
+Escalation Intent.
+
+Canonical outputs are:
+
+- `../architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN.md`;
+- `../architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN_DECISIONS.md`;
+- target contracts and examples under `../../contracts/` and
+  `../../examples/`; and
+- deterministic, non-authoritative cross-record conformance validation.
+
+Scheduler retains Job, lease, and resource authority. Persistent Runtime
+retains durable Assignment projection/lifecycle authority. Capability Manager
+resolves and Dispatcher invokes. Team remains collaboration/responsibility
+scope only. Assignment and Delegation do not authorize or execute.
+
+Production Work Request acceptance, Workflow publication, Task lifecycle,
+assignment selection/acceptance, Delegation, dependency lifecycle, Result
+acceptance, verification, closure, retry-intent, and escalation-intent owners
+remain **OPEN**. Employee-to-job and Team-to-job selection remain **OPEN**.
+Public Assignment Service and Lucy Workflow/Planning/Task/Assignment behavior
+remain **CONFLICTING / INVESTIGATE** or donor evidence only.
+
+Epic 7.0 does not implement a production Workflow engine, Assignment Service,
+projection worker, queue, scheduler algorithm, planner, persistence, API,
+migration, UI, ranking, optimization, autonomous selection, or execution
+path.
+
 ## Phase 5.0 — Non-authoritative Intelligence Test Fixture
 
 The detailed implementation roadmap established after the Phase 3 scope lock

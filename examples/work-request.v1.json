@@ -1,0 +1,50 @@
+{
+  "contract_version": "leos.work-request.v1",
+  "identity": {
+    "resource_type": "WORK_REQUEST",
+    "resource_id": "work-request:acme:market-brief",
+    "display_name": "Market brief request",
+    "revision": "sha256:work-request-acme-market-brief-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:work-request-lifecycle-authority",
+        "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-work-request-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:work-request", "revision": "sha256:actor-context-brett-work-request"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:work-request-create", "revision": "sha256:authorization-work-request-create"},
+    "audit_id": "audit:work-request:acme:market-brief:v1",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:work-request-lifecycle-authority",
+      "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-work-request-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:work-request", "revision": "sha256:actor-context-brett-work-request"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:work-request-create", "revision": "sha256:authorization-work-request-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:work-request:market-brief:submitted", "revision": "sha256:event-work-request-market-brief-submitted"},
+    "transitioned_at": "2026-07-25T18:00:00Z"
+  },
+  "requesting_principal": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+  "submitting_principal": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+  "title": "Prepare market brief",
+  "description": "Research the target market and prepare a concise brief.",
+  "desired_outcome": "A reviewable market brief with cited evidence.",
+  "requested_deliverables": [{"output_id": "market-brief", "description": "Cited market brief", "required": true}],
+  "constraints": [{"authority": {"authority_id": "OPEN:work-request-policy-authority", "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-work-request-policy-authority-v1"}, "reference_id": "constraint:public-sources-only", "revision": "sha256:constraint-public-sources-only-v1"}],
+  "urgency": "NORMAL",
+  "requested_due_window": {"not_before": "2026-07-25T18:00:00Z", "due_at": "2026-07-28T18:00:00Z"},
+  "policy_refs": [],
+  "required_capability_refs": [],
+  "status": "SUBMITTED"
+}

@@ -16,6 +16,8 @@ Read before implementation:
 - `docs/architecture/v2/ORGANIZATION_DOMAIN_DECISIONS.md`
 - `docs/architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN.md`
 - `docs/architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN_DECISIONS.md`
+- `docs/architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN.md`
+- `docs/architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN_DECISIONS.md`
 - `docs/architecture/v2/AUTHORITY_REGISTRY.md`
 - `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md`
 - `docs/roadmap/DEV_PREVIEW_V2_GOALS.md` when present
@@ -61,6 +63,11 @@ the conflict. Do not silently change the architecture.
   non-authoritative conformance only until each explicitly `OPEN` production
   lifecycle owner is accepted; installation and activation never grant
   permission, approval, trust, eligibility, resolution, or execution.
+- **Work Domain:** canonical Work Request, Workflow, Job, Task, Assignment,
+  Delegation, Dependency, Result, and lifecycle target contracts plus
+  non-authoritative conformance; Scheduler retains Job authority, Persistent
+  Runtime retains Assignment projection authority, and all explicitly `OPEN`
+  production owners remain unassigned.
 
 ## Source authority
 

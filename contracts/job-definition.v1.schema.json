@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leosai.org/contracts/job-definition.v1.schema.json",
+  "title": "LEOS Scheduler Job Definition Target v1",
+  "$ref": "https://leosai.org/contracts/work-common.v1.schema.json#/$defs/jobDefinitionDocument"
+}

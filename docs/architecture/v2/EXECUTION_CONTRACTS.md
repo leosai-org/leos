@@ -226,3 +226,15 @@ Migration requires adaptation for Lucy callers that use:
 
 Those behaviors are evidence, not canonical v2 authority. No existing frozen
 contract or executable service is changed by this package.
+
+## Work Domain linkage
+
+`leos.work-result.v1` may retain an exact execution reference as outcome
+lineage. It does not reinterpret `leos.execution-result.v1`, authorize a
+target, or prove work verification/closure. Job, Task, Assignment,
+Delegation, Workflow, Result, and Work State Transition never replace
+`leos.execution.v1` or `leos.execution-result.v1`.
+
+The governed path remains Capability Manager resolution followed by
+Dispatcher invocation. A capability requirement in work is declarative only;
+it cannot directly call Capability Manager or Dispatcher.

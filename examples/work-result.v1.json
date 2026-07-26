@@ -1,0 +1,53 @@
+{
+  "contract_version": "leos.work-result.v1",
+  "identity": {
+    "resource_type": "WORK_RESULT",
+    "resource_id": "work-result:acme:market-brief:research:1",
+    "display_name": "Market research result",
+    "revision": "sha256:work-result-acme-market-brief-research-1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:work-result-authority",
+        "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:open-work-result-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:researcher:result", "revision": "sha256:actor-context-researcher-result"},
+    "creation_authority_evidence_ref": {"authority_id": "authorization-authority", "reference_id": "authorization-decision:result-create", "revision": "sha256:authorization-result-create"},
+    "audit_id": "audit:work-result:acme:market-brief:research:1",
+    "created_at": "2026-07-26T18:00:00Z",
+    "updated_at": "2026-07-26T18:00:00Z"
+  },
+  "record_mode": {"kind": "CANONICAL_TARGET"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:work-result-authority",
+      "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:open-work-result-authority-v1"
+    },
+    "actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:researcher:result", "revision": "sha256:actor-context-researcher-result"},
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization-decision:result-create", "revision": "sha256:authorization-result-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:work-result:research:created", "revision": "sha256:event-work-result-research-created"},
+    "transitioned_at": "2026-07-26T18:00:00Z"
+  },
+  "work_ref": {"resource_type": "TASK", "resource_id": "task:acme:market-brief:research", "revision": "sha256:task-acme-market-brief-research-v1"},
+  "producing_principal": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+  "producing_assignment_ref": {"resource_type": "WORK_ASSIGNMENT", "resource_id": "assignment:acme:market-brief:research:1", "revision": "sha256:assignment-acme-market-brief-research-1"},
+  "outcome": "SUCCEEDED",
+  "summary": "Cited market evidence was collected.",
+  "deliverables": [{"output_id": "research-notes", "status": "PRODUCED", "artifact_refs": [{"resource_type": "ARTIFACT", "resource_id": "artifact:acme:market-research-notes", "revision": "sha256:artifact-acme-market-research-notes-v1"}], "evidence_refs": [{"authority": {"authority_id": "OPEN:artifact-authority", "principal": {"principal_id": "principal:service:open-artifact-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-artifact-authority-v1"}, "reference_id": "artifact-provenance:market-research-notes", "revision": "sha256:artifact-provenance-market-research-notes-v1"}]}],
+  "artifact_links": [{
+    "artifact_ref": {"resource_type": "ARTIFACT", "resource_id": "artifact:acme:market-research-notes", "revision": "sha256:artifact-acme-market-research-notes-v1"},
+    "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+    "output_id": "research-notes",
+    "producer_ref": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+    "provenance_refs": [{"authority": {"authority_id": "OPEN:artifact-authority", "principal": {"principal_id": "principal:service:open-artifact-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-artifact-authority-v1"}, "reference_id": "artifact-provenance:market-research-notes", "revision": "sha256:artifact-provenance-market-research-notes-v1"}]
+  }],
+  "evidence_refs": [{"authority": {"authority_id": "OPEN:work-result-authority", "principal": {"principal_id": "principal:service:open-work-authority", "principal_type": "SERVICE"}, "authority_revision": "sha256:open-work-result-authority-v1"}, "reference_id": "result-evidence:market-research-notes", "revision": "sha256:result-evidence-market-research-notes-v1"}],
+  "completed_at": "2026-07-26T18:00:00Z"
+}

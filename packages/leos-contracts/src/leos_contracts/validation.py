@@ -16,6 +16,7 @@ SCHEMA_RESOURCES = (
     "trust-common.v1.schema.json",
     "organization-common.v1.schema.json",
     "capability-plugin-common.v1.schema.json",
+    "work-common.v1.schema.json",
 )
 SUPPORTED_CONTRACTS = (
     "resource-identity.v1.schema.json",
@@ -56,6 +57,18 @@ SUPPORTED_CONTRACTS = (
     "execution-result.v1.schema.json",
     "effective-ranking-request.v1.schema.json",
     "effective-ranking-result.v1.schema.json",
+    "work-request.v1.schema.json",
+    "workflow-definition.v1.schema.json",
+    "workflow-revision.v1.schema.json",
+    "job-definition.v1.schema.json",
+    "task-definition.v1.schema.json",
+    "work-assignment.v1.schema.json",
+    "work-delegation.v1.schema.json",
+    "work-dependency.v1.schema.json",
+    "work-result.v1.schema.json",
+    "work-state-transition.v1.schema.json",
+    "retry-intent.v1.schema.json",
+    "escalation-intent.v1.schema.json",
 )
 CONTRACT_VERSIONS = {
     "leos.resource-identity.v1": "resource-identity.v1.schema.json",
@@ -107,6 +120,19 @@ CONTRACT_VERSIONS = {
         "effective-ranking-request.v1.schema.json",
     "leos.effective-ranking-result.v1":
         "effective-ranking-result.v1.schema.json",
+    "leos.work-request.v1": "work-request.v1.schema.json",
+    "leos.workflow-definition.v1": "workflow-definition.v1.schema.json",
+    "leos.workflow-revision.v1": "workflow-revision.v1.schema.json",
+    "leos.job-definition.v1": "job-definition.v1.schema.json",
+    "leos.task-definition.v1": "task-definition.v1.schema.json",
+    "leos.work-assignment.v1": "work-assignment.v1.schema.json",
+    "leos.work-delegation.v1": "work-delegation.v1.schema.json",
+    "leos.work-dependency.v1": "work-dependency.v1.schema.json",
+    "leos.work-result.v1": "work-result.v1.schema.json",
+    "leos.work-state-transition.v1":
+        "work-state-transition.v1.schema.json",
+    "leos.retry-intent.v1": "retry-intent.v1.schema.json",
+    "leos.escalation-intent.v1": "escalation-intent.v1.schema.json",
 }
 RESERVED_APPROVAL_SHORTCUTS = {
     "allow_approval_required",
@@ -359,6 +385,18 @@ def validate_semantics(
         "permission-declaration.v1.schema.json":
             "PERMISSION_DECLARATION",
         "plugin-revocation.v1.schema.json": "PLUGIN_REVOCATION",
+        "work-request.v1.schema.json": "WORK_REQUEST",
+        "workflow-definition.v1.schema.json": "WORKFLOW_DEFINITION",
+        "workflow-revision.v1.schema.json": "WORKFLOW_REVISION",
+        "job-definition.v1.schema.json": "SCHEDULER_JOB",
+        "task-definition.v1.schema.json": "TASK",
+        "work-assignment.v1.schema.json": "WORK_ASSIGNMENT",
+        "work-delegation.v1.schema.json": "WORK_DELEGATION",
+        "work-dependency.v1.schema.json": "WORK_DEPENDENCY",
+        "work-result.v1.schema.json": "WORK_RESULT",
+        "work-state-transition.v1.schema.json": "WORK_STATE_TRANSITION",
+        "retry-intent.v1.schema.json": "RETRY_INTENT",
+        "escalation-intent.v1.schema.json": "ESCALATION_INTENT",
     }
     foundation_contracts = {
         "resource-identity.v1.schema.json",
@@ -1432,6 +1470,191 @@ def validate_semantics(
                             "$.attempt_summary.attempts",
                             "attempts must be in ascending number order",
                         )
+
+    work_domain_names = {
+        "work-request.v1.schema.json",
+        "workflow-definition.v1.schema.json",
+        "workflow-revision.v1.schema.json",
+        "job-definition.v1.schema.json",
+        "task-definition.v1.schema.json",
+        "work-assignment.v1.schema.json",
+        "work-delegation.v1.schema.json",
+        "work-dependency.v1.schema.json",
+        "work-result.v1.schema.json",
+        "work-state-transition.v1.schema.json",
+        "retry-intent.v1.schema.json",
+        "escalation-intent.v1.schema.json",
+    }
+    if name in work_domain_names:
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        lifecycle_authority = (
+            ownership.get("lifecycle_authority")
+            if isinstance(ownership, dict)
+            else None
+        )
+        state_evidence = document.get("state_evidence")
+        if isinstance(state_evidence, dict):
+            equal_when_present(
+                lifecycle_authority,
+                state_evidence.get("transition_authority"),
+                "$.state_evidence.transition_authority",
+                "state transition and lifecycle authority",
+            )
+            if "transitioned_at" in state_evidence:
+                validate_timestamp(
+                    state_evidence["transitioned_at"],
+                    "$.state_evidence.transitioned_at",
+                )
+        if isinstance(identity, dict):
+            require_chronology(
+                identity.get("created_at"),
+                identity.get("updated_at"),
+                "$.identity.updated_at",
+                "updated_at must not precede created_at",
+            )
+            require_chronology(
+                identity.get("created_at"),
+                (
+                    state_evidence.get("transitioned_at")
+                    if isinstance(state_evidence, dict)
+                    else None
+                ),
+                "$.state_evidence.transitioned_at",
+                "transitioned_at must not precede resource creation",
+            )
+        due_window = (
+            document.get("requested_due_window")
+            if name == "work-request.v1.schema.json"
+            else document.get("due_window")
+        )
+        if isinstance(due_window, dict):
+            require_chronology(
+                due_window.get("not_before"),
+                due_window.get("due_at"),
+                "$.due_window.due_at",
+                "due_at must not precede not_before",
+            )
+        effective_period = document.get("effective_period")
+        if isinstance(effective_period, dict):
+            require_chronology(
+                effective_period.get("effective_from"),
+                effective_period.get("effective_until"),
+                "$.effective_period.effective_until",
+                "effective_until must be later than effective_from",
+                allow_equal=False,
+            )
+
+    if name in {
+        "job-definition.v1.schema.json",
+        "task-definition.v1.schema.json",
+    }:
+        status = document.get("status")
+        result_refs = document.get("result_refs")
+        if (
+            status in {
+                "COMPLETED",
+                "AWAITING_VERIFICATION",
+                "VERIFIED",
+                "CLOSED",
+            }
+            and isinstance(result_refs, list)
+            and not result_refs
+        ):
+            add(
+                "$.result_refs",
+                "completed or later work state requires result evidence",
+            )
+        governance = document.get("governance")
+        verification_refs = document.get("verification_evidence_refs")
+        if (
+            isinstance(governance, dict)
+            and governance.get("verification_required") is True
+            and status in {"VERIFIED", "CLOSED"}
+            and isinstance(verification_refs, list)
+            and not verification_refs
+        ):
+            add(
+                "$.verification_evidence_refs",
+                "verified or closed work requires verification evidence",
+            )
+        if status == "CLOSED" and "closure_transition_ref" not in document:
+            add(
+                "$.closure_transition_ref",
+                "closed work requires governed closure evidence",
+            )
+
+    if name in {
+        "work-assignment.v1.schema.json",
+        "work-delegation.v1.schema.json",
+    }:
+        acceptance = document.get("acceptance")
+        status = document.get("status")
+        if isinstance(acceptance, dict):
+            required = acceptance.get("required")
+            state = acceptance.get("state")
+            if required is False and state != "NOT_REQUIRED":
+                add(
+                    "$.acceptance.state",
+                    "non-required acceptance must be NOT_REQUIRED",
+                )
+            if required is True and state == "NOT_REQUIRED":
+                add(
+                    "$.acceptance.state",
+                    "required acceptance cannot be NOT_REQUIRED",
+                )
+            if (
+                status == "ACTIVE"
+                and required is True
+                and state != "ACCEPTED"
+            ):
+                add(
+                    "$.acceptance.state",
+                    "active responsibility requires accepted evidence",
+                )
+            if state == "ACCEPTED" and "evidence_ref" not in acceptance:
+                add(
+                    "$.acceptance.evidence_ref",
+                    "accepted responsibility requires evidence",
+                )
+
+    if name == "work-result.v1.schema.json":
+        if "completed_at" in document:
+            validate_timestamp(document["completed_at"], "$.completed_at")
+        producing_principal = document.get("producing_principal")
+        for index, link in enumerate(document.get("artifact_links", [])):
+            if isinstance(link, dict):
+                equal_when_present(
+                    producing_principal,
+                    link.get("producer_ref"),
+                    f"$.artifact_links[{index}].producer_ref",
+                    "result and Artifact producer",
+                )
+
+    if name == "work-state-transition.v1.schema.json":
+        if "occurred_at" in document:
+            validate_timestamp(document["occurred_at"], "$.occurred_at")
+        if document.get("expected_revision") == document.get(
+            "resulting_revision"
+        ):
+            add(
+                "$.resulting_revision",
+                "state transition must produce a new revision",
+            )
+        if document.get("from_state") == document.get("to_state"):
+            add("$.to_state", "state transition must change state")
+
+    if name == "retry-intent.v1.schema.json":
+        requested = document.get("requested_attempt_ref")
+        if requested in document.get("prior_attempt_refs", []):
+            add(
+                "$.requested_attempt_ref",
+                "requested attempt must not reuse prior attempt identity",
+            )
     return tuple(errors)
 
 

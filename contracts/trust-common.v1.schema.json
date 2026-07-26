@@ -69,6 +69,18 @@
         "EVENT",
         "EVENT_SOURCE",
         "SCHEDULER_JOB",
+        "WORK_REQUEST",
+        "WORKFLOW_DEFINITION",
+        "WORKFLOW_REVISION",
+        "TASK",
+        "WORK_ASSIGNMENT",
+        "WORK_DELEGATION",
+        "WORK_DEPENDENCY",
+        "WORK_RESULT",
+        "WORK_STATE_TRANSITION",
+        "WORK_ATTEMPT",
+        "RETRY_INTENT",
+        "ESCALATION_INTENT",
         "KNOWLEDGE_OBJECT",
         "MEMORY_OBJECT"
       ]
