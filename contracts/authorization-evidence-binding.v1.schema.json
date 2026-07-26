@@ -1,0 +1,39 @@
+{
+  "$id": "https://leosai.org/contracts/authorization-evidence-binding.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Authorization Evidence Binding v1",
+  "description": "Canonical input binding for verifying an Authorization Decision against an exact expected subject/action/resource/context scope. The binding is not authority by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "leos.authorization-evidence-binding.v1"
+    },
+    "authorization_decision_ref": {
+      "$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/authorizationDecisionRef"
+    },
+    "actor_context_ref": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"
+    },
+    "organization_ref": {
+      "$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"
+    },
+    "expected_scope": {
+      "$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actionScope"
+    },
+    "expected_decision": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "authorization_decision_ref",
+    "actor_context_ref",
+    "organization_ref",
+    "expected_scope",
+    "expected_decision"
+  ]
+}

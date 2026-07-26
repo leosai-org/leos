@@ -23,6 +23,7 @@ SUPPORTED_CONTRACTS = (
     "principal.v1.schema.json",
     "actor-context.v1.schema.json",
     "authorization-decision.v1.schema.json",
+    "authorization-evidence-binding.v1.schema.json",
     "approval-request.v1.schema.json",
     "approval-grant.v1.schema.json",
     "approval-verification-result.v1.schema.json",
@@ -76,6 +77,8 @@ CONTRACT_VERSIONS = {
     "leos.actor-context.v1": "actor-context.v1.schema.json",
     "leos.authorization-decision.v1":
         "authorization-decision.v1.schema.json",
+    "leos.authorization-evidence-binding.v1":
+        "authorization-evidence-binding.v1.schema.json",
     "leos.approval-request.v1": "approval-request.v1.schema.json",
     "leos.approval-grant.v1": "approval-grant.v1.schema.json",
     "leos.approval-verification-result.v1":

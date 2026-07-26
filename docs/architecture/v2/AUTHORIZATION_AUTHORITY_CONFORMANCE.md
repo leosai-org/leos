@@ -75,6 +75,12 @@ service where:
 Client-provided Authorization Decision JSON is rejected. A structurally valid
 contract document is evidence shape only and never self-authorizes.
 
+Epic 8.6.0 adds `leos.authorization-evidence-binding.v1` as the canonical
+verification input shape for later consumers. The binding carries the expected
+decision reference, Actor Context evidence reference, Organization reference,
+scope, and expected outcome. It does not authorize by itself and does not
+replace this service's live verification.
+
 ## Persistence and outbox
 
 SQLite tables persist:

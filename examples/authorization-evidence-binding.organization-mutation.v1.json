@@ -1,0 +1,43 @@
+{
+  "contract_version": "leos.authorization-evidence-binding.v1",
+  "authorization_decision_ref": {
+    "resource_type": "AUTHORIZATION_DECISION",
+    "resource_id": "authorization-decision:organization-mutation:001",
+    "revision": "sha256:authorization-decision-organization-mutation-001"
+  },
+  "actor_context_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {
+        "principal_id": "principal:service:identity-authority",
+        "principal_type": "SERVICE"
+      },
+      "authority_revision": "sha256:identity-authority-policy-v1"
+    },
+    "reference_id": "actor-context:brett:session-001",
+    "revision": "sha256:actor-context-brett-session-001"
+  },
+  "organization_ref": {
+    "resource_type": "ORGANIZATION",
+    "resource_id": "organization:leos-lab",
+    "revision": "sha256:organization-leos-lab-v1"
+  },
+  "expected_scope": {
+    "subject": {
+      "principal_id": "principal:user:brett",
+      "principal_type": "HUMAN_USER"
+    },
+    "action": "organization.team.update",
+    "resource": {
+      "resource_type": "TEAM",
+      "resource_id": "team:leos-lab:research",
+      "revision": "sha256:team-leos-lab-research-v3"
+    },
+    "context_type": "organization-domain-mutation",
+    "context_id": "organization-mutation:team-update:001",
+    "context_revision": "sha256:organization-mutation-team-update-001",
+    "context_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "expected_decision": "ALLOW"
+}

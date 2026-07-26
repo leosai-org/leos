@@ -1,0 +1,43 @@
+{
+  "contract_version": "leos.authorization-evidence-binding.v1",
+  "authorization_decision_ref": {
+    "resource_type": "AUTHORIZATION_DECISION",
+    "resource_id": "authorization-decision:scheduler-projection:001",
+    "revision": "sha256:authorization-decision-scheduler-projection-001"
+  },
+  "actor_context_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {
+        "principal_id": "principal:service:identity-authority",
+        "principal_type": "SERVICE"
+      },
+      "authority_revision": "sha256:identity-authority-policy-v1"
+    },
+    "reference_id": "actor-context:work-coordination:projection-001",
+    "revision": "sha256:actor-context-work-coordination-projection-001"
+  },
+  "organization_ref": {
+    "resource_type": "ORGANIZATION",
+    "resource_id": "organization:leos-lab",
+    "revision": "sha256:organization-leos-lab-v1"
+  },
+  "expected_scope": {
+    "subject": {
+      "principal_id": "principal:service:work-coordination-service",
+      "principal_type": "SERVICE"
+    },
+    "action": "scheduler.job.project",
+    "resource": {
+      "resource_type": "TASK",
+      "resource_id": "task:daily-briefing:research",
+      "revision": "sha256:task-daily-briefing-research-v1"
+    },
+    "context_type": "scheduler-job-projection",
+    "context_id": "scheduler-projection:daily-briefing:001",
+    "context_revision": "sha256:scheduler-projection-daily-briefing-001",
+    "context_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "expected_decision": "ALLOW"
+}

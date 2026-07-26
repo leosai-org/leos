@@ -217,6 +217,7 @@ These terms are normative even where the final contract is **OPEN**.
 | Team Template | Immutable publishable organization blueprint | Separate from its installed instance, created Team, and active organization. |
 | Approval request | Request for an authorized human/authority decision | Not a grant. |
 | Approval grant | Explicit verifiable scoped authorization | Approval Authority owns lifecycle and verification; caller-provided evidence is not self-verifying. |
+| Authorization evidence binding | Canonical tuple a consumer submits for Authorization Decision verification | Not a decision, permission grant, approval, identity evidence, or authority by itself. |
 | Secret reference | Opaque identifier for protected material | Secret Authority owns identity; the reference never contains or implies authorization to retrieve the secret value. |
 | Artifact | Durable output with identity, ownership, provenance, and derivation | Artifact Authority owns Dev Preview artifact lifecycle and linkage verification. |
 | Memory/knowledge item | Governed retained information with scope, provenance, trust, and lifecycle | Exact taxonomy and authority remain **OPEN**. |

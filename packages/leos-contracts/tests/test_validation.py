@@ -158,6 +158,10 @@ class ValidationApiTests(unittest.TestCase):
                 "leos.authorization-decision.v1",
                 "authorization-decision.v1.json",
             ),
+            (
+                "leos.authorization-evidence-binding.v1",
+                "authorization-evidence-binding.dispatcher-invocation.v1.json",
+            ),
             ("leos.approval-request.v1", "approval-request.v1.json"),
             ("leos.approval-grant.v1", "approval-grant.v1.json"),
             (
