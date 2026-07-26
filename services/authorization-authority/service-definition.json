@@ -1,0 +1,47 @@
+{
+  "service_id": "authorization-authority",
+  "display_name": "LEOS Authorization Authority",
+  "version": "0.2.0-dev-preview-v2",
+  "service_contract": "leos.authorization-authority.provisional-v1",
+  "authority": "authorization-authority",
+  "port": 8119,
+  "health_endpoint": "/health",
+  "readiness_endpoint": "/ready",
+  "description": "Canonical Dev Preview v2 issuer and verifier for Authorization Decision evidence, capability permission grants, revocations, policy evaluation records, audit lineage, and producer-local authorization outbox records.",
+  "owned_records": [
+    "authorization_decision",
+    "capability_permission_grant",
+    "authorization_revocation",
+    "authorization_outbox_record"
+  ],
+  "canonical_contracts": [
+    "leos.authorization-decision.v1",
+    "leos.actor-context.v1"
+  ],
+  "authority_boundaries": {
+    "does_not_own": [
+      "identity_lifecycle",
+      "authentication",
+      "actor_context_issuance",
+      "approval",
+      "organization_lifecycle",
+      "employee_lifecycle",
+      "work_lifecycle",
+      "job_scheduling",
+      "assignment_projection",
+      "capability_resolution",
+      "provider_or_tool_invocation",
+      "dispatcher",
+      "ranking",
+      "plugin_lifecycle",
+      "tool_lifecycle",
+      "secret_values",
+      "event_delivery"
+    ],
+    "defaults": [
+      "deny",
+      "fail_closed"
+    ],
+    "outbox_scope": "producer-local"
+  }
+}
