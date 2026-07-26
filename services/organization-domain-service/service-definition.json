@@ -1,0 +1,25 @@
+{
+  "service_id": "organization-domain-service",
+  "name": "Organization Domain Service",
+  "version": "0.2.0-dev-preview-v2",
+  "service_contract": "leos.organization-domain-service.provisional-v1",
+  "authority": "Organization Domain Service",
+  "capabilities": [
+    "organizations.lifecycle",
+    "organizations.relationships",
+    "organizations.audit",
+    "organizations.outbox"
+  ],
+  "dependencies": [
+    "identity-authority",
+    "authorization-authority",
+    "approval-authority",
+    "employee-registry",
+    "event-delivery-service"
+  ],
+  "persistence": {
+    "type": "sqlite",
+    "path": "/data/organization-domain/organization-domain.db",
+    "outbox": "local-producer-outbox"
+  }
+}

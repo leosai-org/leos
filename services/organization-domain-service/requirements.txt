@@ -1,0 +1,6 @@
+fastapi
+httpx
+jsonschema
+pydantic
+referencing
+uvicorn[standard]
