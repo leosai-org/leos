@@ -1,0 +1,26 @@
+{
+  "service_id": "work-coordination-service",
+  "display_name": "LEOS Work Coordination Service",
+  "version": "0.2.0-dev-preview-v2",
+  "service_contract": "leos.work-coordination-service.provisional-v1",
+  "authority": "work-coordination-service",
+  "port": 8118,
+  "health_endpoint": "/health",
+  "readiness_endpoint": "/ready",
+  "description": "Canonical Dev Preview v2 owner for Work Requests, Workflow Definitions/Revisions, Tasks, Dependencies, assignment decisions, same-Organization Delegation, Work Results, verification, closure, retry intents, escalation intents, and producer-local outbox records.",
+  "authority_boundaries": {
+    "does_not_own": [
+      "scheduler_jobs",
+      "scheduler_leases",
+      "runtime_assignment_projection",
+      "employee_lifecycle",
+      "organization_lifecycle",
+      "authorization_decisions",
+      "approval_grants",
+      "capability_resolution",
+      "dispatcher_invocation",
+      "secret_values",
+      "event_delivery"
+    ]
+  }
+}
