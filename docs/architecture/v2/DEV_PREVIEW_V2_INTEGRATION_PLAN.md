@@ -34,17 +34,17 @@ authoritative services, and add one governed integration layer that coordinates
 work intake and workflow projection without taking scheduler, assignment,
 reasoning, resolution, invocation, approval, secret, or artifact authority.
 
-The biggest release blockers are:
+Epic 8.1 resolves the blocking authority ownership decisions for the
+production path. The biggest remaining release blockers are implementation
+blockers:
 
-- production Organization Domain service topology and storage;
-- Work Request acceptance, Workflow Definition/Revision lifecycle, Task
-  lifecycle, and workflow projection into Scheduler jobs;
-- employee-to-job assignment decision and handoff into Scheduler/Persistent
-  Runtime;
-- Approval Authority durable API and fail-closed grant verification;
-- Secret Authority backend, authorization, and transient injection;
-- Artifact identity, linkage, result acceptance, verification, and closure;
-- event outbox/replay/retention policy across authorities;
+- production Organization Domain Service and storage;
+- Work Coordination Service for Work Requests, Workflow Definitions/Revisions,
+  Tasks, Dependencies, assignment decisions, Results, verification, closure,
+  retry intents, and escalation intents;
+- Scheduler and Persistent Runtime target-contract adoption;
+- Authorization, Approval, Secret, Event Delivery, Artifact, Runtime
+  Activation, Sandbox, Plugin/Tool Lifecycle, and Team Template services;
 - operator/UI surfaces for the organization-first journey;
 - retirement or isolation of legacy Assignment, Lucy Workflow/Planning, and
   catalog entries that conflict with accepted boundaries.
@@ -74,6 +74,7 @@ Canonical architecture and roadmap:
 - `docs/architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN_DECISIONS.md`
 - `docs/architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN.md`
 - `docs/architecture/v2/WORK_WORKFLOW_AND_ASSIGNMENT_DOMAIN_DECISIONS.md`
+- `docs/architecture/v2/DEV_PREVIEW_V2_BLOCKING_AUTHORITY_DECISIONS.md`
 - `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md`
 - `docs/roadmap/DEV_PREVIEW_V2_GOALS.md`
 - `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`
@@ -142,11 +143,11 @@ Lucy remains immutable donor evidence only.
 | Service or surface | Current responsibility | Authoritative records owned today | Persistence and events | APIs observed | Dependencies | Gap to Dev Preview v2 |
 |---|---|---|---|---|---|---|
 | Scheduler | Job lifecycle, worker leases, resource admission/release, employee eligibility recheck | `scheduler_jobs`, `scheduler_workers`, `scheduler_leases`, terminal transitions, resource history | SQLite tables; local `scheduler_events`; best-effort kernel publish through `emit()` | `/workers`, `/workers/{id}/heartbeat`, `/jobs`, `/jobs/{id}`, `/schedule/tick`, `/jobs/{id}/running`, `/complete`, `/fail`, `/cancel`, `/resources/reconcile`, `/events` | Employee Registry, Employee Resource Profile Service, kernel event endpoint | Current Job model must adopt `leos.job-definition.v1`; event reliability and replay remain incomplete; employee-to-job selection is not owned here. |
-| Persistent Employee Runtime | Durable employee presence, mailbox, memory/working state, assignment projection/transitions | `employees`, `employee_messages`, `employee_memory`, `employee_assignments`, assignment terminal transitions | SQLite tables; `employee_event_outbox`; local `employee_events`; kernel event publication | `/employees`, `/messages`, `/memory`, `/scheduler/sync`, `/assignments`, `/assignments/{id}/start`, `/complete`, `/fail`, `/cancel`, `/events` | Scheduler, Employee Registry, kernel event endpoint | Assignment target contract adoption is pending; assignment decision/acceptance remains `OPEN`; memory here is working state, not canonical knowledge. |
+| Persistent Employee Runtime | Durable employee presence, mailbox, memory/working state, assignment acceptance/projection/transitions | `employees`, `employee_messages`, `employee_memory`, `employee_assignments`, assignment terminal transitions | SQLite tables; `employee_event_outbox`; local `employee_events`; kernel event publication | `/employees`, `/messages`, `/memory`, `/scheduler/sync`, `/assignments`, `/assignments/{id}/start`, `/complete`, `/fail`, `/cancel`, `/events` | Scheduler, Employee Registry, kernel event endpoint | Assignment target contract adoption is pending; Work Coordination owns assignment decisions; memory here is working state, not canonical knowledge. |
 | Employee Cognitive Service | Cognitive run lifecycle, context assembly, reason/act/observe loop, execution result handling | `cognitive_runs`, `cognitive_attempts`, `cognitive_observations` | SQLite tables; no canonical global event outbox observed | `/runs`, `/runs/{id}/execute`, `/resume`, `/cancel`, `/tick`, `/runs/{id}` | Persistent Runtime assignment APIs, Dispatcher | Good execution-spine fit; needs production context/knowledge boundaries, approval waiting integration, and target contracts for run/checkpoint evidence. |
 | Execution Dispatcher | Sole governed provider/tool invocation authority, capability resolution consumption, same-target retry, result normalization | `canonical_executions`, `canonical_invocation_attempts`, `execution_claims`, provider adapters | SQLite tables; durable claims and attempts; orphan recovery | `/execute`, `/executions`, `/executions/{id}`, `/contract`, `/adapters` | Capability Manager, provider/adapters | Needs Secret Authority, approval verification, sandbox/tool catalog integration, and production adapter onboarding. |
 | Capability Manager | Provider/capability inventory, provider-capability bindings, eligibility, governed resolution | `providers`, `capabilities`, `provider_capabilities`, `canonical_resolutions` | SQLite tables; local events table | `/providers`, `/capabilities`, `/bindings`, `/providers/register-bundle`, `/resolve`, `/resolutions` | Ranking Policy, Model Registry | Must adopt target Capability/Provider contracts; capability grants and permission verification remain `OPEN`; no execution allowed. |
-| Model Registry | Model facts and model-provider/runtime bindings | `models`, `model_runtime_bindings`, registry events | SQLite tables and local model registry events | `/models`, `/bindings`, `/events` | Capability Manager provider verification | Must integrate production runtime/model activation; exact activation owner remains `OPEN`. |
+| Model Registry | Model facts and model-provider/runtime bindings | `models`, `model_runtime_bindings`, registry events | SQLite tables and local model registry events | `/models`, `/bindings`, `/events` | Capability Manager provider verification | Must integrate with Runtime Activation Authority; Model Registry remains facts/binding owner. |
 | Ranking Policy | User-authored ranking policies and effective ranking evidence | `rankings`, `ranking_events` | SQLite tables and local events | `/rankings`, `/rankings/{id}`, `/effective`, `/events` | Capability Manager effective ranking call | Good authority fit; organization/team policy interaction remains `OPEN`; PPT/cost/health cannot reorder. |
 | Employee Registry | Employee definitions, lifecycle, eligibility, resource-profile synchronization | In-process lifecycle state and persisted employee/resource behavior through local files/service storage | Best-effort event bus publish | `/employees`, `/employees/{id}`, lifecycle endpoints, `/employees/{id}/eligibility`, `/resolve`, `/import/agents` | Employee Resource Profile, Event Bus | Employee v3 adoption pending; legacy `/resolve` selects employees and remains unresolved compatibility behavior. |
 | Employee Resource Profile Service | Employee resource profile, node capacity, admission evaluation, reservations | Profiles, nodes, reservations | Service-local storage via helper module | `/profiles`, `/nodes`, `/admission/evaluate`, `/reservations`, `/snapshot` | Scheduler | Fits Scheduler admission input role; should not own scheduling or model/provider selection. |
@@ -186,14 +187,14 @@ User objective
 
 | Transition | Initiator | Authoritative owner | Input contract | Output contract | Persisted record | Event | Authorization and approval | Failure and retry | Audit evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| User objective to Team Architect intake | Human actor through UI/operator | Identity plus Team Architect protocol owner `OPEN` | Actor Context, Organization Context, plain objective | Team Architect intake/proposal contract `MISSING` | Proposal draft `OPEN` | Proposal-created event by future owner | Authenticated actor required; no approval yet | Invalid/missing actor or organization fails closed | Actor, organization, objective digest, source channel |
-| Proposal to reviewed Team configuration | Team Architect | Team Architect proposal/apply owner `OPEN`; Organization Domain for accepted resources | Proposal, Employee/Team/Capability/Workflow references | Review package `MISSING` | Review plan `OPEN` | Review-requested event by future owner | User review required for authority-bearing changes | Proposal edits invalidate affected approvals | Proposal revision, dependency plan, permission plan |
-| Review to Work Request | Human or approved Team Architect apply coordinator | Work Request owner `OPEN` | `leos.work-request.v1` target plus Actor Context | Accepted Work Request transition `OPEN` | Work Request record | Work-request-accepted event | Authorization required; approval if policy requires | Rejection records reason; retry creates new transition/revision | Exact request revision and decision evidence |
-| Work Request to Workflow Definition/Revision | Workflow intake/publication owner `OPEN` | Workflow Definition/Revision owner `OPEN` | Work Request, selected/published Workflow Definition, Workflow Revision | `leos.workflow-definition.v1`, `leos.workflow-revision.v1` | Definition and immutable revision | Workflow-revision-published or selected event | Authz for publish/select; approval when side effects or cost require | Invalid DAG or missing dependencies fails closed | Definition/revision IDs, dependency graph, validation evidence |
-| Workflow Revision to Job | Workflow projection owner `OPEN`, calling Scheduler | Scheduler owns Job after creation | Workflow Revision, Work Request, Job target contract | Scheduler job record, target `leos.job-definition.v1` | Scheduler job row | Job-created event by Scheduler | Authz to submit job; no employee selection unless governed | Scheduler rejects invalid/duplicate job; idempotent create required | Correlation across work request, workflow, job |
-| Job to Task | Task lifecycle owner `OPEN` | Task lifecycle owner `OPEN` | Workflow Revision step, Job reference | `leos.task-definition.v1` target | Task record | Task-created/ready event by future owner | Authz to materialize task | Invalid dependency blocks readiness, not Scheduler | Task/job/workflow revision lineage |
-| Task to Assignment | Assignment decision owner `OPEN`; Persistent Runtime owns projection after handoff | Decision owner `OPEN`, then Persistent Runtime | Task/Job, employee candidates, Employee Registry eligibility | `leos.work-assignment.v1` target and runtime assignment projection | Assignment projection in Persistent Runtime | Assignment-created/accepted event by Persistent Runtime after adoption | Authz to assign; employee eligibility required; assignment never grants permission | Rejection or unavailable employee produces explicit transition; retry preserves history | Selection/acceptance evidence, employee revision |
-| Assignment to Delegation | Employee or authorized coordinator | Delegation owner `OPEN` | Assignment scope, delegation target | `leos.work-delegation.v1` target | Delegation record | Delegation-created/accepted event | Authz and scope preservation; no cross-org unless accepted | Cycles, scope expansion, or cross-org fail closed | Full responsibility chain |
+| User objective to Team Architect intake | Human actor through UI/operator | Identity plus Team Template Authority for proposal/apply records | Actor Context, Organization Context, plain objective | Team Architect intake/proposal contract `MISSING` | Proposal draft | Proposal-created event by Team Template Authority | Authenticated actor required; no approval yet | Invalid/missing actor or organization fails closed | Actor, organization, objective digest, source channel |
+| Proposal to reviewed Team configuration | Team Architect | Team Template Authority; target resources remain owned by their authorities | Proposal, Employee/Team/Capability/Workflow references | Review package `MISSING` | Review plan | Review-requested event by Team Template Authority | User review required for authority-bearing changes | Proposal edits invalidate affected approvals | Proposal revision, dependency plan, permission plan |
+| Review to Work Request | Human or approved Team Template apply process | Work Coordination Service | `leos.work-request.v1` target plus Actor Context | Accepted Work Request transition | Work Request record | Work-request-accepted event | Authorization required; approval if policy requires | Rejection records reason; retry creates new transition/revision | Exact request revision and decision evidence |
+| Work Request to Workflow Definition/Revision | Work Coordination Service | Work Coordination Service | Work Request, selected/published Workflow Definition, Workflow Revision | `leos.workflow-definition.v1`, `leos.workflow-revision.v1` | Definition and immutable revision | Workflow-revision-published or selected event | Authz for publish/select; approval when side effects or cost require | Invalid DAG or missing dependencies fails closed | Definition/revision IDs, dependency graph, validation evidence |
+| Workflow Revision to Job | Work Coordination Service, calling Scheduler | Scheduler owns Job after creation | Workflow Revision, Work Request, Job target contract | Scheduler job record, target `leos.job-definition.v1` | Scheduler job row | Job-created event by Scheduler | Authz to submit job; no employee selection unless governed | Scheduler rejects invalid/duplicate job; idempotent create required | Correlation across work request, workflow, job |
+| Job to Task | Work Coordination Service | Work Coordination Service | Workflow Revision step, Job reference | `leos.task-definition.v1` target | Task record | Task-created/ready event | Authz to materialize task | Invalid dependency blocks readiness, not Scheduler | Task/job/workflow revision lineage |
+| Task to Assignment | Work Coordination Service; Persistent Runtime owns projection after handoff | Work Coordination for decision, then Persistent Runtime for acceptance/projection | Task/Job, employee candidates, Employee Registry eligibility | `leos.work-assignment.v1` target and runtime assignment projection | Assignment decision and runtime projection | Assignment-decided by Work Coordination; accepted by Persistent Runtime | Authz to assign; employee eligibility required; assignment never grants permission | Rejection or unavailable employee produces explicit transition; retry preserves history | Selection/acceptance evidence, employee revision |
+| Assignment to Delegation | Employee or authorized coordinator | Work Coordination Service | Assignment scope, delegation target | `leos.work-delegation.v1` target | Delegation record | Delegation-created/accepted event | Authz and scope preservation; cross-org fails closed | Cycles, scope expansion, or cross-org fail closed | Full responsibility chain |
 | Assignment to scheduling and lease | Persistent Runtime/Scheduler bridge | Scheduler | Assignment/Job reference and worker heartbeat | Lease and resource reservation | Scheduler lease/resource rows | Lease-acquired/resource-reserved by Scheduler | Employee eligibility and resource admission required | Lease expiry/retry under Scheduler policy; no assignment restart by coordinator | Job, lease, resource reservation IDs |
 | Lease to cognitive run | Persistent Runtime and Cognitive Service | Cognitive Service owns run | Assignment projection | Cognitive run/attempt/checkpoint target `MISSING` | `cognitive_runs`, attempts, observations | Cognitive-run-started event `MISSING` | Cognitive run requires valid assignment projection | Cognitive retry is separate from assignment retry | Run, attempt, assignment, job correlation |
 | Cognitive action to capability request | Cognitive Service | Cognitive Service for reasoning; Dispatcher for execution request | Context, capability request, correlation | Dispatch request using canonical execution contracts | Cognitive attempt and Dispatcher execution | Cognitive-attempt-dispatched | Authz and permission references passed, not self-verified | Cognitive retry may request another action; no direct provider call | Context digest, capability, run/attempt IDs |
@@ -203,8 +204,8 @@ User objective
 | Execution result to cognitive result | Cognitive Service | Cognitive Service | Execution result | Cognitive observation/result | Cognitive observation/result row | Observation/result event `MISSING` | No extra authority unless next action needs it | Ambiguous outcome pauses or requires governed recovery | Result status, attempt, normalized output refs |
 | Cognitive result to Assignment terminal state | Cognitive Service requests runtime terminal transition | Persistent Runtime | Cognitive terminal result | Runtime assignment transition | Assignment terminal transition/outbox | Employee-assignment-completed/failed/canceled | Authz to mutate assignment; no scheduler mutation | Duplicate transition idempotent; conflicting terminal transition fails | Terminal transition ID and result ref |
 | Assignment terminal to Job terminal | Persistent Runtime/Scheduler bridge | Scheduler | Assignment terminal evidence | Job completion/failure/cancellation | Scheduler terminal transition | Job-completed/failed/canceled | Authz to mutate job; resource release required | Release/reconcile on restart; no duplicate external work | Job terminal transition, resource history |
-| Result and Artifact linkage | Producer and future Artifact owner | Work Result owner `OPEN`, Artifact owner `OPEN` | Execution/cognitive/assignment output refs | `leos.work-result.v1`, Artifact ref `OPEN` | Result and Artifact records | Result-created/artifact-linked events | Authz to publish/link; Artifact Trust verifies trust only | Failed artifact write preserves incomplete Result state | Digest, provenance, producer, org scope |
-| Verification and closure | Human/verifier/policy authority `OPEN` | Verification and closure owner `OPEN` | Result, Artifact, external outcome evidence | Verification/closure transition `MISSING` | Verification and closure records | Verified/closed event by owner | Approval is not verification; caller evidence never self-verifies | Rework creates new work/result lineage | Verifier, criteria, evidence, outcome |
+| Result and Artifact linkage | Producer, Work Coordination, and Artifact Authority | Work Coordination owns Result acceptance; Artifact Authority owns Artifact lifecycle/linkage verification | Execution/cognitive/assignment output refs | `leos.work-result.v1`, Artifact ref | Result and Artifact records | Result-created/artifact-linked events | Authz to publish/link; Artifact Trust verifies trust only | Failed artifact write preserves incomplete Result state | Digest, provenance, producer, org scope |
+| Verification and closure | Human/verifier/policy authority through Work Coordination | Work Coordination Service | Result, Artifact, external outcome evidence | Verification/closure transition `MISSING` | Verification and closure records | Verified/closed event by Work Coordination | Approval is not verification; caller evidence never self-verifies | Rework creates new work/result lineage | Verifier, criteria, evidence, outcome |
 
 ## Authority-resolution table
 
@@ -217,24 +218,25 @@ User objective
 | Dispatcher invocation | ACCEPTED | No | None | Keep Dispatcher | `EXECUTION_PLANE.md`, Dispatcher code | Add Secret/Approval/Sandbox adapters | Keep | No |
 | Ranking Policy | ACCEPTED | No | None | Keep Ranking Policy | `INTELLIGENCE_PLANE.md`, service code | Org policy must not add ranking precedence silently | Keep | No |
 | Model Registry | ACCEPTED | No | None | Keep Model Registry | `INTELLIGENCE_PLANE.md`, service code | Runtime activation must feed bindings through accepted owner | Keep | No |
-| Organization Domain production topology | OPEN | Yes | Service/module boundary, store, transaction/outbox, ownership transfer minimum | Single Organization Domain service; modular package inside existing registry; deferred no-service target | Epic 5 contracts; Scope Lock must-have 3 | Wrong choice creates duplicate org state and cross-org leaks | Create one Organization Domain service/module with one store and outbox for v2 | Yes |
-| Work Request owner | OPEN | Yes | Who accepts and transitions Work Requests | New Work Intake/Workflow Coordinator; Organization Domain extension; Scheduler direct intake | Epic 7 target contracts | Direct Scheduler intake would make Work Request a Job and lose review | New Work Intake and Workflow Coordinator that owns intake/projection only | Yes |
-| Workflow Definition/Revision owner | OPEN | Yes | Publication and revision lifecycle owner | Same Work Intake/Workflow Coordinator; separate Workflow Authority; Team Template publisher | Epic 7 and roadmap | Separate generic workflow engine can steal scheduler/assignment authority | Work Intake/Workflow Coordinator owns definitions/revisions/projection only | Yes |
-| Task lifecycle owner | OPEN | Yes | Task creation/state owner | Work Coordinator; Scheduler; Persistent Runtime | Epic 7 says Task is not execution or assignment | Scheduler ownership would collapse Task and Job | Work Coordinator owns Task records; Scheduler owns Job only | Yes |
-| Assignment decision and acceptance | OPEN | Yes | Who proposes/selects employee and how handoff occurs | Work Coordinator from explicit assignment; Team Architect proposal; Employee Registry legacy `/resolve`; Scheduler worker match | Authority Registry row 119, legacy conflict | Legacy scoring/caller force is unsafe; Scheduler selection would mix leases with workforce policy | Dedicated assignment-decision protocol owned by Work Coordinator or accepted Assignment Authority, with Persistent Runtime projection | Yes |
-| Delegation lifecycle | OPEN | Medium | Who records delegation acceptance and scope | Work Coordinator; Persistent Runtime extension | Epic 7 contracts | Premature implementation can expand scope or authorize implicitly | Defer full delegation except same-organization recorded responsibility in v2 if needed | Yes if implemented |
-| Approval Authority durable service/API | OPEN | Yes | Durable request/grant/verify/consume, approver policy, notification | Promote/adapt Lucy approval; new minimal Approval service; UI-only approval | Identity/trust contracts; Lucy donor service exists | UI-only approval would reintroduce caller trust | Minimal Approval Authority service with explicit verification and consumption | Yes |
-| Secret Authority backend/resolution | OPEN | Yes for cloud/tools | Backend, authorization, transient injection, redaction | Local encrypted store; OS keyring; environment-only forbidden for production | Secret Reference contracts; First Run catalogs | Bad choice leaks credentials and makes cloud unsafe | Minimal local Secret Authority with opaque refs and per-operation leases | Yes |
-| Artifact lifecycle and Work Result acceptance | OPEN | Yes | Generic artifact owner, result issuer/acceptor, linkage verifier | Artifact service; Work Coordinator-owned local artifact records; Dispatcher-owned outputs | Work Result contracts, Artifact Trust boundary | Without owner, outputs cannot be audited or reopened safely | Minimal Artifact/Result Authority or Work Coordinator submodule with exact boundaries | Yes |
-| Verification and closure | OPEN | Yes | Who verifies results and closes work | Human review/Work Coordinator; Approval Authority; Scheduler | Epic 7 separates completion, verification, closure | Approval Authority must not become verification authority | Work Coordinator records verification/closure decisions using external evidence | Yes |
-| Event outbox/broker/replay | OPEN | Yes | Outbox, ordering, ack, replay, retention | Per-service outbox plus lightweight event bus; current best-effort; central event store | Runtime has outbox; Scheduler/Registry/Catalogs vary | Best-effort loses restart/recovery evidence | Require per-authority outbox and replayable events before release gate | Yes |
-| Plugin lifecycle | OPEN | Not first vertical path unless Team Template needs install | Publish/install/activate/update/rollback owners | Defer broad plugin platform; minimal installed-core capabilities | Epic 6 contracts | Full plugin system is large; bypassing it creates future rework | Implement minimal local install/activate lifecycle before public plugin SDK | Yes |
-| Tool catalog lifecycle | OPEN | Yes for real tools | Catalog owner and Dispatcher adapter ingestion | Capability Manager owns tool catalog? new Tool Registry? plugin installer feeds Dispatcher | Epic 6 separates Tool from Capability | Capability Manager must not invoke; Tool Runtime must not bypass Dispatcher | Minimal Tool Catalog authority feeding Dispatcher adapters | Yes |
-| Sandbox/workspace lifecycle | OPEN | Yes for side effects | Workspace owner and isolation policy | Dispatcher-owned execution workspace; separate Sandbox Authority | Scope Lock must-have 10 | No sandbox means tools can side-effect silently | Minimal Sandbox/Workspace Authority or Dispatcher-owned bounded workspace for Dev Preview | Yes |
-| Team Template lifecycle | OPEN | Yes for flagship path | Template publish/install/simulate/activate/rollback | Work/Organization coordinator; plugin/publishing authority | Roadmap mandatory Team Template | Template must not self-grant or self-activate | Minimal Team Template Authority after Org/Work/Plugin foundations | Yes |
-| Team Architect apply protocol | OPEN | Yes | Proposal/apply handoff and durable coordination owner | Team Architect as Employee plus Work Coordinator; UI wizard only | Roadmap must-have 15 | AI cannot become publisher/approver/installer | Team Architect produces proposal; Work/Template/Org authorities apply after review | Yes |
+| Organization Domain production topology | ACCEPTED | No | Implement Organization Domain Service | Single Organization Domain Service | Epic 5 contracts; ADR-DPV2-001 | One owner avoids duplicate org state and cross-org leaks | Implement as Epic 8.2 | Accepted |
+| Work Request owner | ACCEPTED | No | Implement Work Coordination Service | Work Coordination Service | Epic 7 target contracts; ADR-DPV2-002 | Direct Scheduler intake would make Work Request a Job and lose review | Work Coordination owns intake/projection only | Accepted |
+| Workflow Definition/Revision owner | ACCEPTED | No | Implement Work Coordination Service | Work Coordination Service | Epic 7 and roadmap; ADR-DPV2-002 | Prevents generic workflow engine from stealing Scheduler/Assignment authority | Work Coordination owns definitions/revisions/projection only | Accepted |
+| Task lifecycle owner | ACCEPTED | No | Implement Work Coordination Service | Work Coordination Service | Epic 7; ADR-DPV2-002 | Scheduler ownership would collapse Task and Job | Work Coordination owns Task records; Scheduler owns Job only | Accepted |
+| Assignment decision and acceptance | ACCEPTED | No | Implement assignment decision and handoff | Work Coordination owns decisions; Persistent Runtime owns acceptance/projection | Authority Registry conflict evidence; ADR-DPV2-003 | Legacy scoring/caller force remains unsafe | Canonical handoff protocol | Accepted |
+| Delegation lifecycle | ACCEPTED FOR DEV PREVIEW | No for same-Organization delegation | Implement same-Organization delegation only | Work Coordination Service | Epic 7; ADR-DPV2-003 | Cross-Organization delegation remains fail-closed | Work Coordination owns same-Organization delegation | Accepted |
+| Authorization and capability permission grants | ACCEPTED | No | Implement Authorization Authority | Authorization Authority | Epic 4 contracts; ADR-DPV2-004 | Enables default-deny capability/tool/model/cloud use | Minimal Dev Preview authorization service | Accepted |
+| Approval Authority durable service/API | ACCEPTED | No | Implement Approval Authority | Approval Authority | Identity/trust contracts; ADR-DPV2-005; Lucy donor approval exists | UI-only approval would reintroduce caller trust | Minimal Approval Authority service with explicit verification and consumption | Accepted |
+| Secret Authority backend/resolution | ACCEPTED | No | Implement Secret Authority | Secret Authority | Secret Reference contracts; ADR-DPV2-006 | Bad choice leaks credentials and makes cloud unsafe | Minimal local Secret Authority with opaque refs and per-operation leases | Accepted |
+| Artifact lifecycle and Work Result acceptance | ACCEPTED | No | Implement Artifact Authority and Work Result acceptance | Artifact Authority; Work Coordination for Results | Work Result contracts, Artifact Trust boundary; ADR-DPV2-008/009 | Without owner, outputs cannot be audited or reopened safely | Artifact Authority plus Work Coordination Result ownership | Accepted |
+| Verification and closure | ACCEPTED | No | Implement verification and closure records | Work Coordination Service | Epic 7; ADR-DPV2-010 | Approval Authority must not become verification authority | Work Coordination records verification/closure decisions | Accepted |
+| Event outbox/broker/replay | ACCEPTED | No | Harden producer outboxes and Event Delivery Service | Producer authorities for outboxes; Event Delivery Service for delivery | Runtime has outbox; Scheduler/Registry vary; ADR-DPV2-007 | Best-effort loses restart/recovery evidence | Per-authority outbox plus delivery service | Accepted |
+| Plugin lifecycle | ACCEPTED | No for Dev Preview minimum | Implement Plugin and Tool Lifecycle Authority | Plugin and Tool Lifecycle Authority | Epic 6 contracts; ADR-DPV2-012 | Full marketplace deferred; bypassing lifecycle creates rework | Minimal local install/activate lifecycle before public SDK | Accepted |
+| Tool catalog lifecycle | ACCEPTED | No | Implement Plugin and Tool Lifecycle Authority | Plugin and Tool Lifecycle Authority | Epic 6; ADR-DPV2-012 | Capability Manager must not invoke; Tool Runtime must not bypass Dispatcher | Lifecycle authority feeds Dispatcher metadata | Accepted |
+| Sandbox/workspace lifecycle | ACCEPTED | No | Implement Sandbox Authority | Sandbox Authority | Scope Lock must-have 10; ADR-DPV2-014 | No sandbox means tools can side-effect silently | Minimal local Sandbox Authority | Accepted |
+| Team Template lifecycle | ACCEPTED | No owner gap; implementation depends on prerequisites | Implement Team Template Authority | Team Template Authority | Roadmap mandatory Team Template; ADR-DPV2-013 | Template must not self-grant or self-activate | Team Template Authority after Org/Work/Plugin foundations | Accepted |
+| Team Architect apply protocol | ACCEPTED | No owner gap; implementation depends on prerequisites | Implement Team Template Authority records and Team Architect Employee | Team Template Authority owns records; Team Architect is supporting Employee | Roadmap must-have 15; ADR-DPV2-013 | AI cannot become publisher/approver/installer | Team Architect proposes; authorities apply after review | Accepted |
 | Memory/knowledge/artifact taxonomy | OPEN | Medium to high | Storage owners and retrieval authority | Defer to Phase 5/6 after work path; minimal provenance refs | Scope Lock must-have 11 | Too early can leak cross-org knowledge | Add only exact provenance refs in early work path | Yes |
-| Runtime/model activation | OPEN | Yes for install-first path | Desired/observed topology and rollback owner | First Run coordinator plus Model Registry; new Runtime Activation service | First Run is coordinator-only | First Run cannot own ongoing activation | Minimal Runtime Activation Authority before production model onboarding | Yes |
+| Runtime/model activation | ACCEPTED | No owner gap; implementation required | Implement Runtime Activation Authority | Runtime Activation Authority; First Run remains coordinator; Model Registry owns model facts/bindings | First Run is coordinator-only; ADR-DPV2-011 | First Run cannot own ongoing activation | Minimal Runtime Activation Authority before production model onboarding | Accepted |
 | Budget/cost/PPT authority | OPEN / observational | Not initial blocker | Cost accounting owner and outcome evidence | Observability module; Work Coordinator reporting | ADR-IP-022/023 and Scope Lock | PPT cannot influence selection/retry | Defer PPT selection; add cost evidence fields only after result/outcome owners | Yes when implemented |
 | Public Assignment Service | CONFLICTING | Yes if kept in path | Retire, adapter, or quarantine | Retire; compatibility facade; migration adapter | Authority Registry conflict | Keeping it risks peer job/assignment authority | Quarantine then retire; no new v2 behavior | Yes |
 | Lucy Workflow/Planning/Coordinator | DONOR EVIDENCE / CONFLICTING where overlapping | No if isolated | Promote, adapt, or retire | Inspect per future epic | Lucy paths exist | Blind promotion imports conflicts | Use as donor evidence only after accepted owner decisions | No for this plan; yes for promotion |
@@ -255,7 +257,7 @@ User objective
 | Work Intake/Workflow Coordinator | Work Request, Workflow Definition/Revision, Task, Dependency, Result, Retry/Escalation intent | No production service; Lucy donor only | Missing | Create production coordinator with narrow projection role | Work/Workflow owner accepted by ADR | No permanent parallel models | Quarantine Lucy/Public Assignment paths | Intake/projection/restart/approval wait/result/closure tests |
 | Approval Authority | approval request, grant, verification result | Contracts only; Lucy donor approval exists | Missing | Minimal durable API for request, decision, verify, consume | Approval Authority | No dual-write from caller refs | Reject caller booleans/opaque self-verification | Scope/expiry/revocation/replay/consumption tests |
 | Secret Authority | secret reference and future use-lease/injection contracts | Secret Reference contract only | Missing | Minimal local backend and use authorization | Secret Authority | No raw secret migration | N/A | No secret persistence, redaction, authorization, rotation tests |
-| Artifact/Result Authority | Artifact object `MISSING`, Work Result target | Work Result contract only; service-local paths | Missing | Add generic Artifact contract/service or Work-owned artifact module | Artifact owner accepted by ADR | No global path-as-ID dual-write | Migrate service-local artifacts into refs | Digest/provenance/linkage/verification tests |
+| Artifact Authority and Work Results | Artifact object `MISSING`, Work Result target | Work Result contract only; service-local paths | Missing implementation; authority accepted by ADR-DPV2-008/009 | Add Artifact Authority plus Work Coordination Result acceptance | Artifact Authority for artifacts; Work Coordination for Results | No global path-as-ID dual-write | Migrate service-local artifacts into refs | Digest/provenance/linkage/verification tests |
 | Installer/First Run | installer/first-run contracts | CLI tools and files | Partial | Feed accepted Runtime Activation, Secret, Model Registry, Organization bootstrap APIs | First Run coordinator plus target authorities | No first-run authority store | Keep coordinator-only evidence | Clean install/restart/rollback/no secret tests |
 | Operator/UI | status/doctor/operator contracts | CLI; employee-builder UI; no organization-first UI | Partial/missing | Add operator API/UI consuming canonical services only | Operator surface | Read projections only | Retire stale catalog entries | UI journey, audit, health, failure correction tests |
 
@@ -269,7 +271,7 @@ Dev Preview v2 must use one authoritative store owner per record type:
 | Organization, Department, Team, Role, Position, Membership, Occupancy | Organization Domain Authority |
 | Employee definitions and lifecycle | Employee Registry |
 | Employee presence, mailbox, working state, assignment projection | Persistent Employee Runtime |
-| Work Request, Workflow Definition/Revision, Task, Dependency, retry/escalation intent | Work Intake/Workflow Coordinator after ADR |
+| Work Request, Workflow Definition/Revision, Task, Dependency, retry/escalation intent | Work Coordination Service |
 | Job, lease, resource admission, resource release | Scheduler |
 | Cognitive run, attempt, checkpoint, observation | Employee Cognitive Service |
 | Capability, Provider, provider-capability binding, resolution | Capability Manager |
@@ -277,9 +279,13 @@ Dev Preview v2 must use one authoritative store owner per record type:
 | Ranking policy and effective ranking evidence | Ranking Policy Authority |
 | Execution, invocation attempt, normalized result | Execution Dispatcher |
 | Approval request/grant/verification/consumption | Approval Authority |
-| Secret reference and protected value lifecycle | Secret Authority |
-| Artifact identity, digest, provenance, retention, linkage | Artifact owner `OPEN` |
-| Verification and closure | Work verification/closure owner `OPEN` |
+| Secret reference, protected value lifecycle, and transient use | Secret Authority |
+| Artifact identity, digest, provenance, retention, linkage | Artifact Authority |
+| Work Result acceptance, verification, and closure | Work Coordination Service |
+| Runtime activation desired/observed state | Runtime Activation Authority |
+| Plugin/Tool installation, activation, and Tool catalog | Plugin and Tool Lifecycle Authority |
+| Sandbox profile and workspace lifecycle | Sandbox Authority |
+| Team Template and Team Architect proposal/apply records | Team Template Authority |
 
 Required persistence rules:
 
@@ -440,28 +446,28 @@ Recommended order:
 
 1. Freeze legacy conflicting paths from receiving new v2 behavior. Keep Lucy
    and Public Assignment isolated.
-2. Accept ADRs for Organization service topology, Work/Workflow owner,
-   Assignment decision handoff, Approval service, Secret backend, Event
-   outbox, Artifact/Result owner, Runtime Activation, and Team Architect apply
-   protocol.
-3. Implement Organization Domain production service/module and migrate
+2. Implement Organization Domain production service/module and migrate
    Employee Registry toward `leos.employee-definition.v3` references.
-4. Implement Work Intake/Workflow Coordinator with Work Request,
+3. Implement Work Coordination Service with Work Request,
    Workflow Definition/Revision, Task, Dependency, Result, verification, and
    closure records. It submits jobs to Scheduler but owns no leases.
-5. Adopt Scheduler Job target contract and Persistent Runtime Assignment
+4. Adopt Scheduler Job target contract and Persistent Runtime Assignment
    target contract through adapters and migration tests.
+5. Implement Authorization Authority for capability grants and decisions.
 6. Implement Approval Authority and integrate Capability Manager/Dispatcher/
    Cognitive waits with verified grants.
 7. Implement Secret Authority and integrate Dispatcher with transient secret
    use.
-8. Implement minimal Artifact/Result authority and sandbox/workspace boundary.
-9. Implement Team Template lifecycle and Team Architect proposal/apply flow.
-10. Update First Run, operator catalogs, local deployment topology, and UI to
+8. Implement Event Delivery Service and producer outbox hardening.
+9. Implement Runtime Activation Authority.
+10. Implement Artifact Authority, Result linkage, verification, and closure.
+11. Implement Sandbox Authority and minimal Plugin/Tool lifecycle.
+12. Implement Team Template lifecycle and Team Architect proposal/apply flow.
+13. Update First Run, operator catalogs, local deployment topology, and UI to
     exercise the end-to-end path.
-11. Run restart/recovery, migration/rollback, adversarial, and clean-install
+14. Run restart/recovery, migration/rollback, adversarial, and clean-install
     release gates.
-12. Retire or quarantine legacy Assignment, old Runtime Coordinator behaviors,
+15. Retire or quarantine legacy Assignment, old Runtime Coordinator behaviors,
     stale catalog capabilities, and Lucy-derived duplicates.
 
 Backward compatibility:
@@ -496,30 +502,38 @@ Removal conditions for legacy paths:
 
 | Epic | Objective | Decisions required beforehand | Services affected | Contract changes | Production code changes | Migrations | Tests | Documentation | Acceptance criteria | Rollback point | Dependencies | Model tier | Effort |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 8.1 Authority ADR pack | Accept blocking Dev Preview owners and forbidden overlaps | None | None | No schema changes unless ADR discovers defect | None | None | ADR uniqueness/docs refs | Authority Registry, decisions | No release-blocking owner is silently assigned; all blockers have accepted or deferred status | Source rollback | Epic 8.0 | Standard reasoning | M |
-| 8.2 Organization Domain service | Implement logical Organization Domain Authority | Org topology, storage, events | New org service/module, Employee Registry references | Possibly no new schemas; adopt Epic 5 contracts | Service, persistence, API, outbox | New local store | Lifecycle, cross-org fail closed, ownership, restart | Service conformance | Org/Team/Role/Position/Membership/Occupancy lifecycle works locally | DB migration rollback | 8.1 | Strong coding | L |
-| 8.3 Work Intake and Workflow Coordinator | Accept Work Requests, own Workflow/Task/Result projection, submit Scheduler jobs | Work owner, Task owner, assignment handoff, event outbox | New work coordinator, Scheduler adapter, Persistent Runtime adapter | Maybe transition/event contracts | Service, persistence, API | New store | Intake, DAG, idempotent submit, restart, no peer leases | Work integration docs | Work Request to Job/Task/Assignment projection works without stealing authority | Migration rollback | 8.1, 8.2 | Strong coding | XL |
-| 8.4 Job and Assignment target adoption | Map Scheduler and Runtime to v2 target contracts | Contract adoption accepted in 8.1/8.3 | Scheduler, Persistent Runtime | Narrow adapter/example updates if needed | API adapters and storage migration | Existing store migration | Contract, terminal, resource, restart tests | Adoption guide | Existing spine emits/serves canonical Job and Assignment views | Reversible schema migration | 8.3 | Strong coding | L |
-| 8.5 Approval Authority | Durable approval request/grant/verify/consume | Approval API, approver policy, notification minimum | New Approval service, Capability Manager, Dispatcher, Cognitive | Maybe no new schemas; use Epic 4 contracts | Service and integration | New store | Expiry, revocation, wrong scope, replay, pending/resume | Approval flow docs | Approval-required work pauses and resumes only with verified grant | Disable approval-gated flows | 8.1, 8.3 | Strong coding | L |
-| 8.6 Secret Authority and sandbox | Local secret backend and bounded workspace for side effects | Secret backend, use lease, sandbox owner | New Secret service, Dispatcher, adapters/tools | Likely secret-use lease/sandbox contracts | Service, Dispatcher integration | New secure store/workspaces | Redaction, no secret persistence, cleanup, restart | Secret/sandbox docs | One local and one optional cloud provider path use explicit secret permission | Disable cloud/tool side effects | 8.1, 8.5 | Strong coding/security | XL |
-| 8.7 Tool/Plugin minimum install path | Minimal local plugin/tool lifecycle feeding Capability Manager/Dispatcher | Plugin lifecycle, tool catalog, install/activation | Plugin/tool authority, Capability Manager, Dispatcher | May adopt Epic 6 target contracts | Install/activate APIs and adapter ingestion | New store | Install/activate/revoke/no permission implication | Plugin minimum docs | One governed tool installs, activates, resolves, dispatches safely | Disable plugin activation | 8.6 | Strong coding | XL |
-| 8.8 Artifact/Result/verification | Store outputs, artifacts, result acceptance, verification, closure | Artifact owner, verification/closure owner | Work Coordinator, Artifact service/module, Dispatcher/Cognitive refs | Artifact contract may be needed | Service/module and API | New store | Digest, provenance, linkage, closure distinct | Artifact/result docs | Result/Artifact linked to work and verifiable without self-verification | Disable closure path | 8.3, 8.6 | Strong coding | L |
-| 8.9 Team Template and Team Architect | First reusable Team Template and proposal/apply flow | Team Template and Architect apply protocol | Org, Work, Employee Registry, Capability, Approval, UI | Proposal/template contracts likely needed | Team Architect employee/config, template service/module, UI/API | New store | Proposal invalidation, simulation, apply, activation approval | Guided UX docs | Non-coder can create a team template and apply it locally | Disable apply; keep draft templates | 8.2-8.8 | Frontier coding/reasoning | XL |
-| 8.10 Operator/UI and clean-install release path | Local guided UI/operator journey and deployment topology | Event/outbox, runtime activation final | UI/operator, First Run, installer, deployment | Operator catalog updates | UI/API composition, catalog/deploy updates | Config migration | Clean install, restart, recovery, update/rollback, audit | Release runbook | Reference journey passes without Lucy or manual hidden state | Revert catalogs/deploy | 8.2-8.9 | Strong coding/frontend | XL |
+| 8.1 Authority ADR pack | Accept blocking Dev Preview owners and forbidden overlaps | None | None | No schema changes unless ADR discovers defect | Documentation only | None | ADR uniqueness/docs refs | Authority Registry, decisions | No release-blocking owner is silently assigned; all blockers have accepted or deferred status | Source rollback | Epic 8.0 | Standard reasoning | M |
+| 8.2 Organization Domain Service | Implement Organization Domain Service | ADR-DPV2-001 | New org service/module, Employee Registry references | No schema changes expected; adopt Epic 5 contracts | Service, persistence, API, outbox | New local store | Lifecycle, cross-org fail closed, ownership, restart | Service conformance | Org/Team/Role/Position/Membership/Occupancy lifecycle works locally | DB migration rollback | 8.1 | Strong coding | L |
+| 8.3 Work Coordination Service | Accept Work Requests, own Workflow/Task/Result projection, assignment decisions, verification, and closure | ADR-DPV2-002/003/008/010 | New work coordinator, Scheduler adapter, Persistent Runtime adapter | Maybe transition/event contracts if defects found | Service, persistence, API | New store | Intake, DAG, idempotent submit, assignment handoff, result, closure, restart | Work integration docs | Work Request to Job/Task/Assignment/Result/closure works without stealing authority | Migration rollback | 8.1, 8.2 | Strong coding | XL |
+| 8.4 Scheduler and Runtime target adoption | Map Scheduler and Runtime to v2 Job and Assignment target contracts | ADR-DPV2-002/003 | Scheduler, Persistent Runtime | Narrow adapter/example updates if needed | API adapters and storage migration | Existing store migration | Contract, terminal, resource, assignment, restart tests | Adoption guide | Existing spine emits/serves canonical Job and Assignment views | Reversible schema migration | 8.3 | Strong coding | L |
+| 8.5 Authorization Authority | Durable authorization decisions and capability permission grants | ADR-DPV2-004 | New Authorization service, Capability Manager, Dispatcher | Maybe no new schemas; use Epic 4 contracts if sufficient | Service and integration | New store | Grant/revoke/decision/default-deny/wrong-scope tests | Authorization docs | Capability use is default-deny and authorization never selects/invokes | Disable governed side-effect flows | 8.1, 8.2 | Strong coding/security | L |
+| 8.6 Approval Authority | Durable approval request/grant/verify/consume | ADR-DPV2-005 | New Approval service, Capability Manager, Dispatcher, Cognitive, Work Coordination | Maybe no new schemas; use Epic 4 contracts | Service and integration | New store | Expiry, revocation, wrong scope, replay, pending/resume | Approval flow docs | Approval-required work pauses and resumes only with verified grant | Disable approval-gated flows | 8.5 | Strong coding | L |
+| 8.7 Secret Authority | Local secret backend and transient use | ADR-DPV2-006 | New Secret service, Dispatcher, Runtime Activation, Plugin/Tool | Likely secret-use lease contract if needed | Service and integration | New secure store | Redaction, no secret persistence, rotation, revocation, restart | Secret docs | One local and optional cloud path uses explicit secret permission | Disable cloud/tool side effects | 8.5 | Strong coding/security | L |
+| 8.8 Event Delivery and outbox hardening | Producer outboxes and delivery/replay service | ADR-DPV2-007 | All release-path authorities | Event envelope/adoption docs if needed | Service and per-authority outbox hardening | Existing event migration | Replay, duplicate delivery, dead-letter, retention, restart | Event docs | Events are reliable without becoming state authority | Disable subscriptions; keep direct reads | 8.2-8.7 | Strong coding | XL |
+| 8.9 Runtime Activation Authority | Desired/observed local runtime activation | ADR-DPV2-011 | Runtime Activation, First Run, Model Registry, Capability Manager, Secret | Runtime activation record shape may be needed | Service and integration | New store | Activate/deactivate/rollback/health/restart/no-ranking tests | Runtime activation docs | Local runtime activation feeds Model Registry/Capability Manager correctly | Disable activation; preserve setup evidence | 8.7 | Strong coding | L |
+| 8.10 Artifact Authority | Artifact lifecycle and linkage verification | ADR-DPV2-009 | Artifact service/module, Work Coordination, Plugin/Tool | Artifact contract may be needed | Service/module and API | New store | Digest, provenance, link, retention, missing-content recovery | Artifact docs | Artifacts have identity and linkage without trust/installation confusion | Disable artifact publication | 8.5 | Strong coding | L |
+| 8.11 Sandbox Authority | Workspace isolation and cleanup for side-effecting work | ADR-DPV2-014 | Sandbox service/module, Dispatcher, Plugin/Tool, Secret, Artifact | Sandbox profile/workspace contracts may be needed | Service/module and integration | New store/workspaces | Filesystem/network/secret/artifact boundaries, cleanup, restart | Sandbox docs | Side-effecting work has governed workspace boundaries | Disable side-effecting tools | 8.7, 8.10 | Strong coding/security | L |
+| 8.12 Plugin and Tool Lifecycle Authority | Minimal local plugin/tool lifecycle feeding Capability Manager/Dispatcher | ADR-DPV2-012 | Plugin/tool authority, Capability Manager, Dispatcher, Artifact, Secret, Sandbox | May adopt Epic 6 target contracts | Install/activate APIs and adapter ingestion | New store | Install/activate/revoke/no permission implication/no direct invocation | Plugin minimum docs | One governed tool installs, activates, resolves, dispatches safely | Disable plugin activation | 8.5, 8.7, 8.10, 8.11 | Strong coding | XL |
+| 8.13 Team Template and Team Architect | First reusable Team Template and proposal/apply flow | ADR-DPV2-013 | Org, Work, Employee Registry, Capability, Approval, Artifact, UI | Proposal/template contracts likely needed | Team Architect employee/config, template service/module, UI/API | New store | Proposal invalidation, simulation, apply, activation approval | Guided UX docs | Non-coder can create a team template and apply it locally | Disable apply; keep draft templates | 8.2-8.12 | Frontier coding/reasoning | XL |
+| 8.14 Operator/UI and clean-install release path | Local guided UI/operator journey and deployment topology | Prior implementation epics complete | UI/operator, First Run, installer, deployment | Operator catalog updates | UI/API composition, catalog/deploy updates | Config migration | Clean install, restart, recovery, update/rollback, audit | Release runbook | Reference journey passes without Lucy or manual hidden state | Revert catalogs/deploy | 8.2-8.13 | Strong coding/frontend | XL |
 
 ## Critical path
 
 Shortest correct path:
 
-1. Epic 8.1: accept the blocking authority ADRs.
-2. Epic 8.2: production Organization Domain service.
-3. Epic 8.3: Work Intake/Workflow Coordinator.
-4. Epic 8.4: Scheduler/Persistent Runtime target-contract adoption.
-5. Epic 8.5: Approval Authority.
-6. Epic 8.6: Secret Authority and sandbox.
-7. Epic 8.8: Artifact/Result/verification.
-8. Epic 8.9: Team Template and Team Architect.
-9. Epic 8.10: UI/operator/clean-install release path.
+1. Epic 8.2: production Organization Domain Service.
+2. Epic 8.3: Work Coordination Service.
+3. Epic 8.4: Scheduler/Persistent Runtime target-contract adoption.
+4. Epic 8.5: Authorization Authority.
+5. Epic 8.6: Approval Authority.
+6. Epic 8.7: Secret Authority.
+7. Epic 8.8: Event Delivery and outbox hardening.
+8. Epic 8.9: Runtime Activation Authority.
+9. Epic 8.10: Artifact Authority.
+10. Epic 8.11: Sandbox Authority.
+11. Epic 8.12: Plugin and Tool Lifecycle Authority.
+12. Epic 8.13: Team Template and Team Architect.
+13. Epic 8.14: UI/operator/clean-install release path.
 
 Parallelizable work:
 
@@ -556,9 +570,9 @@ Safely deferrable:
 
 Cannot defer without debt:
 
-- accepted owners for blocking `OPEN` rows;
 - Organization isolation;
 - Work Request/Workflow/Task/Assignment handoff;
+- authorization and capability permission grants;
 - approval verification;
 - secret resolution for cloud/tools;
 - artifact/result lineage;
@@ -600,97 +614,113 @@ execution. Required checks for this documentation package are:
 
 ## Remaining blockers
 
-Dev Preview v2 implementation should not begin until at least these blockers
-are resolved by accepted ADRs or scoped decisions:
+Epic 8.1 resolves the implementation-blocking owner decisions listed in the
+previous version of this plan. Dev Preview v2 remains blocked by missing
+production implementations and by several non-blocking future architecture
+questions:
 
-1. Organization Domain service/module topology and persistence.
-2. Work Intake/Workflow Coordinator ownership and exact forbidden overlaps.
-3. Assignment decision/acceptance owner and Scheduler/Persistent Runtime
-   handoff.
-4. Approval Authority durable service/API and approver policy.
-5. Secret Authority backend/use authorization/transient injection.
-6. Event outbox/broker/replay/retention policy.
-7. Artifact/Result owner and verification/closure authority.
-8. Runtime/model activation owner.
-9. Tool catalog/plugin installation/activation minimum lifecycle.
-10. Team Template and Team Architect apply protocol.
+1. Organization Domain Service is not implemented.
+2. Work Coordination Service is not implemented.
+3. Scheduler and Persistent Runtime do not yet expose the v2 target Job and
+   Assignment contracts.
+4. Authorization, Approval, Secret, Event Delivery, Runtime Activation,
+   Artifact, Sandbox, Plugin/Tool Lifecycle, and Team Template authorities are
+   not implemented.
+5. Operator/UI and clean-install deployment topology do not yet exercise the
+   organization-first journey.
+6. Public Assignment, legacy Employee Registry `/resolve`, Lucy-derived
+   workflow/planning/plugin behavior, and stale catalog capabilities remain
+   `CONFLICTING / INVESTIGATE`.
+7. Production authenticators, ownership transfer/recovery, cross-Organization
+   collaboration, deep organizational policy inheritance, memory/knowledge
+   authority, outcome/PPT authority, and hosted marketplace policy remain
+   OPEN but do not block Epic 8.2.
 
 ## Proposed next epic
 
-**Epic 8.1 - Dev Preview v2 Blocking Authority ADR Pack**
+**Epic 8.2 - Organization Domain Service**
 
 Objective:
 
-Accept the minimum set of architecture decisions needed before implementation
-can safely begin on the integration path.
+Implement the production Organization Domain Service as the single
+authoritative owner for Organization, Department, Team, Role, Position,
+Membership, Position Occupancy, and Organization Domain lifecycle transition
+records.
 
 Strict scope:
 
-- `docs/architecture/v2/*_DECISIONS.md`
-- `docs/architecture/v2/AUTHORITY_REGISTRY.md`
-- `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md` only if a release-gate wording
-  correction is required
-- this integration plan only if accepted decisions change it
+Implement only the Organization Domain Service and directly relevant
+architecture/conformance documentation.
 
 Likely files added or modified:
 
-- new ADR entries for Organization topology, Work/Workflow owner, Assignment
-  handoff, Approval service, Secret service, Event outbox, Artifact/Result
-  owner, Runtime Activation, Plugin/Tool minimum lifecycle, and Team Architect
-  apply protocol;
-- `AUTHORITY_REGISTRY.md` rows changed only where an ADR explicitly accepts an
-  owner or changes a blocker classification.
+- `services/organization-domain-service/`
+- service tests for Organization, Department, Team, Role, Position,
+  Membership, Position Occupancy, and lifecycle transitions
+- directly relevant architecture conformance documentation if needed
 
 Explicit exclusions:
 
-- no service code;
-- no contracts/schemas unless an ADR exposes a blocking schema contradiction;
-- no tests except documentation/ADR validation helpers if already present;
-- no runtime configuration or deployment changes;
+- no Work Coordination implementation;
+- no Scheduler or Persistent Runtime changes;
+- no Employee Registry migration;
+- no Authorization, Approval, Secret, Event Delivery, Runtime Activation,
+  Artifact, Sandbox, Plugin/Tool, Team Template, Team Architect, or UI
+  implementation;
+- no contracts/schemas unless a concrete blocking defect is discovered and
+  explicitly scoped;
 - no Lucy changes;
-- no Public Assignment changes.
+- no Public Assignment changes;
+- no runtime/deployment configuration changes.
 
 Required tests:
 
-- documentation reference validation;
-- ADR identifier uniqueness;
-- authority registry consistency checks where available;
-- credential-pattern scan;
+- Organization Domain lifecycle and conformance;
+- cross-Organization fail-closed behavior;
+- ownership, revision, Actor Context, Authorization Decision, and Approval
+  reference handling;
+- Role/Membership never acting as permission;
+- Position hierarchy acyclicity and Occupancy lifecycle;
+- event/outbox persistence and replay behavior;
+- restart/recovery;
+- service negative tests;
 - `git diff --check`.
 
 Acceptance criteria:
 
-- every decision needed by Epic 8.2 and Epic 8.3 is either accepted or
-  explicitly deferred without blocking the shortest correct Dev Preview path;
-- no previously `OPEN` authority is assigned without an ADR;
-- all forbidden overlaps from Epics 3-7 remain forbidden;
-- Public Assignment remains `CONFLICTING / INVESTIGATE` unless a dedicated ADR
-  changes it;
-- Lucy remains donor evidence only.
+- Organization Domain Service is the only production Organization Domain state
+  owner;
+- all Organization Domain resource lifecycles are revisioned, owned,
+  Organization-scoped, and recoverable;
+- cross-Organization references fail closed;
+- Events are producer-owned and outbox-backed;
+- Role, Membership, Team, Position, and Occupancy do not authorize work,
+  assign employees, schedule, resolve, approve, or invoke;
+- no existing service gains Organization authority;
+- Lucy and Public Assignment remain untouched and non-authoritative.
 
 Rollback criteria:
 
-- any ADR creates a duplicate Scheduler, Assignment, Dispatcher, Capability
-  Manager, Approval, Secret, Organization, Artifact, or Workflow authority;
-- any ADR permits hidden ranking, silent substitution, caller approval,
-  capability-as-permission, or direct provider invocation by non-Dispatcher
-  services;
-- any registry row is changed without a traceable decision.
+- before migration, remove the new service directory and tests;
+- after persistence migration, rollback must use exported state or an explicit
+  irreversible-change warning;
+- rollback is required if the service creates peer Employee, Scheduler,
+  Runtime, Work, Authorization, Approval, Secret, Capability, Dispatcher,
+  Artifact, Plugin/Tool, or Team Template authority.
 
 Recommended model tier:
 
-- strong reasoning model for architecture review;
-- frontier coding/reasoning model only if the ADR pack includes automated
-  consistency validators.
+- strong coding model with architecture-aware review;
+- frontier review for adversarial pre-commit.
 
 ## Proposed commit message
 
 ```text
-docs(architecture): define dev preview v2 integration plan
+docs(architecture): accept dev preview v2 authority owners
 ```
 
 ## Exact staging command
 
 ```bash
-git add docs/architecture/v2/DEV_PREVIEW_V2_INTEGRATION_PLAN.md
+git add docs/architecture/v2/DEV_PREVIEW_V2_BLOCKING_AUTHORITY_DECISIONS.md docs/architecture/v2/AUTHORITY_REGISTRY.md docs/architecture/v2/DEV_PREVIEW_V2_INTEGRATION_PLAN.md
 ```
