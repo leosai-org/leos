@@ -9,6 +9,8 @@ from fastapi import FastAPI, HTTPException, Query
 
 from .domain import (
     COLLECTION_TO_RESOURCE_TYPE,
+    HttpRuntimeHandoffAdapter,
+    HttpSchedulerProjectionAdapter,
     RESOURCE_TYPE_TO_COLLECTION,
     SERVICE_CONTRACT,
     SERVICE_ID,
@@ -20,8 +22,20 @@ from .domain import (
 
 DATA_DIR = Path(os.getenv("LEOS_WORK_COORDINATION_DATA_DIR", "/data/work-coordination"))
 DATABASE = Path(os.getenv("LEOS_WORK_COORDINATION_DB", DATA_DIR / "work-coordination.db"))
+SCHEDULER_URL = os.getenv(
+    "EXECUTION_SCHEDULER_URL",
+    "http://execution-scheduler-service:8000",
+)
+PERSISTENT_RUNTIME_URL = os.getenv(
+    "PERSISTENT_EMPLOYEE_RUNTIME_URL",
+    "http://persistent-employee-runtime-service:8000",
+)
 
-store = WorkCoordinationStore(DATABASE)
+store = WorkCoordinationStore(
+    DATABASE,
+    scheduler_projection_adapter=HttpSchedulerProjectionAdapter(SCHEDULER_URL),
+    runtime_handoff_adapter=HttpRuntimeHandoffAdapter(PERSISTENT_RUNTIME_URL),
+)
 logging.basicConfig(level=os.getenv("LEOS_LOG_LEVEL", "INFO"))
 logger = logging.getLogger(SERVICE_ID)
 

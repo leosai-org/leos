@@ -32,14 +32,18 @@ Scheduler lifecycle state remains durable in Scheduler storage.
 
 ## Governed path
 
-The test bootstraps an employee and resource profile through their public
-HTTP APIs, registers one synthetic capability/provider/binding bundle through
-Capability Manager, and creates a Scheduler job. It then exercises:
+The Epic 1.2E test bootstraps an employee and resource profile through their
+public HTTP APIs, registers one synthetic capability/provider/binding bundle
+through Capability Manager, and creates a Scheduler job. Epic 8.4 adds the
+production-shaped Work Coordination adapters that can submit canonical Job
+projections to Scheduler and canonical Assignment handoffs to Persistent
+Runtime before the existing execution-spine mechanics continue. The synthetic
+proof currently exercises:
 
 ```text
 Scheduler job and resource admission
   -> Scheduler lease
-  -> Persistent Runtime scheduler synchronization and assignment projection
+  -> Persistent Runtime assignment projection
   -> Cognitive assignment discovery, start, and context assembly
   -> canonical leos.execution.v1 request
   -> Dispatcher
@@ -81,6 +85,10 @@ The duplicate guard then performs additional supported Scheduler ticks,
 Runtime synchronizations, and Cognitive ticks. It asserts that no second
 lease, assignment, Cognitive run or attempt, execution, resolution, provider
 invocation, or terminal transition is created.
+
+For canonical Epic 8.4 records, Runtime synchronization may enrich an existing
+handoff-created Assignment projection with lease/resource evidence. It must
+not create a canonical Assignment from a Scheduler row alone.
 
 ## Correlation evidence
 

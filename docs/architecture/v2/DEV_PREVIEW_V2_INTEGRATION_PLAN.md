@@ -523,7 +523,8 @@ Shortest correct path:
 
 1. Epic 8.2: production Organization Domain Service.
 2. Epic 8.3: Work Coordination Service.
-3. Epic 8.4: Scheduler/Persistent Runtime target-contract adoption.
+3. Epic 8.4: Scheduler/Persistent Runtime target-contract adoption
+   through additive canonical projection and handoff adapters.
 4. Epic 8.5: Authorization Authority.
 5. Epic 8.6: Approval Authority.
 6. Epic 8.7: Secret Authority.

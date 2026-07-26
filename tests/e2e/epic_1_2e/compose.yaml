@@ -20,7 +20,8 @@ services:
 
   scheduler:
     build:
-      context: ../../../services/execution-scheduler-service
+      context: ../../..
+      dockerfile: services/execution-scheduler-service/Dockerfile
     environment:
       EMPLOYEE_RESOURCE_PROFILE_URL: http://resource-profile:8000
       EXECUTION_SCHEDULER_AUTO_SCHEDULE: "false"
@@ -43,7 +44,8 @@ services:
 
   persistent-runtime:
     build:
-      context: ../../../services/persistent-employee-runtime-service
+      context: ../../..
+      dockerfile: services/persistent-employee-runtime-service/Dockerfile
     environment:
       EMPLOYEE_RUNTIME_AUTO_POLL_SCHEDULER: "false"
       EXECUTION_SCHEDULER_URL: http://scheduler:8000
@@ -158,4 +160,3 @@ services:
         condition: service_healthy
     environment:
       E2E_TIMEOUT_SECONDS: "30"
-

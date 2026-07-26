@@ -1,5 +1,7 @@
 {
   "capabilities": [
+    "jobs.canonical-projection.accept",
+    "jobs.canonical-view.read",
     "jobs.schedule",
     "jobs.cancel",
     "jobs.fail",
@@ -12,6 +14,9 @@
     "employee-eligibility.recheck"
   ],
   "contract_version": "leos.employee-runtime-governance.v1",
+  "canonical_target_contracts": [
+    "leos.job-definition.v1"
+  ],
   "dependencies": [
     "employee-resource-profile-service",
     "leos-kernel-service",
@@ -45,5 +50,5 @@
     "path": "/data/execution-scheduler/execution-scheduler.db",
     "type": "sqlite"
   },
-  "version": "0.2.0"
+  "version": "0.2.0-dev-preview-v2"
 }

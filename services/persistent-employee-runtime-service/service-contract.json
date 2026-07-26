@@ -3,7 +3,8 @@
   "compatibility_module": "app.phase492_lease_recovery",
   "contracts": [
     "leos.runtime-reconciliation.v3.1",
-    "leos.employee-runtime-resource-lifecycle.v1"
+    "leos.employee-runtime-resource-lifecycle.v1",
+    "leos.work-assignment.v1"
   ],
   "provisional_service_local_contracts": [
     "leos.assignment-terminal-transition.v1"
@@ -21,6 +22,12 @@
     "resource_completion_release": true,
     "resource_start_validation": true,
     "scheduler_assignment_import": true
+  },
+  "canonical_assignment_adoption": {
+    "assignment_handoff_endpoint": "/v2/assignment-handoffs",
+    "canonical_view_endpoint": "/v2/assignments/{assignment_id}/canonical",
+    "record_origin": "canonical_work_handoff",
+    "legacy_scheduler_sync_origin": "legacy_scheduler_sync"
   },
   "schema_version": "1.1.0",
   "service": "persistent-employee-runtime-service"

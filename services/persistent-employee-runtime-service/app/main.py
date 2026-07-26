@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 import sqlite3
@@ -11,12 +12,72 @@ from typing import Any, Literal, Optional
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
+from leos_contracts import (
+    ContractValidationError,
+    validate_contract as validate_governed_contract,
+)
 from pydantic import BaseModel, ConfigDict, Field
 
 
 SERVICE_NAME = "persistent-employee-runtime-service"
 SERVICE_VERSION = "0.2.0"
 EMPLOYEE_OS_VERSION = "leos.employee.v1"
+CANONICAL_ASSIGNMENT_CONTRACT = "leos.work-assignment.v1"
+CANONICAL_HANDOFF_CONTRACT = "leos.runtime-assignment-handoff.v1"
+AUTHORITY_REF = {
+    "authority_id": "persistent-employee-runtime-service",
+    "principal": {
+        "principal_id": "principal:service:persistent-employee-runtime",
+        "principal_type": "SERVICE",
+    },
+    "authority_revision": "sha256:persistent-employee-runtime-service-v2",
+}
+RAW_SECRET_KEYS = {
+    "api_key",
+    "access_token",
+    "auth_token",
+    "client_secret",
+    "credential",
+    "credential_value",
+    "credentials",
+    "password",
+    "private_key",
+    "private_key_pem",
+    "refresh_token",
+    "secret",
+    "secret_value",
+}
+CALLER_AUTHORITY_BOOLEAN_KEYS = {
+    "authorized",
+    "authorization_granted",
+    "approval_granted",
+    "approved",
+    "verified",
+    "is_authorized",
+    "is_approved",
+    "force",
+    "force_assign",
+}
+FORBIDDEN_HANDOFF_CONTROL_KEYS = {
+    "runtime_state",
+    "terminal_state",
+    "lease_id",
+    "scheduler_lease_ref",
+    "complete",
+    "completed",
+    "failed",
+    "cancelled",
+    "execute_now",
+    "dispatcher_request",
+    "capability_resolution",
+    "selected_by_score",
+    "selected_employee",
+    "employee_score",
+    "employee_scores",
+    "ranked_employee_ids",
+    "matching_score",
+    "optimization_score",
+}
 
 DATA_DIR = Path(
     os.getenv(
@@ -184,10 +245,32 @@ def migrate() -> None:
                 details_json TEXT NOT NULL DEFAULT '{}',
                 created_at TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS runtime_handoff_idempotency (
+                idempotency_key TEXT PRIMARY KEY,
+                handoff_id TEXT NOT NULL,
+                assignment_id TEXT NOT NULL,
+                request_hash TEXT NOT NULL,
+                response_json TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
             """
         )
 
         assignment_columns = {
+            "record_origin": "TEXT NOT NULL DEFAULT 'legacy_scheduler_sync'",
+            "canonical_contract_version": "TEXT",
+            "canonical_assignment_json": "TEXT",
+            "canonical_assignment_revision": "TEXT",
+            "organization_ref_json": "TEXT",
+            "work_ref_json": "TEXT",
+            "assignment_decision_ref_json": "TEXT",
+            "source_assignment_handoff_ref_json": "TEXT",
+            "scheduler_job_ref_json": "TEXT",
+            "actor_context_ref_json": "TEXT",
+            "authorization_decision_ref_json": "TEXT",
+            "source_revision": "TEXT",
+            "accepted_at": "TEXT",
             "resource_reservation_id": "TEXT",
             "resource_node_id": "TEXT",
             "resource_gpu_uuid": "TEXT",
@@ -238,6 +321,194 @@ def parse_json(value: Any, default: Any) -> Any:
             return default
 
     return default
+
+
+def canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def request_hash(value: Any) -> str:
+    return "sha256:" + hashlib.sha256(
+        canonical_json(value).encode("utf-8")
+    ).hexdigest()
+
+
+def revision_for(value: Any) -> str:
+    return request_hash(value)
+
+
+def require_dict(value: Any, field: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise HTTPException(422, f"{field} must be an object.")
+    return value
+
+
+def require_ref(value: Any, field: str, resource_type: str) -> dict[str, Any]:
+    ref = require_dict(value, field)
+    if ref.get("resource_type") != resource_type:
+        raise HTTPException(
+            422,
+            f"{field} must reference {resource_type}.",
+        )
+    if not ref.get("resource_id") or not ref.get("revision"):
+        raise HTTPException(
+            422,
+            f"{field} requires resource_id and revision.",
+        )
+    return ref
+
+
+def require_evidence_ref(value: Any, field: str) -> dict[str, Any]:
+    ref = require_dict(value, field)
+    if not ref.get("reference_id") or not ref.get("revision"):
+        raise HTTPException(
+            422,
+            f"{field} requires reference_id and revision.",
+        )
+    if not isinstance(ref.get("authority"), dict):
+        raise HTTPException(
+            422,
+            f"{field} requires authority evidence.",
+        )
+    return ref
+
+
+def reject_raw_secret_values(value: Any, path: str = "$") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            normalized = str(key).strip().lower().replace("-", "_")
+            if normalized in RAW_SECRET_KEYS:
+                raise HTTPException(
+                    422,
+                    {
+                        "code": "raw_secret_prohibited",
+                        "message": (
+                            "raw credential or secret fields are prohibited"
+                        ),
+                        "path": f"{path}.{key}",
+                    },
+                )
+            reject_raw_secret_values(child, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            reject_raw_secret_values(child, f"{path}[{index}]")
+
+
+def reject_caller_authority_claims(value: Any, path: str = "$") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            normalized = str(key).strip().lower().replace("-", "_")
+            if (
+                normalized in CALLER_AUTHORITY_BOOLEAN_KEYS
+                and isinstance(child, bool)
+            ):
+                raise HTTPException(
+                    403,
+                    {
+                        "code": "caller_authority_claim_rejected",
+                        "message": (
+                            "caller-supplied authority booleans are "
+                            "prohibited"
+                        ),
+                        "path": f"{path}.{key}",
+                    },
+                )
+            if normalized in FORBIDDEN_HANDOFF_CONTROL_KEYS:
+                raise HTTPException(
+                    422,
+                    {
+                        "code": "authority_boundary_violation",
+                        "message": (
+                            "handoff cannot set runtime terminal state, "
+                            "execute, resolve, dispatch, score, rank, or "
+                            "optimize"
+                        ),
+                        "path": f"{path}.{key}",
+                    },
+                )
+            reject_caller_authority_claims(child, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            reject_caller_authority_claims(child, f"{path}[{index}]")
+
+
+def validate_canonical_assignment(assignment: dict[str, Any]) -> None:
+    try:
+        validate_governed_contract(CANONICAL_ASSIGNMENT_CONTRACT, assignment)
+    except ContractValidationError as exc:
+        raise HTTPException(
+            422,
+            {
+                "code": "canonical_assignment_invalid",
+                "message": str(exc),
+            },
+        ) from exc
+
+
+def assignment_resource_id(assignment: dict[str, Any]) -> str:
+    identity = require_dict(assignment.get("identity"), "assignment.identity")
+    if identity.get("resource_type") != "WORK_ASSIGNMENT":
+        raise HTTPException(
+            422,
+            "canonical Assignment identity must be WORK_ASSIGNMENT.",
+        )
+    assignment_id = str(identity.get("resource_id") or "").strip()
+    if not assignment_id:
+        raise HTTPException(422, "canonical Assignment resource_id is required.")
+    return assignment_id
+
+
+def map_assignment_status(state: str) -> str:
+    return {
+        "assigned": "ACTIVE",
+        "running": "ACTIVE",
+        "complete": "COMPLETED",
+        "failed": "REVOKED",
+        "cancelled": "CANCELLED",
+    }.get(state, "PROPOSED")
+
+
+def canonical_assignment_view(row: sqlite3.Row) -> Optional[dict[str, Any]]:
+    stored = parse_json(row["canonical_assignment_json"], {})
+    if stored.get("contract_version") != CANONICAL_ASSIGNMENT_CONTRACT:
+        return None
+    document = json.loads(canonical_json(stored))
+    document["status"] = map_assignment_status(str(row["state"]))
+    identity = document.setdefault("identity", {})
+    identity["revision"] = revision_for(
+        {
+            "assignment_id": row["assignment_id"],
+            "state": row["state"],
+            "job_id": row["job_id"],
+            "lease_id": row["lease_id"],
+            "updated_at": row["updated_at"],
+            "source_revision": row["source_revision"],
+        }
+    )
+    identity["updated_at"] = row["updated_at"]
+    lifecycle_authority = (
+        identity.get("ownership", {}).get("lifecycle_authority")
+        if isinstance(identity.get("ownership"), dict)
+        else None
+    ) or AUTHORITY_REF
+    state_evidence = document.setdefault("state_evidence", {})
+    state_evidence["transition_authority"] = lifecycle_authority
+    state_evidence["actor_context_ref"] = parse_json(
+        row["actor_context_ref_json"], {}
+    )
+    state_evidence["authorization_decision_ref"] = parse_json(
+        row["authorization_decision_ref_json"], {}
+    )
+    state_evidence.setdefault("approval_verification_refs", [])
+    state_evidence["event_ref"] = {
+        "resource_type": "EVENT",
+        "resource_id": (
+            f"runtime-assignment-state:{row['assignment_id']}:{row['state']}"
+        ),
+        "revision": identity["revision"],
+    }
+    state_evidence["transitioned_at"] = row["updated_at"]
+    return document
 
 
 async def publish_kernel_event(
@@ -542,7 +813,7 @@ async def import_scheduler_assignments() -> dict[str, Any]:
 
             existing = db.execute(
                 """
-                SELECT assignment_id
+                SELECT *
                 FROM employee_assignments
                 WHERE job_id=?
                   AND state IN ('assigned', 'running')
@@ -551,6 +822,57 @@ async def import_scheduler_assignments() -> dict[str, Any]:
             ).fetchone()
 
             if existing is not None:
+                if (
+                    existing["record_origin"] == "canonical_work_handoff"
+                    and not existing["lease_id"]
+                    and job.get("lease_id")
+                ):
+                    db.execute(
+                        """
+                        UPDATE employee_assignments
+                        SET lease_id=?, resource_reservation_id=?,
+                            resource_node_id=?, resource_gpu_uuid=?,
+                            resource_profile_name=?,
+                            resource_decision_json=?, resource_state=?,
+                            updated_at=?
+                        WHERE assignment_id=?
+                        """,
+                        (
+                            job.get("lease_id"),
+                            job.get("resource_reservation_id"),
+                            job.get("resource_node_id"),
+                            job.get("resource_gpu_uuid"),
+                            job.get("resource_profile_name"),
+                            json.dumps(job.get("resource_decision", {})),
+                            job.get("resource_state"),
+                            now(),
+                            existing["assignment_id"],
+                        ),
+                    )
+                    db.execute(
+                        """
+                        UPDATE employees
+                        SET runtime_state='assigned',
+                            current_job_id=?,
+                            current_assignment_id=?,
+                            current_workflow_id=?,
+                            current_step_id=?,
+                            updated_at=?
+                        WHERE employee_id=?
+                        """,
+                        (
+                            job["job_id"],
+                            existing["assignment_id"],
+                            job.get("workflow_id"),
+                            job.get("step_id"),
+                            now(),
+                            employee_id,
+                        ),
+                    )
+                skipped += 1
+                continue
+
+            if job.get("record_origin") == "canonical_work_projection":
                 skipped += 1
                 continue
 
@@ -1356,6 +1678,257 @@ async def scheduler_sync() -> dict[str, Any]:
     return await import_scheduler_assignments()
 
 
+@app.post("/v2/assignment-handoffs")
+def accept_canonical_assignment_handoff(
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    reject_raw_secret_values(payload)
+    reject_caller_authority_claims(payload)
+
+    handoff = require_dict(payload.get("handoff", payload), "handoff")
+    if handoff.get("contract_version") not in {
+        CANONICAL_HANDOFF_CONTRACT,
+        None,
+    }:
+        raise HTTPException(422, "unsupported Runtime handoff contract.")
+
+    handoff_id = str(handoff.get("handoff_id") or "").strip()
+    if not handoff_id:
+        raise HTTPException(422, "handoff_id is required.")
+    idempotency_key = str(
+        payload.get("idempotency_key")
+        or handoff.get("idempotency_key")
+        or ""
+    ).strip()
+    if not idempotency_key:
+        raise HTTPException(422, "idempotency_key is required.")
+
+    actor_context_ref = require_ref(
+        payload.get("actor_context_ref")
+        or handoff.get("actor_context_ref"),
+        "actor_context_ref",
+        "ACTOR_CONTEXT",
+    )
+    authorization_decision_ref = require_ref(
+        payload.get("authorization_decision_ref")
+        or handoff.get("authorization_decision_ref"),
+        "authorization_decision_ref",
+        "AUTHORIZATION_DECISION",
+    )
+    organization_ref = require_ref(
+        handoff.get("organization_ref"),
+        "organization_ref",
+        "ORGANIZATION",
+    )
+    source_handoff_ref = require_ref(
+        handoff.get("source_assignment_handoff_ref"),
+        "source_assignment_handoff_ref",
+        "ASSIGNMENT_HANDOFF",
+    )
+    source_revision = str(handoff.get("source_revision") or "").strip()
+    if not source_revision:
+        raise HTTPException(422, "source_revision is required.")
+    if source_revision != source_handoff_ref.get("revision"):
+        raise HTTPException(409, "stale_source_revision")
+    assignment_decision_ref = require_evidence_ref(
+        handoff.get("assignment_decision_ref"),
+        "assignment_decision_ref",
+    )
+    source_task_ref = require_ref(
+        handoff.get("source_task_ref"),
+        "source_task_ref",
+        "TASK",
+    )
+    scheduler_job_ref = require_ref(
+        handoff.get("scheduler_job_ref"),
+        "scheduler_job_ref",
+        "SCHEDULER_JOB",
+    )
+
+    canonical_assignment = require_dict(
+        handoff.get("assignment") or handoff.get("canonical_assignment"),
+        "canonical_assignment",
+    )
+    validate_canonical_assignment(canonical_assignment)
+    if canonical_assignment.get("organization_ref") != organization_ref:
+        raise HTTPException(
+            422,
+            "canonical Assignment crosses Organization boundary.",
+        )
+    if canonical_assignment.get("assignment_decision_ref") != assignment_decision_ref:
+        raise HTTPException(422, "assignment decision lineage mismatch.")
+    if canonical_assignment.get("work_ref") != source_task_ref:
+        raise HTTPException(422, "source Task lineage mismatch.")
+    if canonical_assignment.get("status") not in {"PROPOSED", "ACTIVE"}:
+        raise HTTPException(
+            422,
+            "Work Coordination cannot set Runtime terminal lifecycle state.",
+        )
+
+    assignee = require_dict(
+        canonical_assignment.get("assignee"),
+        "assignment.assignee",
+    )
+    if assignee.get("target_type") != "EMPLOYEE":
+        raise HTTPException(
+            422,
+            "Persistent Runtime accepts only Employee Assignment projections.",
+        )
+    employee_ref = require_ref(
+        assignee.get("resource"),
+        "assignment.assignee.resource",
+        "EMPLOYEE",
+    )
+    employee_id = employee_ref["resource_id"]
+    assignment_id = assignment_resource_id(canonical_assignment)
+    assignment_revision = str(
+        canonical_assignment["identity"].get("revision") or ""
+    ).strip()
+    if not assignment_revision:
+        raise HTTPException(422, "canonical Assignment revision is required.")
+
+    fingerprint = request_hash(payload)
+    with connect() as db:
+        existing_idempotency = db.execute(
+            "SELECT * FROM runtime_handoff_idempotency "
+            "WHERE idempotency_key=?",
+            (idempotency_key,),
+        ).fetchone()
+        if existing_idempotency is not None:
+            if existing_idempotency["request_hash"] != fingerprint:
+                raise HTTPException(409, "idempotency_key_conflict")
+            return json.loads(existing_idempotency["response_json"])
+
+        employee = db.execute(
+            "SELECT employee_id FROM employees WHERE employee_id=?",
+            (employee_id,),
+        ).fetchone()
+        if employee is None:
+            raise HTTPException(
+                503,
+                "Employee reference evidence unavailable to Runtime.",
+            )
+
+        existing_assignment = db.execute(
+            "SELECT * FROM employee_assignments WHERE assignment_id=?",
+            (assignment_id,),
+        ).fetchone()
+        if existing_assignment is not None:
+            raise HTTPException(
+                409,
+                "Runtime Assignment projection already exists.",
+            )
+
+        timestamp = now()
+        response = {
+            "ok": True,
+            "status": "ACCEPTED",
+            "assignment_ref": {
+                "resource_type": "WORK_ASSIGNMENT",
+                "resource_id": assignment_id,
+                "revision": assignment_revision,
+            },
+            "runtime_assignment_id": assignment_id,
+            "record_origin": "canonical_work_handoff",
+            "handoff_id": handoff_id,
+            "accepted_revision": assignment_revision,
+        }
+        db.execute(
+            """
+            INSERT INTO employee_assignments (
+                assignment_id, employee_id, job_id, workflow_id, step_id,
+                capability_id, lease_id, state, payload_json, result_json,
+                error, assigned_at, started_at, completed_at, updated_at,
+                resource_reservation_id, resource_node_id, resource_gpu_uuid,
+                resource_profile_name, resource_decision_json,
+                resource_state, record_origin, canonical_contract_version,
+                canonical_assignment_json, canonical_assignment_revision,
+                organization_ref_json, work_ref_json,
+                assignment_decision_ref_json,
+                source_assignment_handoff_ref_json, scheduler_job_ref_json,
+                actor_context_ref_json, authorization_decision_ref_json,
+                source_revision, accepted_at
+            )
+            VALUES (
+                ?, ?, ?, NULL, ?, NULL, NULL, 'assigned', ?, NULL, NULL,
+                ?, NULL, NULL, ?, NULL, NULL, NULL, NULL, '{}', NULL,
+                'canonical_work_handoff', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
+            """,
+            (
+                assignment_id,
+                employee_id,
+                scheduler_job_ref["resource_id"],
+                source_task_ref["resource_id"],
+                json.dumps(
+                    {
+                        "canonical_assignment_ref": response["assignment_ref"],
+                        "scheduler_job_ref": scheduler_job_ref,
+                        "source_task_ref": source_task_ref,
+                        "handoff_id": handoff_id,
+                        "work_payload": handoff.get("payload", {}),
+                    }
+                ),
+                timestamp,
+                timestamp,
+                CANONICAL_ASSIGNMENT_CONTRACT,
+                canonical_json(canonical_assignment),
+                assignment_revision,
+                canonical_json(organization_ref),
+                canonical_json(source_task_ref),
+                canonical_json(assignment_decision_ref),
+                canonical_json(source_handoff_ref),
+                canonical_json(scheduler_job_ref),
+                canonical_json(actor_context_ref),
+                canonical_json(authorization_decision_ref),
+                source_revision,
+                timestamp,
+            ),
+        )
+        db.execute(
+            """
+            UPDATE employees
+            SET runtime_state='assigned', current_job_id=?,
+                current_assignment_id=?, current_step_id=?, updated_at=?
+            WHERE employee_id=?
+            """,
+            (
+                scheduler_job_ref["resource_id"],
+                assignment_id,
+                source_task_ref["resource_id"],
+                timestamp,
+                employee_id,
+            ),
+        )
+        db.execute(
+            """
+            INSERT INTO runtime_handoff_idempotency(
+                idempotency_key, handoff_id, assignment_id, request_hash,
+                response_json, created_at
+            ) VALUES(?, ?, ?, ?, ?, ?)
+            """,
+            (
+                idempotency_key,
+                handoff_id,
+                assignment_id,
+                fingerprint,
+                json.dumps(response),
+                timestamp,
+            ),
+        )
+
+    emit_local(
+        "runtime_canonical_assignment_handoff_accepted",
+        employee_id=employee_id,
+        details={
+            "assignment_id": assignment_id,
+            "handoff_id": handoff_id,
+            "record_origin": "canonical_work_handoff",
+        },
+    )
+    return response
+
+
 @app.get("/assignments")
 def list_assignments(
     state: Optional[str] = None,
@@ -1407,6 +1980,56 @@ def list_assignments(
             }
             for row in rows
         ],
+    }
+
+
+@app.get("/v2/assignments/{assignment_id}/canonical")
+def get_canonical_assignment(
+    assignment_id: str,
+) -> dict[str, Any]:
+    with connect() as db:
+        row = db.execute(
+            """
+            SELECT *
+            FROM employee_assignments
+            WHERE assignment_id=?
+            """,
+            (assignment_id,),
+        ).fetchone()
+
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment not found.",
+        )
+
+    view = canonical_assignment_view(row)
+    if view is None:
+        return {
+            "ok": True,
+            "canonical": False,
+            "assignment_id": assignment_id,
+            "record_origin": row["record_origin"],
+            "reason": (
+                "legacy Runtime row has no complete canonical Assignment "
+                "evidence"
+            ),
+        }
+
+    return {
+        "ok": True,
+        "canonical": True,
+        "record_origin": row["record_origin"],
+        "assignment": view,
+        "runtime": {
+            "state": row["state"],
+            "job_id": row["job_id"],
+            "lease_id": row["lease_id"],
+            "resource_state": row["resource_state"],
+            "accepted_at": row["accepted_at"],
+            "started_at": row["started_at"],
+            "completed_at": row["completed_at"],
+        },
     }
 
 
@@ -1651,6 +2274,7 @@ async def terminal_assignment_transition(
         "failed": "fail",
         "cancelled": "cancel",
     }[target_state]
+    # Scheduler completion and resource release remain Scheduler-owned.
     path = f"/jobs/{row['job_id']}/{operation}"
     scheduler_request: dict[str, Any] = {
         "transition_id": request.transition_id,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 import sqlite3
@@ -11,11 +12,68 @@ from typing import Any, Optional
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
+from leos_contracts import (
+    ContractValidationError,
+    validate_contract as validate_governed_contract,
+)
 from pydantic import BaseModel, ConfigDict, Field
 
 
 SERVICE_NAME = "execution-scheduler-service"
 SERVICE_VERSION = "0.2.0"
+CANONICAL_JOB_CONTRACT = "leos.job-definition.v1"
+CANONICAL_PROJECTION_CONTRACT = (
+    "leos.scheduler-job-projection.v1"
+)
+AUTHORITY_REF = {
+    "authority_id": "execution-scheduler-service",
+    "principal": {
+        "principal_id": "principal:service:execution-scheduler",
+        "principal_type": "SERVICE",
+    },
+    "authority_revision": "sha256:execution-scheduler-service-v2",
+}
+RAW_SECRET_KEYS = {
+    "api_key",
+    "access_token",
+    "auth_token",
+    "client_secret",
+    "credential",
+    "credential_value",
+    "credentials",
+    "password",
+    "private_key",
+    "private_key_pem",
+    "refresh_token",
+    "secret",
+    "secret_value",
+}
+CALLER_AUTHORITY_BOOLEAN_KEYS = {
+    "authorized",
+    "authorization_granted",
+    "approval_granted",
+    "approved",
+    "verified",
+    "is_authorized",
+    "is_approved",
+    "force",
+    "force_assign",
+}
+FORBIDDEN_PROJECTION_CONTROL_KEYS = {
+    "attempt_count",
+    "lease",
+    "lease_id",
+    "lease_state",
+    "scheduler_state",
+    "selected_by_score",
+    "selected_employee",
+    "selected_employee_ref",
+    "employee_score",
+    "employee_scores",
+    "ranked_employee_ids",
+    "matching_score",
+    "optimization_score",
+}
 
 DATA_DIR = Path(
     os.getenv(
@@ -241,10 +299,34 @@ def migrate() -> None:
 
             CREATE INDEX IF NOT EXISTS idx_scheduler_resource_history_job
                 ON scheduler_resource_history(job_id, created_at);
+
+            CREATE TABLE IF NOT EXISTS scheduler_projection_idempotency (
+                idempotency_key TEXT PRIMARY KEY,
+                projection_id TEXT NOT NULL,
+                job_id TEXT NOT NULL,
+                request_hash TEXT NOT NULL,
+                response_json TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
             """
         )
 
         job_columns = {
+            "record_origin": "TEXT NOT NULL DEFAULT 'legacy'",
+            "canonical_contract_version": "TEXT",
+            "canonical_job_json": "TEXT",
+            "canonical_job_revision": "TEXT",
+            "organization_ref_json": "TEXT",
+            "source_work_request_ref_json": "TEXT",
+            "source_workflow_definition_ref_json": "TEXT",
+            "source_workflow_revision_ref_json": "TEXT",
+            "source_task_ref_json": "TEXT",
+            "source_scheduler_projection_ref_json": "TEXT",
+            "actor_context_ref_json": "TEXT",
+            "authorization_decision_ref_json": "TEXT",
+            "source_revision": "TEXT",
+            "projection_id": "TEXT",
+            "projection_status": "TEXT",
             "resource_decision_json": "TEXT NOT NULL DEFAULT '{}'",
             "resource_reservation_id": "TEXT",
             "resource_node_id": "TEXT",
@@ -287,6 +369,10 @@ def migrate() -> None:
                 db.execute(
                     f"ALTER TABLE scheduler_jobs ADD COLUMN {column} {definition}"
                 )
+        db.execute(
+            "CREATE INDEX IF NOT EXISTS idx_scheduler_jobs_projection "
+            "ON scheduler_jobs(projection_id)"
+        )
 
         existing_lease_columns = {
             row["name"]
@@ -471,6 +557,175 @@ def parse_json(value: Any) -> dict[str, Any]:
             return {}
 
     return {}
+
+
+def canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def request_hash(value: Any) -> str:
+    return "sha256:" + hashlib.sha256(
+        canonical_json(value).encode("utf-8")
+    ).hexdigest()
+
+
+def revision_for(value: Any) -> str:
+    return request_hash(value)
+
+
+def require_dict(value: Any, field: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise HTTPException(422, f"{field} must be an object.")
+    return value
+
+
+def require_ref(value: Any, field: str, resource_type: str) -> dict[str, Any]:
+    ref = require_dict(value, field)
+    if ref.get("resource_type") != resource_type:
+        raise HTTPException(
+            422,
+            f"{field} must reference {resource_type}.",
+        )
+    if not ref.get("resource_id") or not ref.get("revision"):
+        raise HTTPException(
+            422,
+            f"{field} requires resource_id and revision.",
+        )
+    return ref
+
+
+def reject_raw_secret_values(value: Any, path: str = "$") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            normalized = str(key).strip().lower().replace("-", "_")
+            if normalized in RAW_SECRET_KEYS:
+                raise HTTPException(
+                    422,
+                    {
+                        "code": "raw_secret_prohibited",
+                        "message": (
+                            "raw credential or secret fields are prohibited"
+                        ),
+                        "path": f"{path}.{key}",
+                    },
+                )
+            reject_raw_secret_values(child, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            reject_raw_secret_values(child, f"{path}[{index}]")
+
+
+def reject_caller_authority_claims(value: Any, path: str = "$") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            normalized = str(key).strip().lower().replace("-", "_")
+            if (
+                normalized in CALLER_AUTHORITY_BOOLEAN_KEYS
+                and isinstance(child, bool)
+            ):
+                raise HTTPException(
+                    403,
+                    {
+                        "code": "caller_authority_claim_rejected",
+                        "message": (
+                            "caller-supplied authority booleans are "
+                            "prohibited"
+                        ),
+                        "path": f"{path}.{key}",
+                    },
+                )
+            if normalized in FORBIDDEN_PROJECTION_CONTROL_KEYS:
+                raise HTTPException(
+                    422,
+                    {
+                        "code": "authority_boundary_violation",
+                        "message": (
+                            "Work Coordination cannot set Scheduler "
+                            "lifecycle, lease, attempt, timing, scoring, "
+                            "or selection state"
+                        ),
+                        "path": f"{path}.{key}",
+                    },
+                )
+            reject_caller_authority_claims(child, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            reject_caller_authority_claims(child, f"{path}[{index}]")
+
+
+def validate_canonical_job(job: dict[str, Any]) -> None:
+    try:
+        validate_governed_contract(CANONICAL_JOB_CONTRACT, job)
+    except ContractValidationError as exc:
+        raise HTTPException(
+            422,
+            {
+                "code": "canonical_job_invalid",
+                "message": str(exc),
+            },
+        ) from exc
+
+
+def job_resource_id(job: dict[str, Any]) -> str:
+    identity = require_dict(job.get("identity"), "job.identity")
+    if identity.get("resource_type") != "SCHEDULER_JOB":
+        raise HTTPException(422, "canonical Job identity must be SCHEDULER_JOB.")
+    job_id = str(identity.get("resource_id") or "").strip()
+    if not job_id:
+        raise HTTPException(422, "canonical Job resource_id is required.")
+    return job_id
+
+
+def map_job_status(state: str) -> str:
+    return {
+        "queued": "READY",
+        "leased": "ACTIVE",
+        "running": "ACTIVE",
+        "complete": "COMPLETED",
+        "failed": "FAILED",
+        "cancelled": "CANCELLED",
+        "rejected": "FAILED",
+    }.get(state, "BLOCKED")
+
+
+def canonical_job_view(row: sqlite3.Row) -> Optional[dict[str, Any]]:
+    stored = parse_json(row["canonical_job_json"])
+    if stored.get("contract_version") != CANONICAL_JOB_CONTRACT:
+        return None
+    document = json.loads(canonical_json(stored))
+    document["status"] = map_job_status(str(row["state"]))
+    identity = document.setdefault("identity", {})
+    identity["revision"] = revision_for(
+        {
+            "job_id": row["job_id"],
+            "state": row["state"],
+            "attempt_count": row["attempt_count"],
+            "lease_id": row["lease_id"],
+            "result_json": row["result_json"],
+            "updated_at": row["updated_at"],
+            "source_revision": row["source_revision"],
+        }
+    )
+    identity["updated_at"] = row["updated_at"]
+    lifecycle_authority = (
+        identity.get("ownership", {}).get("lifecycle_authority")
+        if isinstance(identity.get("ownership"), dict)
+        else None
+    ) or AUTHORITY_REF
+    state_evidence = document.setdefault("state_evidence", {})
+    state_evidence["transition_authority"] = lifecycle_authority
+    state_evidence["actor_context_ref"] = parse_json(row["actor_context_ref_json"])
+    state_evidence["authorization_decision_ref"] = parse_json(
+        row["authorization_decision_ref_json"]
+    )
+    state_evidence.setdefault("approval_verification_refs", [])
+    state_evidence["event_ref"] = {
+        "resource_type": "EVENT",
+        "resource_id": f"scheduler-job-state:{row['job_id']}:{row['state']}",
+        "revision": identity["revision"],
+    }
+    state_evidence["transitioned_at"] = row["updated_at"]
+    return document
 
 
 class ResourceEnforcementError(RuntimeError):
@@ -2433,6 +2688,287 @@ def create_job(
     }
 
 
+@app.post("/v2/job-projections")
+def accept_canonical_job_projection(
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    reject_raw_secret_values(payload)
+    reject_caller_authority_claims(payload)
+
+    projection = require_dict(payload.get("projection", payload), "projection")
+    if projection.get("contract_version") not in {
+        CANONICAL_PROJECTION_CONTRACT,
+        None,
+    }:
+        raise HTTPException(422, "unsupported Scheduler projection contract.")
+
+    projection_id = str(projection.get("projection_id") or "").strip()
+    if not projection_id:
+        raise HTTPException(422, "projection_id is required.")
+    idempotency_key = str(
+        payload.get("idempotency_key")
+        or projection.get("idempotency_key")
+        or ""
+    ).strip()
+    if not idempotency_key:
+        raise HTTPException(422, "idempotency_key is required.")
+
+    actor_context_ref = require_ref(
+        payload.get("actor_context_ref")
+        or projection.get("actor_context_ref"),
+        "actor_context_ref",
+        "ACTOR_CONTEXT",
+    )
+    authorization_decision_ref = require_ref(
+        payload.get("authorization_decision_ref")
+        or projection.get("authorization_decision_ref"),
+        "authorization_decision_ref",
+        "AUTHORIZATION_DECISION",
+    )
+    organization_ref = require_ref(
+        projection.get("organization_ref"),
+        "organization_ref",
+        "ORGANIZATION",
+    )
+    source_task_ref = require_ref(
+        projection.get("source_task_ref"),
+        "source_task_ref",
+        "TASK",
+    )
+    source_projection_ref = require_ref(
+        projection.get("source_scheduler_projection_ref"),
+        "source_scheduler_projection_ref",
+        "SCHEDULER_PROJECTION",
+    )
+    source_revision = str(projection.get("source_revision") or "").strip()
+    if not source_revision:
+        raise HTTPException(422, "source_revision is required.")
+    if source_revision != source_projection_ref.get("revision"):
+        raise HTTPException(409, "stale_source_revision")
+
+    source_work_request_ref = projection.get("source_work_request_ref")
+    if source_work_request_ref is not None:
+        source_work_request_ref = require_ref(
+            source_work_request_ref,
+            "source_work_request_ref",
+            "WORK_REQUEST",
+        )
+    source_workflow_definition_ref = projection.get(
+        "source_workflow_definition_ref"
+    )
+    if source_workflow_definition_ref is not None:
+        source_workflow_definition_ref = require_ref(
+            source_workflow_definition_ref,
+            "source_workflow_definition_ref",
+            "WORKFLOW_DEFINITION",
+        )
+    source_workflow_revision_ref = projection.get(
+        "source_workflow_revision_ref"
+    )
+    if source_workflow_revision_ref is not None:
+        source_workflow_revision_ref = require_ref(
+            source_workflow_revision_ref,
+            "source_workflow_revision_ref",
+            "WORKFLOW_REVISION",
+        )
+
+    canonical_job = require_dict(
+        projection.get("job") or projection.get("canonical_job"),
+        "canonical_job",
+    )
+    validate_canonical_job(canonical_job)
+    if canonical_job.get("organization_ref") != organization_ref:
+        raise HTTPException(422, "canonical Job crosses Organization boundary.")
+    if canonical_job.get("source_work_request_ref") != source_work_request_ref:
+        raise HTTPException(422, "source Work Request lineage mismatch.")
+    if (
+        canonical_job.get("source_workflow_definition_ref")
+        != source_workflow_definition_ref
+    ):
+        raise HTTPException(422, "source Workflow Definition lineage mismatch.")
+    if (
+        canonical_job.get("source_workflow_revision_ref")
+        != source_workflow_revision_ref
+    ):
+        raise HTTPException(422, "source Workflow Revision lineage mismatch.")
+    if canonical_job.get("status") not in {"DRAFT", "READY"}:
+        raise HTTPException(
+            422,
+            "Work Coordination cannot set Scheduler lifecycle state.",
+        )
+    if projection.get("retry_intent_ref") and projection.get(
+        "scheduler_retry_now"
+    ):
+        raise HTTPException(
+            422,
+            "Retry Intent cannot directly set Scheduler retry timing.",
+        )
+    if projection.get("not_before") is not None:
+        raise HTTPException(
+            422,
+            "Work Coordination cannot set Scheduler not-before directly.",
+        )
+
+    job_id = job_resource_id(canonical_job)
+    identity = require_dict(canonical_job.get("identity"), "job.identity")
+    canonical_revision = str(identity.get("revision") or "").strip()
+    if not canonical_revision:
+        raise HTTPException(422, "canonical Job revision is required.")
+
+    assignee = projection.get("assignee") or projection.get("employee_ref")
+    employee_id = None
+    if isinstance(assignee, dict):
+        employee_ref = assignee.get("resource", assignee)
+        if isinstance(employee_ref, dict):
+            if employee_ref.get("resource_type") != "EMPLOYEE":
+                raise HTTPException(
+                    422,
+                    "Scheduler projection assignee must reference an Employee.",
+                )
+            employee_id = employee_ref.get("resource_id")
+
+    resource_requirements = require_dict(
+        projection.get("resource_requirements", {}),
+        "resource_requirements",
+    )
+    scheduling = require_dict(
+        projection.get("scheduling", {}),
+        "scheduling",
+    )
+    required_capability_refs = canonical_job.get("required_capability_refs", [])
+    capability_id = None
+    if required_capability_refs:
+        first_capability = required_capability_refs[0]
+        if isinstance(first_capability, dict):
+            capability_id = first_capability.get("resource_id")
+
+    fingerprint = request_hash(payload)
+    with connect() as db:
+        existing_idempotency = db.execute(
+            "SELECT * FROM scheduler_projection_idempotency "
+            "WHERE idempotency_key=?",
+            (idempotency_key,),
+        ).fetchone()
+        if existing_idempotency is not None:
+            if existing_idempotency["request_hash"] != fingerprint:
+                raise HTTPException(409, "idempotency_key_conflict")
+            return json.loads(existing_idempotency["response_json"])
+        existing_job = db.execute(
+            "SELECT * FROM scheduler_jobs WHERE job_id=?",
+            (job_id,),
+        ).fetchone()
+        if existing_job is not None:
+            raise HTTPException(409, "Scheduler Job already exists.")
+
+        timestamp = now()
+        response = {
+            "ok": True,
+            "status": "ACCEPTED",
+            "job_ref": {
+                "resource_type": "SCHEDULER_JOB",
+                "resource_id": job_id,
+                "revision": canonical_revision,
+            },
+            "scheduler_job_id": job_id,
+            "record_origin": "canonical_work_projection",
+            "projection_id": projection_id,
+            "accepted_revision": canonical_revision,
+        }
+        db.execute(
+            """
+            INSERT INTO scheduler_jobs (
+                job_id, mission_id, workflow_id, step_id, employee_id,
+                capability_id, job_type, priority, state, cpu_required,
+                ram_mb_required, gpu_required, vram_mb_required,
+                required_labels_json, payload_json, max_attempts,
+                attempt_count, not_before, assigned_worker_id, lease_id,
+                lease_expires_at, result_json, error, created_at, queued_at,
+                started_at, completed_at, updated_at, record_origin,
+                canonical_contract_version, canonical_job_json,
+                canonical_job_revision, organization_ref_json,
+                source_work_request_ref_json,
+                source_workflow_definition_ref_json,
+                source_workflow_revision_ref_json, source_task_ref_json,
+                source_scheduler_projection_ref_json, actor_context_ref_json,
+                authorization_decision_ref_json, source_revision,
+                projection_id, projection_status
+            )
+            VALUES (
+                ?, NULL, ?, ?, ?, ?, 'canonical-work-projection',
+                ?, 'queued', ?, ?, ?, ?, ?, ?, ?, 0, ?,
+                NULL, NULL, NULL, NULL, NULL, ?, ?, NULL, NULL, ?,
+                'canonical_work_projection', ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, 'accepted'
+            )
+            """,
+            (
+                job_id,
+                (source_workflow_definition_ref or {}).get("resource_id"),
+                source_task_ref.get("resource_id"),
+                employee_id,
+                capability_id,
+                int(canonical_job.get("priority", 50)),
+                float(resource_requirements.get("cpu_required", 0)),
+                int(resource_requirements.get("ram_mb_required", 0)),
+                int(resource_requirements.get("gpu_required", 0)),
+                int(resource_requirements.get("vram_mb_required", 0)),
+                json.dumps(scheduling.get("required_labels", {})),
+                json.dumps(
+                    {
+                        "canonical_job_ref": response["job_ref"],
+                        "source_task_ref": source_task_ref,
+                        "projection_id": projection_id,
+                        "work_payload": projection.get("payload", {}),
+                    }
+                ),
+                int(scheduling.get("max_attempts", 3)),
+                scheduling.get("not_before"),
+                timestamp,
+                timestamp,
+                timestamp,
+                CANONICAL_JOB_CONTRACT,
+                canonical_json(canonical_job),
+                canonical_revision,
+                canonical_json(organization_ref),
+                canonical_json(source_work_request_ref or {}),
+                canonical_json(source_workflow_definition_ref or {}),
+                canonical_json(source_workflow_revision_ref or {}),
+                canonical_json(source_task_ref),
+                canonical_json(source_projection_ref),
+                canonical_json(actor_context_ref),
+                canonical_json(authorization_decision_ref),
+                source_revision,
+                projection_id,
+            ),
+        )
+        db.execute(
+            """
+            INSERT INTO scheduler_projection_idempotency(
+                idempotency_key, projection_id, job_id, request_hash,
+                response_json, created_at
+            ) VALUES(?, ?, ?, ?, ?, ?)
+            """,
+            (
+                idempotency_key,
+                projection_id,
+                job_id,
+                fingerprint,
+                json.dumps(response),
+                timestamp,
+            ),
+        )
+
+    emit(
+        "scheduler_canonical_job_projection_accepted",
+        job_id=job_id,
+        details={
+            "projection_id": projection_id,
+            "record_origin": "canonical_work_projection",
+        },
+    )
+    return response
+
+
 @app.get("/jobs")
 def list_jobs(
     state: Optional[str] = None,
@@ -2484,6 +3020,54 @@ def list_jobs(
             }
             for row in rows
         ],
+    }
+
+
+@app.get("/v2/jobs/{job_id}/canonical")
+def get_canonical_job(
+    job_id: str,
+) -> dict[str, Any]:
+    with connect() as db:
+        row = db.execute(
+            """
+            SELECT *
+            FROM scheduler_jobs
+            WHERE job_id=?
+            """,
+            (job_id,),
+        ).fetchone()
+
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Job not found.",
+        )
+
+    view = canonical_job_view(row)
+    if view is None:
+        return {
+            "ok": True,
+            "canonical": False,
+            "job_id": job_id,
+            "record_origin": row["record_origin"],
+            "reason": (
+                "legacy Scheduler row has no complete canonical Job evidence"
+            ),
+        }
+
+    return {
+        "ok": True,
+        "canonical": True,
+        "record_origin": row["record_origin"],
+        "job": view,
+        "scheduler": {
+            "state": row["state"],
+            "attempt_count": row["attempt_count"],
+            "lease_id": row["lease_id"],
+            "lease_expires_at": row["lease_expires_at"],
+            "resource_state": row["resource_state"],
+            "not_before": row["not_before"],
+        },
     }
 
 

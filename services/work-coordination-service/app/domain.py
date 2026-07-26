@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Protocol
 
+import httpx
 from leos_contracts import ContractValidationError, validate_contract, validate_work_domain
 from leos_contracts.work_domain import TRANSITIONS
 
@@ -419,6 +420,96 @@ class UnavailableSchedulerProjectionAdapter:
 class UnavailableRuntimeHandoffAdapter:
     def request_assignment_handoff(self, handoff: dict[str, Any]) -> dict[str, Any]:
         raise DependencyUnavailableError("Persistent Runtime handoff adapter is unavailable")
+
+
+class HttpSchedulerProjectionAdapter:
+    """HTTP adapter to the Scheduler's canonical projection endpoint."""
+
+    def __init__(self, base_url: str, *, timeout: float = 10.0) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+
+    def request_job_projection(self, projection: dict[str, Any]) -> dict[str, Any]:
+        projection_id = str(projection.get("projection_id") or "")
+        payload = {
+            "actor_context_ref": projection.get("actor_context_ref"),
+            "authorization_decision_ref": projection.get("authorization_decision_ref"),
+            "idempotency_key": f"work-coordination:scheduler-projection:{projection_id}",
+            "projection": projection,
+        }
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(f"{self.base_url}/v2/job-projections", json=payload)
+        except Exception as exc:
+            raise DependencyUnavailableError(
+                f"Scheduler projection request failed: {exc}"
+            ) from exc
+        try:
+            body = response.json()
+        except Exception:
+            body = {"raw": response.text}
+        if response.status_code >= 500:
+            raise DependencyUnavailableError(
+                f"Scheduler projection authority unavailable: {response.status_code}"
+            )
+        if response.status_code >= 400:
+            return {
+                "status": "REJECTED",
+                "job_ref": None,
+                "scheduler_authority": "execution-scheduler-service",
+                "rejection": body,
+            }
+        return {
+            "status": body.get("status", "ACCEPTED"),
+            "job_ref": body.get("job_ref"),
+            "scheduler_authority": "execution-scheduler-service",
+            "scheduler_response": body,
+        }
+
+
+class HttpRuntimeHandoffAdapter:
+    """HTTP adapter to the Persistent Runtime's canonical handoff endpoint."""
+
+    def __init__(self, base_url: str, *, timeout: float = 10.0) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+
+    def request_assignment_handoff(self, handoff: dict[str, Any]) -> dict[str, Any]:
+        handoff_id = str(handoff.get("handoff_id") or "")
+        payload = {
+            "actor_context_ref": handoff.get("actor_context_ref"),
+            "authorization_decision_ref": handoff.get("authorization_decision_ref"),
+            "idempotency_key": f"work-coordination:assignment-handoff:{handoff_id}",
+            "handoff": handoff,
+        }
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(f"{self.base_url}/v2/assignment-handoffs", json=payload)
+        except Exception as exc:
+            raise DependencyUnavailableError(
+                f"Persistent Runtime handoff request failed: {exc}"
+            ) from exc
+        try:
+            body = response.json()
+        except Exception:
+            body = {"raw": response.text}
+        if response.status_code >= 500:
+            raise DependencyUnavailableError(
+                f"Persistent Runtime handoff authority unavailable: {response.status_code}"
+            )
+        if response.status_code >= 400:
+            return {
+                "status": "REJECTED",
+                "assignment_ref": None,
+                "runtime_authority": "persistent-employee-runtime-service",
+                "rejection": body,
+            }
+        return {
+            "status": body.get("status", "ACCEPTED"),
+            "assignment_ref": body.get("assignment_ref"),
+            "runtime_authority": "persistent-employee-runtime-service",
+            "runtime_response": body,
+        }
 
 
 class StaticSchedulerProjectionAdapter:

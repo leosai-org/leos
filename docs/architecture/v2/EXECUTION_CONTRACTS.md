@@ -14,6 +14,14 @@ The contracts cover:
 - the normalized result returned and audited by Execution Dispatcher;
 - reusable execution-plane correlation.
 
+Epic 8.4 additionally adopts the Epic 7 Work Domain target contracts at the
+execution-spine boundary: Scheduler accepts and serves canonical
+`leos.job-definition.v1` views through an additive projection adapter, and
+Persistent Runtime accepts and serves canonical `leos.work-assignment.v1`
+views through an additive handoff adapter. Those adapters do not transfer
+Scheduler Job authority or Runtime Assignment projection authority to Work
+Coordination.
+
 ## Authority boundaries
 
 Employee Cognitive Service creates a complete execution request but does not
@@ -42,6 +50,8 @@ Dispatcher -> Cognitive Service : normalized execution result
 | `leos.capability-resolution-request.v1` | `contracts/capability-resolution-request.v1.schema.json` | Dispatcher |
 | `leos.capability-resolution-result.v1` | `contracts/capability-resolution-result.v1.schema.json` | Capability Manager |
 | `leos.execution-result.v1` | `contracts/execution-result.v1.schema.json` | Execution Dispatcher |
+| `leos.job-definition.v1` | `contracts/job-definition.v1.schema.json` | Scheduler target-contract adapter |
+| `leos.work-assignment.v1` | `contracts/work-assignment.v1.schema.json` | Persistent Runtime target-contract adapter |
 
 All top-level objects are closed. Contract versions are exact constants.
 Identifiers in the correlation object are optional except for its contract
@@ -118,6 +128,13 @@ model reference.
 Dispatcher transport retry remains limited to the same authorized target.
 Provider/model re-resolution, model escalation, and validation-triggered
 escalation are separate and are not implemented by these schemas.
+
+Scheduler retry timing remains separate from Work Coordination Retry Intent,
+assignment/reassignment, escalation, Cognitive retry, Dispatcher same-target
+retry, and Capability Manager re-resolution. Runtime Assignment acceptance is
+explicit and cannot be inferred from a Scheduler Job, Scheduler lease, Work
+Coordination assignment decision, caller Boolean, Employee Registry legacy
+resolution, Team/Role membership, or capability declaration.
 
 ## Normalized outcomes
 
