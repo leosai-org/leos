@@ -15,6 +15,7 @@ CONTRACT_ROOT_ENV = "LEOS_CONTRACT_ROOT"
 SCHEMA_RESOURCES = (
     "trust-common.v1.schema.json",
     "organization-common.v1.schema.json",
+    "capability-plugin-common.v1.schema.json",
 )
 SUPPORTED_CONTRACTS = (
     "resource-identity.v1.schema.json",
@@ -36,6 +37,18 @@ SUPPORTED_CONTRACTS = (
     "membership.v1.schema.json",
     "position-occupancy.v1.schema.json",
     "organization-lifecycle-transition.v1.schema.json",
+    "capability-definition.v1.schema.json",
+    "tool-definition.v1.schema.json",
+    "plugin-definition.v1.schema.json",
+    "plugin-manifest.v1.schema.json",
+    "provider-definition.v1.schema.json",
+    "plugin-installation.v1.schema.json",
+    "plugin-activation.v1.schema.json",
+    "capability-profile.v1.schema.json",
+    "runtime-requirement.v1.schema.json",
+    "compatibility-evidence.v1.schema.json",
+    "permission-declaration.v1.schema.json",
+    "plugin-revocation.v1.schema.json",
     "execution-correlation.v1.schema.json",
     "execution.v1.schema.json",
     "capability-resolution-request.v1.schema.json",
@@ -68,6 +81,21 @@ CONTRACT_VERSIONS = {
     "leos.position-occupancy.v1": "position-occupancy.v1.schema.json",
     "leos.organization-lifecycle-transition.v1":
         "organization-lifecycle-transition.v1.schema.json",
+    "leos.capability-definition.v1":
+        "capability-definition.v1.schema.json",
+    "leos.tool-definition.v1": "tool-definition.v1.schema.json",
+    "leos.plugin-definition.v1": "plugin-definition.v1.schema.json",
+    "leos.plugin-manifest.v1": "plugin-manifest.v1.schema.json",
+    "leos.provider-definition.v1": "provider-definition.v1.schema.json",
+    "leos.plugin-installation.v1": "plugin-installation.v1.schema.json",
+    "leos.plugin-activation.v1": "plugin-activation.v1.schema.json",
+    "leos.capability-profile.v1": "capability-profile.v1.schema.json",
+    "leos.runtime-requirement.v1": "runtime-requirement.v1.schema.json",
+    "leos.compatibility-evidence.v1":
+        "compatibility-evidence.v1.schema.json",
+    "leos.permission-declaration.v1":
+        "permission-declaration.v1.schema.json",
+    "leos.plugin-revocation.v1": "plugin-revocation.v1.schema.json",
     "leos.execution-correlation.v1": "execution-correlation.v1.schema.json",
     "leos.execution.v1": "execution.v1.schema.json",
     "leos.capability-resolution-request.v1":
@@ -317,6 +345,20 @@ def validate_semantics(
         "position-occupancy.v1.schema.json": "POSITION_OCCUPANCY",
         "organization-lifecycle-transition.v1.schema.json":
             "ORGANIZATION_TRANSITION",
+        "capability-definition.v1.schema.json": "CAPABILITY",
+        "tool-definition.v1.schema.json": "TOOL",
+        "plugin-definition.v1.schema.json": "PLUGIN",
+        "plugin-manifest.v1.schema.json": "PLUGIN_MANIFEST",
+        "provider-definition.v1.schema.json": "PROVIDER",
+        "plugin-installation.v1.schema.json": "PLUGIN_INSTALLATION",
+        "plugin-activation.v1.schema.json": "PLUGIN_ACTIVATION",
+        "capability-profile.v1.schema.json": "CAPABILITY_PROFILE",
+        "runtime-requirement.v1.schema.json": "RUNTIME_REQUIREMENT",
+        "compatibility-evidence.v1.schema.json":
+            "COMPATIBILITY_EVIDENCE",
+        "permission-declaration.v1.schema.json":
+            "PERMISSION_DECLARATION",
+        "plugin-revocation.v1.schema.json": "PLUGIN_REVOCATION",
     }
     foundation_contracts = {
         "resource-identity.v1.schema.json",
@@ -932,6 +974,214 @@ def validate_semantics(
             add(
                 "$.rollback_behavior",
                 "non-DELETED rollback requires a governed compensating transition",
+            )
+
+    capability_plugin_names = {
+        "capability-definition.v1.schema.json",
+        "tool-definition.v1.schema.json",
+        "plugin-definition.v1.schema.json",
+        "plugin-manifest.v1.schema.json",
+        "provider-definition.v1.schema.json",
+        "plugin-installation.v1.schema.json",
+        "plugin-activation.v1.schema.json",
+        "capability-profile.v1.schema.json",
+        "runtime-requirement.v1.schema.json",
+        "compatibility-evidence.v1.schema.json",
+        "permission-declaration.v1.schema.json",
+        "plugin-revocation.v1.schema.json",
+    }
+    if name in capability_plugin_names:
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        state_evidence = document.get("state_evidence")
+        if isinstance(ownership, dict) and isinstance(state_evidence, dict):
+            equal_when_present(
+                state_evidence.get("transition_authority"),
+                ownership.get("lifecycle_authority"),
+                "$.state_evidence.transition_authority",
+                "state transition authority and lifecycle authority",
+            )
+            for field, evidence_field in (
+                ("installer_actor_context_ref", "actor_context_ref"),
+                ("activating_actor_context_ref", "actor_context_ref"),
+                ("actor_context_ref", "actor_context_ref"),
+                ("authorization_decision_ref",
+                 "authorization_decision_ref"),
+                ("approval_verification_refs",
+                 "approval_verification_refs"),
+            ):
+                if field in document:
+                    equal_when_present(
+                        document.get(field),
+                        state_evidence.get(evidence_field),
+                        f"$.{field}",
+                        f"{field} and state evidence",
+                    )
+        if isinstance(state_evidence, dict):
+            if "transitioned_at" in state_evidence:
+                validate_timestamp(
+                    state_evidence["transitioned_at"],
+                    "$.state_evidence.transitioned_at",
+                )
+            updated_at = (
+                identity.get("updated_at")
+                if isinstance(identity, dict)
+                else None
+            )
+            require_chronology(
+                updated_at,
+                state_evidence.get("transitioned_at"),
+                "$.state_evidence.transitioned_at",
+                "state transition must not precede the resource revision",
+            )
+
+    if name in {
+        "tool-definition.v1.schema.json",
+        "permission-declaration.v1.schema.json",
+    }:
+        side_effects = document.get("side_effects")
+        risk = document.get("risk_classification")
+        if isinstance(side_effects, dict):
+            effect = side_effects.get("effect")
+            reach = side_effects.get("reach")
+            reversibility = side_effects.get("reversibility")
+            accesses = side_effects.get("accesses")
+            if effect in {"NONE", "READ_ONLY"}:
+                if reversibility != "NOT_APPLICABLE":
+                    add(
+                        "$.side_effects.reversibility",
+                        "non-mutating operations require NOT_APPLICABLE",
+                    )
+                if "rollback_expectation" in side_effects:
+                    add(
+                        "$.side_effects.rollback_expectation",
+                        "non-mutating operations must not claim rollback",
+                    )
+            if effect == "NONE":
+                if reach != "NONE":
+                    add(
+                        "$.side_effects.reach",
+                        "an operation with no side effect must have NONE reach",
+                    )
+                if accesses:
+                    add(
+                        "$.side_effects.accesses",
+                        "an operation with no side effect must declare no access",
+                    )
+            if effect in {"MUTATING", "DESTRUCTIVE"} and reach == "NONE":
+                add(
+                    "$.side_effects.reach",
+                    "mutating operations must declare their side-effect reach",
+                )
+            if effect == "DESTRUCTIVE":
+                if risk not in {"HIGH", "CRITICAL"}:
+                    add(
+                        "$.risk_classification",
+                        "destructive operations must be HIGH or CRITICAL risk",
+                    )
+                if reversibility == "REVERSIBLE":
+                    add(
+                        "$.side_effects.reversibility",
+                        "destructive operations cannot claim full reversibility",
+                    )
+                if not side_effects.get("risk_justification"):
+                    add(
+                        "$.side_effects.risk_justification",
+                        "destructive operations require risk justification",
+                    )
+            if (
+                isinstance(accesses, list)
+                and "NETWORK" in accesses
+                and reach not in {"EXTERNAL", "LOCAL_AND_EXTERNAL"}
+            ):
+                add(
+                    "$.side_effects.reach",
+                    "network access requires external side-effect reach",
+                )
+            if (
+                reversibility == "IRREVERSIBLE"
+                and "rollback_expectation" in side_effects
+            ):
+                add(
+                    "$.side_effects.rollback_expectation",
+                    "irreversible operations cannot claim rollback",
+                )
+
+    if name == "plugin-definition.v1.schema.json":
+        publisher = document.get("publisher")
+        if (
+            isinstance(publisher, dict)
+            and publisher.get("principal_type") != "PUBLISHER"
+        ):
+            add(
+                "$.publisher.principal_type",
+                "plugin publisher must be a PUBLISHER principal",
+            )
+
+    if name == "plugin-manifest.v1.schema.json":
+        publisher = document.get("publisher")
+        if (
+            isinstance(publisher, dict)
+            and publisher.get("principal_type") != "PUBLISHER"
+        ):
+            add(
+                "$.publisher.principal_type",
+                "manifest publisher must be a PUBLISHER principal",
+            )
+
+    if name == "plugin-activation.v1.schema.json":
+        for field in ("effective_from", "effective_until"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("effective_from"),
+            document.get("effective_until"),
+            "$.effective_until",
+            "effective_until must be later than effective_from",
+            allow_equal=False,
+        )
+
+    if name == "compatibility-evidence.v1.schema.json":
+        for field in ("observed_at", "valid_until"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("observed_at"),
+            document.get("valid_until"),
+            "$.valid_until",
+            "valid_until must be later than observed_at",
+            allow_equal=False,
+        )
+        reasons = document.get("reasons")
+        if (
+            document.get("outcome") != "COMPATIBLE"
+            and isinstance(reasons, list)
+            and not reasons
+        ):
+            add(
+                "$.reasons",
+                "non-compatible evidence requires reasons",
+            )
+
+    if name == "plugin-revocation.v1.schema.json":
+        if "effective_at" in document:
+            validate_timestamp(document["effective_at"], "$.effective_at")
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        if isinstance(ownership, dict):
+            equal_when_present(
+                document.get("declaring_authority"),
+                ownership.get("lifecycle_authority"),
+                "$.declaring_authority",
+                "revocation declaring authority and lifecycle authority",
             )
 
     if name == "capability-resolution-request.v1.schema.json":

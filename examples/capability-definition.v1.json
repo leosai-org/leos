@@ -1,0 +1,65 @@
+{
+  "contract_version": "leos.capability-definition.v1",
+  "identity": {
+    "resource_type": "CAPABILITY",
+    "resource_id": "capability:web.search",
+    "display_name": "Web Search",
+    "revision": "sha256:capability-web-search-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:service:capability-manager", "principal_type": "SERVICE"},
+      "lifecycle_authority": {
+        "authority_id": "capability-manager",
+        "principal": {"principal_id": "principal:service:capability-manager", "principal_type": "SERVICE"},
+        "authority_revision": "architecture:v2"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:epic6", "revision": "sha256:actor-context-epic6"},
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization:capability:web-search:create",
+      "revision": "sha256:authorization-capability-create"
+    },
+    "audit_id": "audit:capability:web-search:v1",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "semantic_version": "1.0.0",
+  "description": "Search governed public web sources.",
+  "capability_class": "information.retrieval",
+  "input_contract_refs": [{
+    "contract_id": "web.search.input.v1",
+    "schema_ref": "https://example.invalid/contracts/web-search-input.v1.schema.json",
+    "revision": "sha256:web-search-input-v1"
+  }],
+  "output_contract_refs": [{
+    "contract_id": "web.search.output.v1",
+    "schema_ref": "https://example.invalid/contracts/web-search-output.v1.schema.json",
+    "revision": "sha256:web-search-output-v1"
+  }],
+  "risk_classification": "MODERATE",
+  "compatibility_constraint_refs": [{"resource_type": "RUNTIME_REQUIREMENT", "resource_id": "runtime-requirement:web-search", "revision": "sha256:runtime-requirement-web-search-v1"}],
+  "status": "ACTIVE",
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "capability-manager",
+      "principal": {"principal_id": "principal:service:capability-manager", "principal_type": "SERVICE"},
+      "authority_revision": "architecture:v2"
+    },
+    "actor_context_ref": {
+      "evidence_type": "ACTOR_CONTEXT",
+      "authority": {
+        "authority_id": "identity-authority",
+        "principal": {"principal_id": "principal:service:identity", "principal_type": "SERVICE"},
+        "authority_revision": "architecture:v2"
+      },
+      "reference_id": "actor-context:brett:epic6",
+      "revision": "sha256:actor-context-epic6"
+    },
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization:capability:web-search:create", "revision": "sha256:authorization-capability-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:capability:web-search:active", "revision": "sha256:event-capability-active"},
+    "transitioned_at": "2026-07-25T18:00:00Z"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "contract_version": "leos.plugin-activation.v1",
+  "identity": {
+    "resource_type": "PLUGIN_ACTIVATION",
+    "resource_id": "plugin-activation:acme:web-search:runtime-local",
+    "display_name": "Acme Web Search Activation",
+    "revision": "sha256:plugin-activation-acme-web-search-runtime-local-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:service:unassigned-plugin-activation-authority", "principal_type": "SERVICE"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:plugin-activation",
+        "principal": {"principal_id": "principal:service:unassigned-plugin-activation-authority", "principal_type": "SERVICE"},
+        "authority_revision": "OPEN"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:brett:epic6", "revision": "sha256:actor-context-epic6"},
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization:plugin-activation:web-search",
+      "revision": "sha256:authorization-plugin-activation-web-search"
+    },
+    "audit_id": "audit:plugin-activation:acme:web-search:runtime-local:v1",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "installation_ref": {"resource_type": "PLUGIN_INSTALLATION", "resource_id": "plugin-installation:acme:web-search:runtime-local", "revision": "sha256:plugin-installation-acme-web-search-runtime-local-v1"},
+  "target_scope": {"resource_type": "RUNTIME", "resource_id": "runtime:acme:local", "revision": "sha256:runtime-acme-local-v1"},
+  "status": "ACTIVE",
+  "effective_from": "2026-07-25T18:00:00Z",
+  "effective_until": "2026-08-25T18:00:00Z",
+  "activating_actor_context_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {"principal_id": "principal:service:identity", "principal_type": "SERVICE"},
+      "authority_revision": "architecture:v2"
+    },
+    "reference_id": "actor-context:brett:epic6",
+    "revision": "sha256:actor-context-epic6"
+  },
+  "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization:plugin-activation:web-search", "revision": "sha256:authorization-plugin-activation-web-search"},
+  "approval_verification_refs": [{"resource_type": "APPROVAL_VERIFICATION", "resource_id": "approval-verification:plugin-activation:web-search", "revision": "sha256:approval-verification-plugin-activation-web-search"}],
+  "compatibility_evidence_refs": [{"resource_type": "COMPATIBILITY_EVIDENCE", "resource_id": "compatibility:acme:web-search:runtime-local", "revision": "sha256:compatibility-acme-web-search-runtime-local-v1"}],
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:plugin-activation",
+      "principal": {"principal_id": "principal:service:unassigned-plugin-activation-authority", "principal_type": "SERVICE"},
+      "authority_revision": "OPEN"
+    },
+    "actor_context_ref": {
+      "evidence_type": "ACTOR_CONTEXT",
+      "authority": {
+        "authority_id": "identity-authority",
+        "principal": {"principal_id": "principal:service:identity", "principal_type": "SERVICE"},
+        "authority_revision": "architecture:v2"
+      },
+      "reference_id": "actor-context:brett:epic6",
+      "revision": "sha256:actor-context-epic6"
+    },
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization:plugin-activation:web-search", "revision": "sha256:authorization-plugin-activation-web-search"},
+    "approval_verification_refs": [{"resource_type": "APPROVAL_VERIFICATION", "resource_id": "approval-verification:plugin-activation:web-search", "revision": "sha256:approval-verification-plugin-activation-web-search"}],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:plugin-activation:web-search:active", "revision": "sha256:event-plugin-activation-active"},
+    "transitioned_at": "2026-07-25T18:00:00Z"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "contract_version": "leos.plugin-definition.v1",
+  "identity": {
+    "resource_type": "PLUGIN",
+    "resource_id": "plugin:acme:web-search",
+    "display_name": "Acme Web Search Plugin",
+    "revision": "sha256:plugin-acme-web-search-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+      "creator": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+      "steward": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:plugin-definition",
+        "principal": {"principal_id": "principal:service:unassigned-plugin-definition-authority", "principal_type": "SERVICE"},
+        "authority_revision": "OPEN"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:publisher:epic6", "revision": "sha256:actor-context-publisher-epic6"},
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization:plugin:web-search:create",
+      "revision": "sha256:authorization-plugin-create"
+    },
+    "audit_id": "audit:plugin:acme:web-search:v1",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "semantic_version": "1.0.0",
+  "category": "THIRD_PARTY",
+  "publisher": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+  "artifact_ref": {"resource_type": "ARTIFACT", "resource_id": "artifact:plugin:acme:web-search:1.0.0", "revision": "sha256:artifact-acme-web-search-1-0-0"},
+  "manifest_ref": {"resource_type": "PLUGIN_MANIFEST", "resource_id": "plugin-manifest:acme:web-search:1.0.0", "revision": "sha256:plugin-manifest-acme-web-search-v1"},
+  "provided_tool_refs": [{"resource_type": "TOOL", "resource_id": "tool:acme:web-search", "revision": "sha256:tool-acme-web-search-v1"}],
+  "declared_capability_refs": [{"resource_type": "CAPABILITY", "resource_id": "capability:web.search", "revision": "sha256:capability-web-search-v1"}],
+  "runtime_requirement_refs": [{"resource_type": "RUNTIME_REQUIREMENT", "resource_id": "runtime-requirement:web-search", "revision": "sha256:runtime-requirement-web-search-v1"}],
+  "dependencies": [],
+  "permission_declaration_refs": [{"resource_type": "PERMISSION_DECLARATION", "resource_id": "permission-declaration:acme:web-search", "revision": "sha256:permission-declaration-acme-web-search-v1"}],
+  "provenance_refs": [{
+    "authority": {
+      "authority_id": "OPEN:plugin-publishing",
+      "principal": {"principal_id": "principal:service:unassigned-plugin-publishing-authority", "principal_type": "SERVICE"},
+      "authority_revision": "OPEN"
+    },
+    "reference_id": "provenance:plugin:acme:web-search:1.0.0",
+    "revision": "sha256:provenance-plugin-acme-web-search-v1"
+  }],
+  "artifact_trust_evidence_refs": [{"resource_type": "ARTIFACT_TRUST_EVIDENCE", "resource_id": "artifact-trust:plugin:acme:web-search:1.0.0", "revision": "sha256:artifact-trust-acme-web-search-v1"}],
+  "installation_compatibility_refs": [{"resource_type": "RUNTIME_REQUIREMENT", "resource_id": "runtime-requirement:web-search", "revision": "sha256:runtime-requirement-web-search-v1"}],
+  "status": "PUBLISHED",
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:plugin-definition",
+      "principal": {"principal_id": "principal:service:unassigned-plugin-definition-authority", "principal_type": "SERVICE"},
+      "authority_revision": "OPEN"
+    },
+    "actor_context_ref": {
+      "evidence_type": "ACTOR_CONTEXT",
+      "authority": {
+        "authority_id": "identity-authority",
+        "principal": {"principal_id": "principal:service:identity", "principal_type": "SERVICE"},
+        "authority_revision": "architecture:v2"
+      },
+      "reference_id": "actor-context:publisher:epic6",
+      "revision": "sha256:actor-context-publisher-epic6"
+    },
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization:plugin:web-search:create", "revision": "sha256:authorization-plugin-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:plugin:web-search:published", "revision": "sha256:event-plugin-published"},
+    "transitioned_at": "2026-07-25T18:00:00Z"
+  }
+}

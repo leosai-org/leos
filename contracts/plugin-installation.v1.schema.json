@@ -1,0 +1,6 @@
+{
+  "$id": "https://leosai.org/contracts/plugin-installation.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Plugin Installation v1",
+  "$ref": "https://leosai.org/contracts/capability-plugin-common.v1.schema.json#/$defs/pluginInstallationDocument"
+}

@@ -1,0 +1,74 @@
+{
+  "contract_version": "leos.compatibility-evidence.v1",
+  "identity": {
+    "resource_type": "COMPATIBILITY_EVIDENCE",
+    "resource_id": "compatibility:acme:web-search:runtime-local",
+    "display_name": "Web Search Runtime Compatibility Observation",
+    "revision": "sha256:compatibility-acme-web-search-runtime-local-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:service:runtime-observer", "principal_type": "SERVICE"},
+      "steward": {"principal_id": "principal:service:runtime-observer", "principal_type": "SERVICE"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:runtime-compatibility-observation",
+        "principal": {"principal_id": "principal:service:unassigned-runtime-observation-authority", "principal_type": "SERVICE"},
+        "authority_revision": "OPEN"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:runtime-observer:epic6", "revision": "sha256:actor-context-runtime-observer-epic6"},
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization:compatibility:observe",
+      "revision": "sha256:authorization-compatibility-observe"
+    },
+    "audit_id": "audit:compatibility:acme:web-search:runtime-local:v1",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "requirement_ref": {"resource_type": "RUNTIME_REQUIREMENT", "resource_id": "runtime-requirement:web-search", "revision": "sha256:runtime-requirement-web-search-v1"},
+  "target_scope": {"resource_type": "RUNTIME", "resource_id": "runtime:acme:local", "revision": "sha256:runtime-acme-local-v1"},
+  "observer": {
+    "authority_id": "OPEN:runtime-compatibility-observation",
+    "principal": {"principal_id": "principal:service:unassigned-runtime-observation-authority", "principal_type": "SERVICE"},
+    "authority_revision": "OPEN"
+  },
+  "observed_facts": {
+    "operating_system": "LINUX",
+    "cpu_architecture": "X86_64",
+    "runtime_types": ["oci-container"],
+    "cpu_cores": 8,
+    "ram_bytes": 17179869184,
+    "storage_bytes": 107374182400,
+    "gpu_present": false,
+    "gpu_memory_bytes": 0,
+    "network_available": true,
+    "available_secret_reference_ids": []
+  },
+  "outcome": "COMPATIBLE",
+  "reasons": [],
+  "authoritative": false,
+  "observed_at": "2026-07-25T18:00:00Z",
+  "valid_until": "2026-07-26T18:00:00Z",
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:runtime-compatibility-observation",
+      "principal": {"principal_id": "principal:service:unassigned-runtime-observation-authority", "principal_type": "SERVICE"},
+      "authority_revision": "OPEN"
+    },
+    "actor_context_ref": {
+      "evidence_type": "ACTOR_CONTEXT",
+      "authority": {
+        "authority_id": "identity-authority",
+        "principal": {"principal_id": "principal:service:identity", "principal_type": "SERVICE"},
+        "authority_revision": "architecture:v2"
+      },
+      "reference_id": "actor-context:runtime-observer:epic6",
+      "revision": "sha256:actor-context-runtime-observer-epic6"
+    },
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization:compatibility:observe", "revision": "sha256:authorization-compatibility-observe"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:compatibility:acme:web-search:compatible", "revision": "sha256:event-compatibility-compatible"},
+    "transitioned_at": "2026-07-25T18:00:00Z"
+  }
+}

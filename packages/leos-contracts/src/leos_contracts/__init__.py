@@ -7,11 +7,13 @@ from .validation import (
     validate_contract,
 )
 from .organization import validate_organization_domain
+from .capability_plugin import validate_capability_plugin_domain
 
 __all__ = [
     "ContractValidationError",
     "ContractRootError",
     "ValidationIssue",
     "validate_contract",
+    "validate_capability_plugin_domain",
     "validate_organization_domain",
 ]

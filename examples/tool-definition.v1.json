@@ -1,0 +1,84 @@
+{
+  "contract_version": "leos.tool-definition.v1",
+  "identity": {
+    "resource_type": "TOOL",
+    "resource_id": "tool:acme:web-search",
+    "display_name": "Acme Web Search Tool",
+    "revision": "sha256:tool-acme-web-search-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+      "creator": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+      "steward": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+      "lifecycle_authority": {
+        "authority_id": "OPEN:tool-definition",
+        "principal": {"principal_id": "principal:service:unassigned-tool-authority", "principal_type": "SERVICE"},
+        "authority_revision": "OPEN"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:publisher:epic6", "revision": "sha256:actor-context-publisher-epic6"},
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization:tool:web-search:create",
+      "revision": "sha256:authorization-tool-create"
+    },
+    "audit_id": "audit:tool:acme:web-search:v1",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "semantic_version": "1.0.0",
+  "package_owner_ref": {"resource_type": "PLUGIN", "resource_id": "plugin:acme:web-search", "revision": "sha256:plugin-acme-web-search-v1"},
+  "provided_capability_refs": [{"resource_type": "CAPABILITY", "resource_id": "capability:web.search", "revision": "sha256:capability-web-search-v1"}],
+  "input_contract_ref": {
+    "contract_id": "web.search.input.v1",
+    "schema_ref": "https://example.invalid/contracts/web-search-input.v1.schema.json",
+    "revision": "sha256:web-search-input-v1"
+  },
+  "output_contract_ref": {
+    "contract_id": "web.search.output.v1",
+    "schema_ref": "https://example.invalid/contracts/web-search-output.v1.schema.json",
+    "revision": "sha256:web-search-output-v1"
+  },
+  "side_effects": {
+    "effect": "READ_ONLY",
+    "reach": "EXTERNAL",
+    "reversibility": "NOT_APPLICABLE",
+    "accesses": ["NETWORK"],
+    "risk_justification": "The operation reads public external sources and does not mutate them."
+  },
+  "risk_classification": "MODERATE",
+  "idempotency": "IDEMPOTENT",
+  "timeout_seconds": 30,
+  "cancellation": "BEST_EFFORT",
+  "runtime_requirement_refs": [{"resource_type": "RUNTIME_REQUIREMENT", "resource_id": "runtime-requirement:web-search", "revision": "sha256:runtime-requirement-web-search-v1"}],
+  "artifact_trust_requirement_refs": [{
+    "authority": {
+      "authority_id": "artifact-trust-authority",
+      "principal": {"principal_id": "principal:service:artifact-trust", "principal_type": "SERVICE"},
+      "authority_revision": "architecture:v2"
+    },
+    "reference_id": "trust-policy:plugins:default",
+    "revision": "sha256:trust-policy-plugins-default"
+  }],
+  "status": "ACTIVE",
+  "state_evidence": {
+    "transition_authority": {
+      "authority_id": "OPEN:tool-definition",
+      "principal": {"principal_id": "principal:service:unassigned-tool-authority", "principal_type": "SERVICE"},
+      "authority_revision": "OPEN"
+    },
+    "actor_context_ref": {
+      "evidence_type": "ACTOR_CONTEXT",
+      "authority": {
+        "authority_id": "identity-authority",
+        "principal": {"principal_id": "principal:service:identity", "principal_type": "SERVICE"},
+        "authority_revision": "architecture:v2"
+      },
+      "reference_id": "actor-context:publisher:epic6",
+      "revision": "sha256:actor-context-publisher-epic6"
+    },
+    "authorization_decision_ref": {"resource_type": "AUTHORIZATION_DECISION", "resource_id": "authorization:tool:web-search:create", "revision": "sha256:authorization-tool-create"},
+    "approval_verification_refs": [],
+    "event_ref": {"resource_type": "EVENT", "resource_id": "event:tool:web-search:active", "revision": "sha256:event-tool-active"},
+    "transitioned_at": "2026-07-25T18:00:00Z"
+  }
+}

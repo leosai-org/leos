@@ -73,6 +73,16 @@ cost, latency, capacity, or capability strength.
 The standalone Provider Registry is not a future peer authority. Its useful
 metadata is a migration input to the Capability Manager provider inventory.
 
+Epic 6.0 defines `leos.provider-definition.v1` as the target Provider inventory
+shape and `leos.runtime-requirement.v1` /
+`leos.compatibility-evidence.v1` as requirement and observation shapes.
+Compatibility Evidence is explicitly non-authoritative. The current
+Capability Manager has not adopted the target Provider contract, and
+observation ownership/freshness remain **OPEN**. Plugin Installation,
+Activation, Capability Profiles, and compatibility observations cannot create
+ranking, eligibility, resolution, model binding, runtime activation, or
+invocation authority.
+
 ## 3. Model identity
 
 A normalized model identity denotes the model independently of any one serving

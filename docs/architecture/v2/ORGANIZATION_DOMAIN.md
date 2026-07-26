@@ -384,6 +384,14 @@ Epic 5.0 does not establish:
 - cloud permission; or
 - budget authority.
 
+Epic 6.0 adds an Organization-scoped Capability Profile target contract, but
+does not resolve these policy questions. Organization, Team, Employee, and
+Runtime profiles retain separate exact scope and Organization references.
+They express requirements, prohibitions, set-like preferences, risk limits,
+runtime constraints, and policy references only. They do not grant
+permission, satisfy approval, establish a new ranking scope, select a
+provider, resolve a capability, activate a Plugin, or invoke work.
+
 The accepted ranking precedence remains:
 
 ```text

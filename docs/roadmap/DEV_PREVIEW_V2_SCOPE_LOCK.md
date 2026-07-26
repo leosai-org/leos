@@ -157,6 +157,13 @@ Required outcome:
 The public Plugin layer is mandatory. Hosted marketplace billing, entitlement,
 fraud, and private moderation are not.
 
+Epic 6.0 establishes the logical Plugin Definition, Manifest, Installation,
+Activation, Runtime Requirement, Compatibility Evidence, Permission
+Declaration, dependency, revocation, and conformance contracts. It does not
+satisfy the remaining production SDK, publishing, installer, activation,
+update/rollback/removal, runtime isolation, or health lifecycle gates. Those
+owners remain **OPEN**.
+
 ### 6. Capability grants and permissions
 
 Required outcome:
@@ -171,6 +178,11 @@ Required outcome:
 
 Capability presence never implies permission.
 
+Epic 6.0 defines Permission Declarations as requests and Capability Profiles
+as non-authoritative constraints/preferences. It does not implement the
+default-deny permission grant issuer, verifier, revocation, delegation, or
+enforcement authority required by this gate.
+
 ### 7. Governed Tool operations
 
 Required outcome:
@@ -184,6 +196,11 @@ Required outcome:
 - Dispatcher invocation, result normalization, redaction, and audit.
 
 No separate Tool Runtime may become a peer invocation authority.
+
+Epic 6.0 defines the canonical Tool identity/operation target contract and
+fail-closed risk/side-effect conformance. Tool catalog ownership, Dispatcher
+adapter integration, sandbox enforcement, and production ingestion remain
+**OPEN**.
 
 ### 8. Verifiable approvals
 

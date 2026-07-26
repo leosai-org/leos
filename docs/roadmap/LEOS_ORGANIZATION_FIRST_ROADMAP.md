@@ -544,6 +544,35 @@ collaboration, Employee v2-to-v3 migration, and employee-to-job selection
 remain **OPEN**. The Public Assignment Service remains
 **CONFLICTING / INVESTIGATE**.
 
+## Epic 6.0 — Capability, Plugin, and Tool Domain Foundation
+
+Epic 6.0 establishes the logical contract foundation for Capability, Tool,
+Plugin Definition, Plugin Manifest, Provider Definition, Plugin Installation,
+Plugin Activation, Capability Profile, Runtime Requirement, Compatibility
+Evidence, Permission Declaration, dependency/version relationships, and
+Plugin ecosystem revocation.
+
+Canonical outputs are:
+
+- `../architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN.md`;
+- `../architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN_DECISIONS.md`;
+- target contracts and examples under `../../contracts/` and
+  `../../examples/`; and
+- deterministic, non-authoritative cross-record conformance validation.
+
+Capability Manager remains capability/provider inventory and resolution
+authority. Dispatcher remains sole invocation authority. Artifact Trust,
+Authorization, Approval, Secret, Model Registry, Scheduler, Persistent
+Runtime, Cognitive Service, and Organization Domain boundaries remain
+separate.
+
+Epic 6.0 does not implement a production Plugin service, publisher, SDK,
+installer, activator, updater, marketplace, package manager, runtime
+supervisor, provider integration, sandbox, UI, migration, or database.
+Definition/Manifest publishing, installation, activation, dependency
+resolution, revocation, Tool catalog, runtime compatibility observation, and
+Capability Profile production owners remain **OPEN**.
+
 ## Phase 5.0 — Non-authoritative Intelligence Test Fixture
 
 The detailed implementation roadmap established after the Phase 3 scope lock
@@ -633,6 +662,11 @@ interfaces, permission declarations, isolation policy, health, audit, and
 local package support. It does not require any particular proprietary
 connector, hosted marketplace, billing system, third-party model weight, or
 cloud service.
+
+Epic 6.0 supplies the logical manifest and lifecycle target contracts and
+reference conformance. The production public SDK, install/activation/update/
+rollback/removal path, runtime isolation, and accepted owners remain required
+follow-on work; schema validity is not installation or activation authority.
 
 ## Required plugin functions
 

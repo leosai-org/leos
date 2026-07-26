@@ -9,6 +9,14 @@ first-ranked-valid selection, and canonical resolution audit.
 It does not invoke providers, adapt payloads, own execution history, or own
 model-provider/runtime bindings.
 
+`leos.capability-definition.v1` and `leos.provider-definition.v1` are the
+accepted Epic 6.0 target inventory contracts. The current service-local
+provider/capability API and database have not adopted them in this Epic.
+Migration, endpoint compatibility, installed Plugin ingestion, and rollback
+require a separate implementation package. Plugin Manifest, Installation,
+Activation, Permission Declaration, Capability Profile, and Compatibility
+Evidence never register or authorize themselves merely by existing.
+
 ## Canonical API
 
 Inventory APIs remain:

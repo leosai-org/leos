@@ -1,0 +1,65 @@
+{
+  "contract_version": "leos.artifact-trust-evidence.v1",
+  "identity": {
+    "resource_type": "ARTIFACT_TRUST_EVIDENCE",
+    "resource_id": "artifact-trust:plugin:acme:web-search:1.0.0",
+    "display_name": "Trust Evidence for Acme Web Search 1.0.0",
+    "revision": "sha256:artifact-trust-acme-web-search-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:service:artifact-trust", "principal_type": "SERVICE"},
+      "steward": {"principal_id": "principal:service:artifact-trust", "principal_type": "SERVICE"},
+      "lifecycle_authority": {
+        "authority_id": "artifact-trust-authority",
+        "principal": {"principal_id": "principal:service:artifact-trust", "principal_type": "SERVICE"},
+        "authority_revision": "architecture:v2"
+      }
+    },
+    "creation_actor_context_ref": {"resource_type": "ACTOR_CONTEXT", "resource_id": "actor-context:artifact-trust:epic6", "revision": "sha256:actor-context-artifact-trust-epic6"},
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization:artifact-trust:verify",
+      "revision": "sha256:authorization-artifact-trust-verify"
+    },
+    "audit_id": "audit:artifact-trust:acme:web-search:v1",
+    "created_at": "2026-07-25T18:00:00Z",
+    "updated_at": "2026-07-25T18:00:00Z"
+  },
+  "artifact_ref": {"resource_type": "ARTIFACT", "resource_id": "artifact:plugin:acme:web-search:1.0.0", "revision": "sha256:artifact-acme-web-search-1-0-0"},
+  "artifact_version": "1.0.0",
+  "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "publisher": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+  "signatures": [{
+    "signer": {"principal_id": "principal:publisher:acme-labs", "principal_type": "PUBLISHER"},
+    "algorithm": "REFERENCE_ONLY",
+    "key_ref": "key-ref:publisher:acme-labs",
+    "signature_ref": "signature-ref:plugin:acme:web-search:1.0.0"
+  }],
+  "provenance_refs": [{
+    "authority": {
+      "authority_id": "OPEN:plugin-publishing",
+      "principal": {"principal_id": "principal:service:unassigned-plugin-publishing-authority", "principal_type": "SERVICE"},
+      "authority_revision": "OPEN"
+    },
+    "reference_id": "provenance:plugin:acme:web-search:1.0.0",
+    "revision": "sha256:provenance-plugin-acme-web-search-v1"
+  }],
+  "trust_policy_ref": {
+    "authority": {
+      "authority_id": "artifact-trust-authority",
+      "principal": {"principal_id": "principal:service:artifact-trust", "principal_type": "SERVICE"},
+      "authority_revision": "architecture:v2"
+    },
+    "reference_id": "trust-policy:plugins:default",
+    "revision": "sha256:trust-policy-plugins-default"
+  },
+  "verifier": {
+    "authority_id": "artifact-trust-authority",
+    "principal": {"principal_id": "principal:service:artifact-trust", "principal_type": "SERVICE"},
+    "authority_revision": "architecture:v2"
+  },
+  "outcome": "TRUSTED",
+  "reasons": [],
+  "verified_at": "2026-07-25T18:00:00Z",
+  "valid_until": "2026-08-25T18:00:00Z"
+}

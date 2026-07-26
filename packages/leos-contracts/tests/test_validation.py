@@ -197,6 +197,29 @@ class ValidationApiTests(unittest.TestCase):
         ):
             self.assertIsNone(validate_contract(contract, self.example(example)))
 
+    def test_capability_plugin_domain_contract_examples_validate(self):
+        for contract, example in (
+            ("leos.capability-definition.v1", "capability-definition.v1.json"),
+            ("leos.tool-definition.v1", "tool-definition.v1.json"),
+            ("leos.plugin-definition.v1", "plugin-definition.v1.json"),
+            ("leos.plugin-manifest.v1", "plugin-manifest.v1.json"),
+            ("leos.provider-definition.v1", "provider-definition.v1.json"),
+            ("leos.plugin-installation.v1", "plugin-installation.v1.json"),
+            ("leos.plugin-activation.v1", "plugin-activation.v1.json"),
+            ("leos.capability-profile.v1", "capability-profile.v1.json"),
+            ("leos.runtime-requirement.v1", "runtime-requirement.v1.json"),
+            (
+                "leos.compatibility-evidence.v1",
+                "compatibility-evidence.v1.json",
+            ),
+            (
+                "leos.permission-declaration.v1",
+                "permission-declaration.v1.json",
+            ),
+            ("leos.plugin-revocation.v1", "plugin-revocation.v1.json"),
+        ):
+            self.assertIsNone(validate_contract(contract, self.example(example)))
+
     def test_undefined_effective_ranking_has_no_source_authority(self):
         value = {
             "contract_version": "leos.effective-ranking-result.v1",

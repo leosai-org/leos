@@ -320,12 +320,20 @@ intelligence authorities without creating peers.
 
 ### G-05 — Plugin manifest, SDK, trust, dependencies, lifecycle, and isolation
 
-- **Classification:** **Documentation Only / Missing** in Core;
+- **Classification:** **Partially Implemented** in Core;
   **Lucy Donor Evidence Only / Conflicting Authority**.
-- **Current evidence:** Repository and license documents require a public
-  plugin/adapter SDK and manifest direction, but no canonical Core plugin
-  contract or SDK is present.
-- **Authoritative files:** `docs/architecture/REPOSITORY_ARCHITECTURE.md`,
+- **Current evidence:** Epic 6.0 defines canonical Plugin Definition, Manifest,
+  Installation, Activation, Runtime Requirement, Compatibility Evidence,
+  Permission Declaration, dependency, revocation, examples, and deterministic
+  non-authoritative conformance. No production SDK, publisher, installer,
+  activator, updater, runtime supervisor, or isolation boundary exists.
+- **Authoritative files:** `docs/architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN.md`,
+  `docs/architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN_DECISIONS.md`,
+  `contracts/plugin-definition.v1.schema.json`,
+  `contracts/plugin-manifest.v1.schema.json`,
+  `contracts/plugin-installation.v1.schema.json`,
+  `contracts/plugin-activation.v1.schema.json`,
+  `docs/architecture/REPOSITORY_ARCHITECTURE.md`,
   `docs/legal/LICENSE_BOUNDARIES.md`, and
   `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`.
 - **Lucy donor evidence:** `../lucy-runtime-reference/plugin-platform-service/app/main.py`
@@ -336,18 +344,19 @@ intelligence authorities without creating peers.
   is a donor manifest;
   `../lucy-runtime-reference/module-registry/app.py` independently registers,
   scans, enables, disables, and removes modules.
-- **Missing contracts:** Manifest and package envelope; plugin/runtime
-  identity; declared capabilities/tools/providers; configuration schema;
-  required secrets and permissions; dependencies; compatibility; trust and
-  signature verification; installed instance; enabled state; health;
-  update/rollback/remove; data ownership; isolation profile.
+- **Missing contracts:** Generic Artifact/package envelope; publication and
+  installed-data ownership; production transition/apply protocol; update,
+  rollback, removal, health, runtime-instance, and isolation enforcement;
+  dependency lock/acquisition; SDK compatibility promise.
 - **Missing services:** Canonical local Plugin Manager/installer and public
   SDK validation tooling. A hosted marketplace backend is not required in
   Core.
-- **Missing tests:** Manifest compatibility; cryptographic verification;
-  dependency graph and cycles; archive safety; least-privilege install;
-  enable/disable; failed update rollback; data retention/removal; offline
-  behavior; runtime isolation; capability registration/revocation.
+- **Missing tests:** Production cryptographic verification, archive safety,
+  least-privilege installation, enable/disable, failed update rollback, data
+  retention/removal, offline behavior, runtime isolation, and canonical
+  capability/provider ingestion. Epic 6.0 covers schema/linkage,
+  dependency/version/cycle, trust-reference, compatibility, scope,
+  revocation, and hidden-permission negative conformance.
 - **Dependencies:** Publishing, capability declarations, grants, Tool
   contracts, secrets, approval, sandbox, installer, Model Registry, and
   Dispatcher adapters.
@@ -365,13 +374,18 @@ intelligence authorities without creating peers.
 ### G-06 — Capability grants, permissions, revocation, and audit
 
 - **Classification:** Capability inventory/resolution is **Implemented**;
-  grants and permissions are **Missing**; Lucy is **Conflicting Authority**.
+  declaration/profile shapes are **Partially Implemented**; grants and
+  permission enforcement are **Missing**; Lucy is **Conflicting Authority**.
 - **Current evidence:** Capability Manager governs provider inventory,
   bindings, eligibility, and resolution. Employee definitions contain
   permission-shaped data, but no canonical subject/resource/action grant
   lifecycle or verifier exists.
 - **Authoritative files:** `docs/architecture/v2/CAPABILITY_MANAGER_CONFORMANCE.md`,
+  `docs/architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN.md`,
   `services/capability-manager-service/app/main.py`,
+  `contracts/capability-definition.v1.schema.json`,
+  `contracts/capability-profile.v1.schema.json`,
+  `contracts/permission-declaration.v1.schema.json`,
   `contracts/capability-resolution-request.v1.schema.json`,
   `contracts/capability-resolution-result.v1.schema.json`, and
   `contracts/employee-definition.v2.schema.json`.
@@ -380,7 +394,7 @@ intelligence authorities without creating peers.
   `../lucy-runtime-reference/tool-runtime-service/app/main.py` each derive or
   expose capability state. Plugin installation also registers capabilities
   into multiple registries.
-- **Missing contracts:** Capability declaration versus runtime inventory;
+- **Missing contracts:** Production declaration/installed-inventory ingestion;
   grant subject/scope/action; issuer; policy and approval references;
   effective time and expiry; revocation; delegation; decision evidence;
   employee/workflow/team binding; audit events.
@@ -404,13 +418,17 @@ intelligence authorities without creating peers.
 
 ### G-07 — Tool identity, schemas, side effects, idempotency, and dispatch
 
-- **Classification:** **Missing** in Core; **Lucy Donor Evidence Only /
+- **Classification:** **Partially Implemented** in Core; **Lucy Donor Evidence Only /
   Conflicting Authority**.
-- **Current evidence:** Canonical execution contracts can carry governed
-  invocations, and Dispatcher is the sole invocation authority, but no
-  first-class Tool definition or operation contract was found.
+- **Current evidence:** Epic 6.0 adds a first-class Tool Definition target
+  contract with capability, schema, side-effect, risk, idempotency, timeout,
+  cancellation, runtime, and trust declarations. Dispatcher remains sole
+  invocation authority. Tool catalog ownership and production adapter
+  integration remain absent.
 - **Authoritative files:** `docs/architecture/v2/EXECUTION_PLANE.md`,
   `docs/architecture/v2/EXECUTION_PLANE_DECISIONS.md`,
+  `docs/architecture/v2/CAPABILITY_PLUGIN_AND_TOOL_DOMAIN.md`,
+  `contracts/tool-definition.v1.schema.json`,
   `contracts/execution.v1.schema.json`, and
   `services/execution-dispatcher-service/app/main.py`.
 - **Lucy donor evidence:** `../lucy-runtime-reference/tool-runtime-service/app/main.py`
@@ -418,10 +436,9 @@ intelligence authorities without creating peers.
   checks, adapter discovery, and direct `/execute` calls.
   `../lucy-runtime-reference/adapter-manager/app.py` is another direct
   invocation layer.
-- **Missing contracts:** Tool and operation identity; version; input/output
-  JSON Schemas; capability link; side-effect/risk class; idempotency support;
-  timeout/cancellation; required permissions/secrets; provider adaptation;
-  normalized result and error mapping; audit/redaction policy.
+- **Missing contracts:** Tool catalog lifecycle/ingestion, operation-to-
+  permission linkage, sandbox enforcement, provider adaptation, normalized
+  Tool-specific result/error mapping, and audit/redaction policy.
 - **Missing services:** Tool catalog/declaration authority and Dispatcher
   adapters. A separate normal-path Tool Runtime must not become a second
   invocation authority.
@@ -957,13 +974,18 @@ reasoner, resolver, invoker, scheduler, or transport selector.
 
 ### Extension and governance plane
 
-8. **Epic 3.6 — Plugin Contract and Public SDK**
-   - Manifest, declarations, configuration, compatibility, trust,
-     dependencies, and validation.
+8. **Epic 3.6 / Epic 6.0 — Plugin Contract Foundation and Public SDK**
+   - Epic 6.0 establishes Manifest, definition, installation/activation,
+     declarations, compatibility, trust linkage, dependencies, revocation,
+     and non-authoritative validation. The public SDK and production lifecycle
+     remain.
 9. **Epic 3.7 — Capability Grants and Permission Authority**
    - Separate declaration/inventory/grant/eligibility/resolution.
-10. **Epic 3.8 — Tool Contract and Dispatcher Adapter Boundary**
-   - Tool operations, schemas, side effects, idempotency, results, and audit.
+10. **Epic 3.8 / Epic 6.0 — Tool Contract and Dispatcher Adapter Boundary**
+   - Epic 6.0 establishes Tool identity, schemas, side effects, risk,
+     idempotency, timeout, cancellation, and runtime/trust requirements.
+     Catalog ownership, Dispatcher adapters, results, and audit integration
+     remain.
 11. **Epic 3.9 — Durable Verifiable Approval Authority**
     - Implement the accepted authenticated scoped grant, verification, expiry,
       revocation, and use boundaries.

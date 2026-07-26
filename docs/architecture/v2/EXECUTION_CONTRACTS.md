@@ -200,6 +200,14 @@ include words such as `token` or `key`; those payloads remain subject to their
 capability contracts and runtime secret-redaction controls. The execution
 contract does not treat such field names as credential authority.
 
+Epic 6.0 Tool, Plugin, Provider, Installation, Activation, Permission,
+Compatibility, and Capability Profile contracts are definition/configuration
+inputs only. A Tool Definition does not authorize invocation. Installation or
+Activation does not create permission, verified approval, eligibility, or a
+Capability Manager resolution. Dispatcher continues to invoke only the exact
+target authorized by a canonical resolution, and any provider/tool protocol
+adapter remains transport-only.
+
 ## Lucy compatibility and migration
 
 `leos.execution.v1` preserves the demonstrated Lucy Dispatcher envelope:

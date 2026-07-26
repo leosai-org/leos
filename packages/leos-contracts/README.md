@@ -18,8 +18,9 @@ environment `contracts/` directory. Missing, incomplete, or malformed
 governed roots raise `ContractRootError`.
 
 The validator supports the canonical execution, effective-ranking, Epic 4.0
-identity/trust, and Epic 5.0 Organization Domain contracts. It validates
-schemas and deterministic cross-field invariants only.
+identity/trust, Epic 5.0 Organization Domain, and Epic 6.0 Capability/Plugin/
+Tool Domain contracts. It validates schemas and deterministic cross-field
+invariants only.
 
 `validate_organization_domain` additionally validates a caller-supplied,
 in-memory record set for reference integrity, revision pinning, organization
@@ -29,6 +30,15 @@ present, it also checks their resulting revision, status, owner, lifecycle
 authority, subject, and payload linkage. Its explicit `observed_at` input
 makes time-dependent conformance deterministic. It does not persist or mutate
 records and is not a production Organization Domain Authority.
+
+`validate_capability_plugin_domain` validates a caller-supplied in-memory
+snapshot for identity uniqueness, exact revision linkage, Plugin/Manifest/
+Artifact consistency, Tool/Capability linkage, runtime compatibility,
+Artifact Trust linkage, Organization/target scope, semantic-version
+dependencies, cycles, transitive permission declarations, revocation, and
+active Installation/Activation uniqueness at an explicit observation time.
+It does not publish, install, activate, authorize, approve, resolve, invoke,
+or mutate records and is not a production lifecycle authority.
 
 The package does not authenticate principals, authorize actions, verify a
 live Approval Grant or artifact signature, resolve a secret, or establish
