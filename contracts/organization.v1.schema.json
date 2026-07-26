@@ -1,0 +1,18 @@
+{
+  "$id": "https://leosai.org/contracts/organization.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Organization v1",
+  "description": "Canonical top-level organizational boundary. Policy references are not policy authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.organization.v1"},
+    "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+    "organization_principal_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+    "status": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationStatus"},
+    "description": {"type": "string", "maxLength": 4096},
+    "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+    "metadata": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/metadata"}
+  },
+  "required": ["contract_version", "identity", "organization_principal_ref", "status", "description", "policy_refs", "metadata"]
+}

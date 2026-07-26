@@ -58,9 +58,12 @@ The organization-first product layer is not yet internally complete. Epic 4.0
 establishes canonical principal, actor, exactly-one-owner, authorization-
 decision, Approval Grant/verification, Artifact Trust, Secret Reference, and
 Event Envelope foundations, but does not implement their production services
-or migrate existing callers. Core still has no canonical Organization,
-Department, Team, Workflow, Plugin, Tool, Team Template, secret-resolution, or
-sandbox lifecycle. It also
+or migrate existing callers. Epic 5.0 establishes the logical Organization
+Domain Authority, canonical Organization/Department/Team/Role/Position/
+Membership/Position Occupancy contracts, and an organization-aware Employee
+target contract, but not a production service, persistence, or Employee
+migration. Core still has no canonical Workflow, Plugin, Tool, Team Template,
+secret-resolution, or sandbox lifecycle. It also
 lacks a governed model activation/onboarding path, organization-first guided
 console, Team Architect protocol, and unified memory/knowledge/provenance
 authority. These are architecture and contract gaps, not merely missing UI.
@@ -100,6 +103,7 @@ intelligence authorities without creating peers.
 | Foundation | Classification | Current evidence | Boundary that must be preserved |
 |---|---|---|---|
 | Identity, ownership, and trust contracts | **Implemented** for the Epic 4.0 contract-foundation scope | `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`, `contracts/principal.v1.schema.json`, `contracts/actor-context.v1.schema.json`, `contracts/resource-identity.v1.schema.json`, trust evidence contracts, and `tests/v2/test_identity_trust_contracts.py` | Logical evidence authorities are accepted; production authenticators/services and domain migrations remain unimplemented. Contract validity never creates trust. |
+| Organization Domain foundation | **Implemented** for Epic 5.0 contracts and reference conformance; production authority **Partially Implemented** | `docs/architecture/v2/ORGANIZATION_DOMAIN.md`, Organization Domain schemas/examples, `validate_organization_domain`, and `tests/v2/test_organization_domain_contracts.py` | One logical Organization Domain Authority is accepted. The validator is non-authoritative; production topology, persistence, policy, cross-organization collaboration, and Employee migration remain **OPEN**. |
 | Execution contracts and correlation | **Implemented** | `contracts/execution.v1.schema.json`, `contracts/execution-result.v1.schema.json`, `contracts/execution-correlation.v1.schema.json`, `tests/v2/test_execution_contracts.py` | Resolution authorizes; Dispatcher invokes; non-invoked outcomes remain truthful. |
 | Execution Dispatcher | **Implemented** for current conformance scope | `services/execution-dispatcher-service/app/main.py`, `services/execution-dispatcher-service/tests/test_execution_dispatcher_conformance.py`, `docs/architecture/v2/DISPATCHER_CONFORMANCE.md` | Sole governed provider/tool invocation authority; no selection. |
 | Capability resolution | **Implemented** for provider capability resolution | `services/capability-manager-service/app/main.py`, `services/capability-manager-service/tests/test_capability_manager_conformance.py`, `contracts/capability-resolution-result.v1.schema.json` | Inventory, eligibility, and first-ranked-valid resolution only; no invocation or approval self-verification. |
@@ -120,7 +124,7 @@ intelligence authorities without creating peers.
 | # | Capability or subsystem | Core classification | Lucy evidence classification | Release conclusion |
 |---|---|---|---|---|
 | 1 | Publishing authority and artifact lifecycle | **Partially Implemented / Documentation Only** | **Lucy Donor Evidence Only / Conflicting Authority** | Define public artifact and lifecycle authority before further publishing implementation. |
-| 2 | Organization, Department, and Team lifecycle | **Missing** | **Lucy Donor Evidence Only / Experimental** | Canonical definitions and lifecycle authority are prerequisite. |
+| 2 | Organization, Department, Team, Role, Position, Membership, and Position Occupancy lifecycle | **Implemented** contract foundation / **Partially Implemented** production authority | **Lucy Donor Evidence Only / Experimental** | Epic 5.0 accepts logical authority and contracts; production topology, persistence, policy, migration, and recovery remain prerequisites. |
 | 3 | Organizational policy with ranking/restrictions | **Documentation Only / Missing** | **Conflicting Authority** | Keep current ranking precedence until an explicit architecture decision adds organizational restrictions or scopes. |
 | 4 | Workflow definition and lifecycle | **Missing** | **Lucy Donor Evidence Only / Conflicting Authority** | Select one canonical workflow authority and projection boundary. |
 | 5 | Plugin manifest, SDK, trust, lifecycle, isolation | **Documentation Only / Missing** | **Lucy Donor Evidence Only / Conflicting Authority** | Public plugin layer is a v2 must-have but Lucy cannot be copied unchanged. |
@@ -183,40 +187,48 @@ intelligence authorities without creating peers.
   package layouts, and `present_unverified` signature states as donor data,
   not compatibility commitments.
 
-### G-02 — Organization, Department, and Team contracts and lifecycle
+### G-02 — Organization Domain production authority and migration
 
-- **Classification:** **Missing** in Core; **Lucy Donor Evidence Only /
-  Experimental**.
-- **Current evidence:** The roadmap defines the product hierarchy, but no
-  Organization, Department, or Team schema, lifecycle authority, service, or
-  conformance suite exists.
-- **Authoritative files:** `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`.
-  Individual employee authority remains in
-  `contracts/employee-definition.v2.schema.json`,
-  `contracts/employee-lifecycle.v1.schema.json`, and
-  `services/employee-registry/app.py`.
+- **Classification:** **Implemented** for the Epic 5.0 logical authority,
+  contracts, examples, and reference conformance; **Partially Implemented**
+  overall because no production topology or persistence exists; **Lucy Donor
+  Evidence Only / Experimental**.
+- **Current evidence:** Epic 5.0 accepts one logical Organization Domain
+  Authority and canonical Organization, Department, Team, Role, Position,
+  Membership, Position Occupancy, lifecycle-transition, and
+  organization-aware Employee target contracts. The deterministic reference
+  validator enforces cross-record integrity without persisting or mutating
+  state. Employee Registry remains Employee authority.
+- **Authoritative files:** `docs/architecture/v2/ORGANIZATION_DOMAIN.md`,
+  `docs/architecture/v2/ORGANIZATION_DOMAIN_DECISIONS.md`,
+  Organization Domain schemas under `contracts/`, and
+  `docs/roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`.
 - **Lucy donor evidence:** `../lucy-runtime-reference/companies/default-company/company.yaml`
   and `../lucy-runtime-reference/departments/communications/department.yaml`
   show configuration shapes.
   `../lucy-runtime-reference/organization-intelligence-service/app/main.py`
   builds organization snapshots, graphs, insights, and review state, but acts
   as analytics/projection rather than a proven lifecycle authority.
-- **Missing contracts:** Definition, stable identity, revision, lifecycle,
-  membership, reporting relations, policy references, knowledge references,
-  ownership, deletion/archive, import/export, and event/correlation contracts
-  for all three object types.
-- **Missing services:** Canonical organization structure authority, or an
-  explicitly accepted allocation of Organization/Department/Team storage to a
-  smaller set of authorities.
-- **Missing tests:** Revision concurrency; lifecycle transitions; membership
-  integrity; employee archival effects; cross-team membership; policy
-  inheritance; deletion safety; audit history; tenant/organization isolation.
+- **Missing contracts:** Ownership transfer/recovery, child-transition plan,
+  cross-organization collaboration/delegation, production mutation/API,
+  Employee v2-to-v3 migration, import/export, and event delivery/evolution.
+  Organization policy remains a separate gap.
+- **Missing services:** A production deployment of the accepted logical
+  Organization Domain Authority and its durable transaction/outbox,
+  backup/recovery, and projection interfaces.
+- **Missing tests:** Production authorization and approval verification;
+  revision concurrency/atomicity; durable lifecycle recovery; ownership
+  transfer; employee archival effects; policy integration; deletion safety;
+  outbox/replay; migration/rollback; and multi-organization isolation against
+  a real store.
 - **Dependencies:** Publishing identity, employee references, Workflow,
   permissions, policy, knowledge, Team Templates, and activation.
 - **Security implications:** Undefined organization boundaries can leak
   knowledge, credentials, capabilities, or audit data between teams and can
   allow unauthorized membership or policy changes.
-- **Recommended epic:** **P0 — Organization Domain Authority and Contracts**.
+- **Recommended epic:** Epic 5.0 contract foundation is complete; follow with
+  **P0 — Organization Domain Production Authority and Employee Migration**
+  only after its remaining authority decisions are accepted.
 - **Recommended priority:** **P0** before Team Architect or Team Template
   activation.
 - **Migration or compatibility concerns:** Lucy YAML and graph IDs should be
@@ -846,7 +858,7 @@ Core-role status is therefore:
 | Workflow lifecycle | **OPEN**, one future canonical authority | Two workflow engines plus Planning lifecycle and autonomous continuation | Select one state machine; make planning produce definitions/plans rather than run authority. |
 | Plugin/module lifecycle | **OPEN**, one future canonical local authority | Plugin Platform and Module Registry both install/register/state-change/remove | Define one object and installed-instance model; migrate or retire duplicates. |
 | Memory/experience/knowledge/artifacts | **OPEN** | Memory Service, Employee Learning, Experience Engine, Company Knowledge, generic persistence | Define object boundaries and one source of truth; treat derived indexes/playbooks as projections where possible. |
-| Organization structure | **OPEN** | Lucy configuration paths and Organization Intelligence graph/snapshots | Establish canonical definitions; Organization Intelligence becomes a consumer/projection. |
+| Organization structure | Logical Organization Domain Authority; production topology **OPEN** | Lucy configuration paths and Organization Intelligence graph/snapshots | Preserve canonical Epic 5.0 definitions; Organization Intelligence remains a consumer/projection. |
 | Secrets | Future Secret Authority | Environment variables, Config Service, kernel-variable resolution | Use opaque references and transient authorized resolution; never promote raw values. |
 | Scheduling and resource control | Scheduler | Workflow/planning/autonomous services may drive continuation directly | Workflow submits governed jobs; Scheduler alone owns leases/admission/release. |
 | Employee reasoning and durable state | Cognitive Service / Persistent Runtime | Legacy orchestration services may blend planning, continuation, and employee state | Migrate only necessary behavior into the accepted split; retire restart/reasoning peers. |
@@ -930,9 +942,12 @@ reasoner, resolver, invoker, scheduler, or transport selector.
 
 ### Organization and work definition
 
-5. **Epic 3.3 — Organization, Department, and Team Domain**
-   - Definitions, revisions, lifecycle, membership, policy references, and
-     audit.
+5. **Epic 5.0 — Organization, Team, and Employee Domain Foundation**
+   - **Completed foundation:** logical authority, definitions, revisions,
+     lifecycle, membership, Role/Position/supervision, ownership, audit, and
+     non-authoritative cross-record conformance.
+   - **Follow-on:** production topology/persistence, ownership transfer,
+     event/outbox protocol, Employee v2-to-v3 migration, and recovery.
 6. **Epic 3.4 — Organizational Policy Boundary**
    - Decide restriction inheritance and whether any new ranking scope is
      allowed; preserve current precedence until accepted.
@@ -1093,8 +1108,9 @@ contracts are accepted:
 
 1. What public Core component owns publishing artifact metadata, and which
    responsibilities remain only in private publication/marketplace systems?
-2. Is Organization/Department/Team lifecycle one authority or several
-   authorities sharing a revision/event protocol?
+2. How is the accepted logical Organization Domain Authority deployed and
+   persisted without creating peer lifecycle authorities, and what atomic
+   revision/event protocol does it use?
 3. Can organization or team policy add ranking scopes, or may it only add
    cumulative hard restrictions? If scopes are added, where do they sit
    relative to `job > employee > capability > global`?

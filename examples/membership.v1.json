@@ -1,0 +1,59 @@
+{
+  "contract_version": "leos.membership.v1",
+  "identity": {
+    "resource_type": "MEMBERSHIP",
+    "resource_id": "membership:acme:researcher:team",
+    "display_name": "Researcher membership in Market Research",
+    "revision": "sha256:membership-acme-researcher-team-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "organization-domain-authority",
+        "principal": {"principal_id": "principal:service:organization-domain-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:organization-domain-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:brett:membership-create",
+      "revision": "sha256:actor-context-brett-membership-create"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization-decision:membership-create",
+      "revision": "sha256:authorization-membership-create"
+    },
+    "audit_id": "audit:membership:acme:researcher:team:v1",
+    "created_at": "2026-07-25T16:30:00Z",
+    "updated_at": "2026-07-25T16:30:00Z"
+  },
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "membership_kind": "EMPLOYEE_TEAM",
+  "member": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+  "container_ref": {"resource_type": "TEAM", "resource_id": "team:acme:market-research", "revision": "sha256:team-acme-market-research-v1"},
+  "role_refs": [{"resource_type": "ROLE", "resource_id": "role:acme:researcher", "revision": "sha256:role-acme-researcher-v1"}],
+  "status": "ACTIVE",
+  "effective_from": "2026-07-25T16:30:00Z",
+  "issuer": {
+    "authority_id": "organization-domain-authority",
+    "principal": {"principal_id": "principal:service:organization-domain-authority", "principal_type": "SERVICE"},
+    "authority_revision": "sha256:organization-domain-authority-v1"
+  },
+  "issued_by_actor_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {"principal_id": "principal:service:identity-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:identity-authority-v1"
+    },
+    "reference_id": "actor-context:brett:membership-create",
+    "revision": "sha256:actor-context-brett-membership-create"
+  },
+  "authorization_decision_ref": {
+    "resource_type": "AUTHORIZATION_DECISION",
+    "resource_id": "authorization-decision:membership-create",
+    "revision": "sha256:authorization-membership-create"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "contract_version": "leos.position.v1",
+  "identity": {
+    "resource_type": "POSITION",
+    "resource_id": "position:acme:market-researcher-1",
+    "display_name": "Market Researcher I",
+    "revision": "sha256:position-acme-market-researcher-1-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "organization-domain-authority",
+        "principal": {"principal_id": "principal:service:organization-domain-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:organization-domain-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:brett:position-create",
+      "revision": "sha256:actor-context-brett-position-create"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization-decision:position-create",
+      "revision": "sha256:authorization-position-create"
+    },
+    "audit_id": "audit:position:acme:market-researcher-1:v1",
+    "created_at": "2026-07-25T16:20:00Z",
+    "updated_at": "2026-07-25T16:20:00Z"
+  },
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "department_ref": {"resource_type": "DEPARTMENT", "resource_id": "department:acme:research", "revision": "sha256:department-acme-research-v1"},
+  "team_ref": {"resource_type": "TEAM", "resource_id": "team:acme:market-research", "revision": "sha256:team-acme-market-research-v1"},
+  "role_ref": {"resource_type": "ROLE", "resource_id": "role:acme:researcher", "revision": "sha256:role-acme-researcher-v1"},
+  "status": "ACTIVE",
+  "position_code": "market-researcher-1",
+  "policy_refs": [],
+  "metadata": {"labels": {"level": "one"}, "annotations": []}
+}

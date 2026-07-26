@@ -17,9 +17,20 @@ An installed package outside that verified source layout must set
 environment `contracts/` directory. Missing, incomplete, or malformed
 governed roots raise `ContractRootError`.
 
-The validator supports the canonical execution, effective-ranking, and Epic
-4.0 identity/trust contracts. It validates schemas and deterministic
-cross-field invariants only. It does not authenticate principals, authorize
-actions, verify a live Approval Grant or artifact signature, resolve a secret,
-or establish event truth. Those operations require the recognized authority
-over an authenticated boundary.
+The validator supports the canonical execution, effective-ranking, Epic 4.0
+identity/trust, and Epic 5.0 Organization Domain contracts. It validates
+schemas and deterministic cross-field invariants only.
+
+`validate_organization_domain` additionally validates a caller-supplied,
+in-memory record set for reference integrity, revision pinning, organization
+scope, active relationship periods, duplicate active relationships, and
+Department/Position hierarchy cycles. When transition and Event evidence are
+present, it also checks their resulting revision, status, owner, lifecycle
+authority, subject, and payload linkage. Its explicit `observed_at` input
+makes time-dependent conformance deterministic. It does not persist or mutate
+records and is not a production Organization Domain Authority.
+
+The package does not authenticate principals, authorize actions, verify a
+live Approval Grant or artifact signature, resolve a secret, or establish
+event truth. Those operations require the recognized authority over an
+authenticated boundary.

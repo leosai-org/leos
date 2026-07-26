@@ -1,0 +1,22 @@
+{
+  "$id": "https://leosai.org/contracts/position-occupancy.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Position Occupancy v1",
+  "description": "Canonical relationship between one Position and one Employee. It is neither membership nor work assignment.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.position-occupancy.v1"},
+    "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+    "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+    "position_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/positionRef"},
+    "employee_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/employeeRef"},
+    "status": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/occupancyStatus"},
+    "effective_from": {"type": "string", "format": "date-time"},
+    "effective_until": {"type": "string", "format": "date-time"},
+    "issuer": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/authorityRef"},
+    "issued_by_actor_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"},
+    "authorization_decision_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/authorizationDecisionRef"}
+  },
+  "required": ["contract_version", "identity", "organization_ref", "position_ref", "employee_ref", "status", "effective_from", "issuer", "issued_by_actor_ref", "authorization_decision_ref"]
+}

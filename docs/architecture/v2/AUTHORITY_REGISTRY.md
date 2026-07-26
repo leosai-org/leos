@@ -14,6 +14,8 @@ It consolidates decisions already accepted in:
 - `EXECUTION_CONTRACTS.md`
 - `IDENTITY_OWNERSHIP_AND_TRUST.md`
 - `IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md`
+- `ORGANIZATION_DOMAIN.md`
+- `ORGANIZATION_DOMAIN_DECISIONS.md`
 - `EFFECTIVE_RANKING_AND_MODEL_RESOLUTION.md`
 - `../../roadmap/LEOS_ORGANIZATION_FIRST_ROADMAP.md`
 - `../../roadmap/LEOS_DEV_PREVIEW_V2_GAP_REPORT.md`
@@ -61,6 +63,10 @@ authority may still be incomplete, while a working Lucy service may remain
 | Compute/resource admission | Scheduler | Admission decisions and resource reservations | Employee resource profiles supply governed inputs; they do not admit work. |
 | Employee resource profile | Employee Resource Profile Service | Canonical employee resource requirement/profile records | Does not select models or providers and does not replace Scheduler admission. |
 | Employee definition and lifecycle | Employee Registry | Employee definitions, revisions, lifecycle, execution-eligibility decisions, and assignment-policy inputs | Legacy embedded model preferences are migration input, not ranking authority; employee-to-job selection remains **OPEN**. |
+| Organization, Department, and Team lifecycle | Logical Organization Domain Authority | Definitions, revisions, ownership, lifecycle, hierarchy, policy references, and canonical transition events | Production service/module topology, persistence, ownership transfer, and child-transition protocol remain **OPEN**. Organization Intelligence and filesystem layout are projections/donor evidence only. |
+| Role and Position lifecycle | Logical Organization Domain Authority | Reusable responsibility definitions, concrete organizational slots, revisions, and reporting-position hierarchy | Role is not authorization. Position is not Employee identity or work Assignment. |
+| Membership lifecycle | Logical Organization Domain Authority | User/Employee Organization/Team relationships, effective periods, issuer evidence, revisions, and history | Membership and Role never independently authorize permission, capability use, assignment, or execution. |
+| Position Occupancy lifecycle | Logical Organization Domain Authority | Employee-to-Position relationships, effective periods, revisions, and history | Occupancy is neither Membership nor work Assignment. |
 | Durable employee presence and mailbox | Persistent Employee Runtime | Durable employee presence, mailbox, and working-state storage | No reasoning, provider invocation, or scheduler lease ownership. |
 | Assignment projection and transitions | Persistent Employee Runtime | Assignment identity, durable projection, and runtime-owned transitions | Scheduler remains job/lease authority; Cognitive Service remains reasoning authority. |
 | Cognitive run | Employee Cognitive Service | Cognitive runs, attempts, checkpoints, observations, and cognitive results | No direct scheduler mutation, durable assignment ownership, or provider invocation. |
@@ -98,9 +104,9 @@ seek approval for the authority; it may not silently choose one.
 | Publishing artifact metadata | Public/private repository boundary is documented | Core publishing owner and artifact object model | Release-publication evidence must not be reused as plugin/template publishing authority. |
 | Artifact version and dependency lifecycle | Immutable versioning and provenance are required | Package, signature, compatibility, dependency, deprecation, and revocation contracts | No ad hoc package format may become canonical by implementation. |
 | Installed artifact instance | Published definition and installed instance must differ | Install, configure, enable, update, rollback, remove, and data-ownership authority | Installation must not imply activation or permission. |
-| Organization lifecycle | Organization-first hierarchy is accepted product direction | Definition, revision, lifecycle, membership, and persistence owner | Organization Intelligence or filesystem layout must not become definition authority. |
-| Department lifecycle | Department is a first-class organizational concept | Definition, revision, lifecycle, membership, and persistence owner | Lucy department YAML is donor evidence only. |
-| Team lifecycle | Team is a first-class organizational concept | Definition, revision, lifecycle, membership, and persistence owner | Team Template installation must not invent an implicit Team authority. |
+| Organization Domain production topology | One logical Organization Domain Authority and its contracts are accepted | Service/module allocation, persistence technology, transaction/outbox protocol, backup, recovery, and deployment topology | No implementation may create peer Organization, Department, Team, Role, Position, Membership, or Occupancy authorities. |
+| Organization ownership transfer and recovery | A v1 Organization has one Human User owner and one Organization Principal | Transfer, recovery, inheritance, and nested Organization ownership protocol | Caller owner fields, file moves, projections, or events must not transfer ownership. |
+| Cross-organization collaboration | Organization is the accepted isolation boundary | Delegation, visibility, knowledge/secret/permission access, and audit protocol | Cross-organization references fail closed until accepted. |
 | Employee-to-job assignment decision | Scheduler accepts a job identifying an employee; Employee Registry owns definition, eligibility, and assignment-policy inputs | Who proposes/selects the employee for a job, applicable policy, and the governed handoff into Scheduler | Legacy scoring, identifier order, caller `force`, or a second job store must not become canonical assignment authority. |
 | Organizational policy | Current ranking precedence remains `job > employee > capability > global` | Restriction inheritance and whether organization/team ranking scopes ever exist | Organizational policy may not silently add ranking precedence or reorder candidates. |
 | Workflow definition and lifecycle | Workflow correlation fields exist; Workflow submits governed work | Definition, validation, lifecycle, compensation, projection, and persistence owner | Workflow engines must not create peer scheduler, assignment, or invocation authority. |
@@ -188,7 +194,7 @@ Lifecycle families must not be collapsed.
 | Artifact publication lifecycle | Draft/validation/publication/deprecation/revocation semantics require future contracts. Publication is never installation. |
 | Installed-instance lifecycle | Inspect/plan/install/configure/enable/update/rollback/remove semantics require future contracts. Installation is never activation. |
 | Runtime lifecycle | Desired/observed activation, health, placement, and rollback authority remain **OPEN**. |
-| Organization/Department/Team lifecycle | Definitions, revisions, membership, activation, archive, and deletion remain **OPEN**. |
+| Organization Domain lifecycle | The logical Organization Domain Authority owns Organization, Department, Team, Role, Position, Membership, and Position Occupancy definitions and lifecycle. Production topology, persistence, ownership transfer, child-transition transactions, and event delivery remain **OPEN**. |
 | Workflow lifecycle | Definition revision and workflow-instance state are separate from projected Scheduler jobs; exact states remain **OPEN**. |
 | Permission lifecycle | Request/grant/verify/expire/revoke semantics remain **OPEN** and separate from capability inventory. |
 | Approval lifecycle | Approval Authority owns request/decision/grant/verify/consume/expire/revoke; durable implementation and approver-policy integration remain **OPEN**. |

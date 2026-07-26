@@ -1,0 +1,40 @@
+{
+  "contract_version": "leos.employee-definition.v3",
+  "identity": {
+    "resource_type": "EMPLOYEE",
+    "resource_id": "employee:acme:researcher",
+    "display_name": "Acme Researcher",
+    "revision": "sha256:employee-acme-researcher-v3",
+    "ownership": {
+      "owner": {"principal_id": "principal:organization:acme", "principal_type": "ORGANIZATION"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:service:employee-registry", "principal_type": "SERVICE"},
+      "lifecycle_authority": {
+        "authority_id": "employee-registry",
+        "principal": {"principal_id": "principal:service:employee-registry", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:employee-registry-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:brett:employee-create",
+      "revision": "sha256:actor-context-brett-employee-create"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization-decision:employee-create",
+      "revision": "sha256:authorization-employee-create"
+    },
+    "audit_id": "audit:employee:acme:researcher:v3",
+    "created_at": "2026-07-25T16:25:00Z",
+    "updated_at": "2026-07-25T16:25:00Z"
+  },
+  "employee_principal_ref": {"principal_id": "principal:employee:acme:researcher", "principal_type": "EMPLOYEE"},
+  "organization_ref": {"resource_type": "ORGANIZATION", "resource_id": "organization:acme", "revision": "sha256:organization-acme-v1"},
+  "status": "ACTIVE",
+  "description": "Research employee definition; no runtime or assignment state.",
+  "responsibilities": ["Research assigned topics and retain traceable provenance."],
+  "role_refs": [{"resource_type": "ROLE", "resource_id": "role:acme:researcher", "revision": "sha256:role-acme-researcher-v1"}],
+  "policy_refs": [],
+  "metadata": {"labels": {"employee_class": "research"}, "annotations": []}
+}

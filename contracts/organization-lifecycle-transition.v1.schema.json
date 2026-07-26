@@ -1,0 +1,32 @@
+{
+  "$id": "https://leosai.org/contracts/organization-lifecycle-transition.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Organization Lifecycle Transition v1",
+  "description": "Completed, revision-conditional Organization Domain transition evidence. It cannot authorize its own transition.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.organization-lifecycle-transition.v1"},
+    "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+    "subject_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationalSubjectRef"},
+    "from_status": {"type": "string", "minLength": 1, "maxLength": 64},
+    "to_status": {"type": "string", "minLength": 1, "maxLength": 64},
+    "resulting_revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"},
+    "actor_context_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"},
+    "authorization_decision_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/authorizationDecisionRef"},
+    "approval_requirement": {"enum": ["NOT_REQUIRED", "VERIFIED"]},
+    "approval_verification_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/approvalVerificationRef"},
+    "resulting_event_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/eventRef"},
+    "rollback_behavior": {"enum": ["COMPENSATING_TRANSITION_REQUIRED", "TERMINAL_NO_ROLLBACK"]},
+    "child_resource_behavior": {"enum": ["NO_CHILDREN", "BLOCKED_UNTIL_CHILD_PLAN", "EXPLICIT_CHILD_TRANSITIONS", "RETAINED_UNDER_RESTRICTION"]},
+    "transitioned_at": {"type": "string", "format": "date-time"}
+  },
+  "required": ["contract_version", "identity", "subject_ref", "from_status", "to_status", "resulting_revision", "actor_context_ref", "authorization_decision_ref", "approval_requirement", "resulting_event_ref", "rollback_behavior", "child_resource_behavior", "transitioned_at"],
+  "allOf": [
+    {
+      "if": {"properties": {"approval_requirement": {"const": "VERIFIED"}}, "required": ["approval_requirement"]},
+      "then": {"required": ["approval_verification_ref"]},
+      "else": {"not": {"required": ["approval_verification_ref"]}}
+    }
+  ]
+}

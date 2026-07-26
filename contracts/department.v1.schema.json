@@ -1,0 +1,19 @@
+{
+  "$id": "https://leosai.org/contracts/department.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Department v1",
+  "description": "Canonical department definition within exactly one Organization.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.department.v1"},
+    "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+    "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+    "parent_department_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/departmentRef"},
+    "status": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationStatus"},
+    "description": {"type": "string", "maxLength": 4096},
+    "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+    "metadata": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/metadata"}
+  },
+  "required": ["contract_version", "identity", "organization_ref", "status", "description", "policy_refs", "metadata"]
+}

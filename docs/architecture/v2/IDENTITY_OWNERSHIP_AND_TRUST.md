@@ -201,10 +201,14 @@ may be persisted until an accepted authority owns its lifecycle.
 | Object | Immutable identity | Display identity | Canonical owner | Creator/steward | Lifecycle authority | Authentication and authorization | Version/audit | Persistence |
 |---|---|---|---|---|---|---|---|---|
 | User | `USER` resource ID and bound human principal ID | User-controlled display name | The human principal; bootstrap exceptions require governed evidence | Authenticated bootstrap/administrator actor; designated steward | Identity Authority for the foundation scope | Identity Authority authenticates; Authorization Authority decides actions | Material revision and audit ID | Identity Authority store |
-| Organization | Organization resource ID and later bound organization principal | Organization name | Human or parent organization principal under future lifecycle rules | Authenticated creator and governed steward | **OPEN** Organization authority | Actor Context plus future organization policy | Required before instance creation | Future Organization authority store |
-| Department | Department resource ID and later bound department principal | Department name | Organization principal under future rules | Authenticated creator and governed steward | **OPEN** Organization/Department authority | Actor Context plus future organization policy | Required before instance creation | Future domain store |
-| Team | Team resource ID and later bound Team principal | Team name | Organization or other accepted owner under future rules | Authenticated creator and governed steward | **OPEN** Team authority | Actor Context plus future organization policy | Required before instance creation | Future Team authority store |
-| Employee | Employee resource ID and bound Employee principal | Employee name | User, Organization, or Team principal under later ownership policy | Authenticated creator; Employee Registry steward | Employee Registry | Actor Context and Authorization Decision; capability use remains separately governed | Employee definition revision and audit | Employee Registry |
+| Organization | Organization resource ID and bound Organization Principal | Organization name | Exactly one Human User principal in v1 | Authenticated creator and governed steward | Logical Organization Domain Authority | Actor Context and Authorization Decision; approval policy remains **OPEN** | Material revision and audit ID | Logical Organization Domain Authority; production topology **OPEN** |
+| Department | Department resource ID | Department name | Containing Organization Principal | Authenticated creator and governed steward | Logical Organization Domain Authority | Actor Context and Authorization Decision; cross-organization references fail closed | Material revision and audit ID | Logical Organization Domain Authority; production topology **OPEN** |
+| Team | Team resource ID | Team name | Containing Organization Principal | Authenticated creator and governed steward | Logical Organization Domain Authority | Actor Context and Authorization Decision; Team has no execution authority | Material revision and audit ID | Logical Organization Domain Authority; production topology **OPEN** |
+| Role | Role resource ID | Role name | Containing Organization Principal | Authenticated creator and governed steward | Logical Organization Domain Authority | Actor Context and Authorization Decision; Role never independently authorizes | Material revision and audit ID | Logical Organization Domain Authority; production topology **OPEN** |
+| Position | Position resource ID | Position name/code | Containing Organization Principal | Authenticated creator and governed steward | Logical Organization Domain Authority | Actor Context and Authorization Decision; Position is not Employee | Material revision and audit ID | Logical Organization Domain Authority; production topology **OPEN** |
+| Membership | Membership resource ID | Relationship description | Containing Organization Principal | Authenticated issuer and governed steward | Logical Organization Domain Authority | Actor Context and Authorization Decision; membership never independently authorizes | Material revision, effective period, and audit ID | Logical Organization Domain Authority; production topology **OPEN** |
+| Position Occupancy | Position Occupancy resource ID | Relationship description | Containing Organization Principal | Authenticated issuer and governed steward | Logical Organization Domain Authority | Actor Context and Authorization Decision; occupancy is not Assignment | Material revision, effective period, and audit ID | Logical Organization Domain Authority; production topology **OPEN** |
+| Employee | Employee resource ID and bound Employee principal | Employee name | Containing Organization Principal in the v3 target contract | Authenticated creator; Employee Registry steward | Employee Registry | Actor Context and Authorization Decision; capability use remains separately governed | Employee definition revision and audit | Employee Registry |
 | Workflow | Workflow resource ID | Workflow name | Accepted user/organization/team principal | Authenticated creator and governed steward | **OPEN** Workflow authority | Actor Context and future workflow policy | Required before instance creation | Future Workflow authority store |
 | Plugin | Plugin resource ID; installed instance remains separate | Plugin name | Publisher for published definition; local owner for installed instance | Authenticated publisher/installer and governed steward | **OPEN** publishing and installed-instance authorities | Publisher/installer Actor Context and separate authorization/trust evidence | Immutable published version plus instance revision | Future publishing and installation stores |
 | Capability | Capability resource ID | Capability name | User or organization principal under later policy | Authenticated creator; Capability Manager steward | Capability Manager | Declaration/inventory is not a grant; Authorization Decision precedes resolution where required | Capability revision and audit | Capability Manager |
@@ -485,15 +489,18 @@ revocation, outage, restart, replay, migration, and adversarial tests.
 
 ## Remaining OPEN decisions
 
-Epic 4.0 intentionally leaves these decisions **OPEN**:
+Epic 4.0 intentionally left these decisions **OPEN**. Epic 5.0 subsequently
+accepted the logical Organization Domain boundary in
+`ORGANIZATION_DOMAIN.md`; the remaining list is:
 
 1. production human and workload authenticators;
 2. Identity, Authorization, Approval, Artifact Trust, and Secret deployment
    topology and durable stores;
 3. authorization policy language, permission-grant issuer, role model, and
    organization-policy inheritance;
-4. organization, department, team, workflow, plugin, Tool, runtime, artifact,
-   knowledge, and memory lifecycle authorities;
+4. Organization Domain production topology/persistence, ownership transfer,
+   and migration, plus workflow, plugin, Tool, runtime, artifact, knowledge,
+   and memory lifecycle authorities;
 5. employee-to-job selection authority;
 6. publisher protocol, package format, signature algorithms, key lifecycle,
    trust roots, and transparency evidence;

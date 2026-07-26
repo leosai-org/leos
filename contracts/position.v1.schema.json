@@ -1,0 +1,22 @@
+{
+  "$id": "https://leosai.org/contracts/position.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Organizational Position v1",
+  "description": "Concrete organizational slot. Occupancy is a separate resource and Position is never Employee identity.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.position.v1"},
+    "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+    "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+    "department_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/departmentRef"},
+    "team_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/teamRef"},
+    "role_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/roleRef"},
+    "reports_to_position_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/positionRef"},
+    "status": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationStatus"},
+    "position_code": {"type": "string", "minLength": 1, "maxLength": 256},
+    "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+    "metadata": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/metadata"}
+  },
+  "required": ["contract_version", "identity", "organization_ref", "role_ref", "status", "position_code", "policy_refs", "metadata"]
+}

@@ -1,0 +1,40 @@
+{
+  "contract_version": "leos.organization.v1",
+  "identity": {
+    "resource_type": "ORGANIZATION",
+    "resource_id": "organization:acme",
+    "display_name": "Acme Research",
+    "revision": "sha256:organization-acme-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "creator": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "steward": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "lifecycle_authority": {
+        "authority_id": "organization-domain-authority",
+        "principal": {"principal_id": "principal:service:organization-domain-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:organization-domain-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:brett:organization-create",
+      "revision": "sha256:actor-context-brett-organization-create"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "authorization-authority",
+      "reference_id": "authorization-decision:organization-create",
+      "revision": "sha256:authorization-organization-create"
+    },
+    "audit_id": "audit:organization:acme:v1",
+    "created_at": "2026-07-25T16:00:00Z",
+    "updated_at": "2026-07-25T16:00:00Z"
+  },
+  "organization_principal_ref": {
+    "principal_id": "principal:organization:acme",
+    "principal_type": "ORGANIZATION"
+  },
+  "status": "ACTIVE",
+  "description": "A governed research organization.",
+  "policy_refs": [],
+  "metadata": {"labels": {"environment": "reference"}, "annotations": ["Non-production conformance example."]}
+}

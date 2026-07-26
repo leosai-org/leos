@@ -400,7 +400,8 @@ implementation decisions are:
 3. event outbox, broker, ordering, acknowledgement, replay, retention, and
    schema evolution;
 4. publishing artifact and installed-instance authority;
-5. Organization, Department, and Team lifecycle ownership;
+5. Organization Domain production topology, persistence, ownership transfer,
+   child-transition protocol, and v2-to-v3 Employee migration;
 6. employee-to-job assignment proposal/selection and Scheduler handoff;
 7. organizational restriction and ranking interaction;
 8. Workflow definition/lifecycle and Scheduler projection;

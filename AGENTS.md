@@ -12,6 +12,8 @@ Read before implementation:
 - `docs/architecture/v2/INTELLIGENCE_PLANE_DECISIONS.md`
 - `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST.md`
 - `docs/architecture/v2/IDENTITY_OWNERSHIP_AND_TRUST_DECISIONS.md`
+- `docs/architecture/v2/ORGANIZATION_DOMAIN.md`
+- `docs/architecture/v2/ORGANIZATION_DOMAIN_DECISIONS.md`
 - `docs/architecture/v2/AUTHORITY_REGISTRY.md`
 - `docs/roadmap/DEV_PREVIEW_V2_SCOPE_LOCK.md`
 - `docs/roadmap/DEV_PREVIEW_V2_GOALS.md` when present

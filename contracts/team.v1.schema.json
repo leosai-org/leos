@@ -1,0 +1,34 @@
+{
+  "$id": "https://leosai.org/contracts/team.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Team v1",
+  "description": "Canonical collaboration boundary. A Team has no scheduling, reasoning, resolution, or invocation authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.team.v1"},
+    "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+    "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+    "department_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/departmentRef"},
+    "status": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationStatus"},
+    "purpose": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "role_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/roleRef"}
+    },
+    "policy_refs": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/policyRefs"},
+    "knowledge_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"}
+    },
+    "memory_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revisionedResourceRef"}
+    },
+    "metadata": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/metadata"}
+  },
+  "required": ["contract_version", "identity", "organization_ref", "status", "purpose", "role_refs", "policy_refs", "knowledge_refs", "memory_refs", "metadata"]
+}

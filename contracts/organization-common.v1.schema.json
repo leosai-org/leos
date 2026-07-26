@@ -1,0 +1,171 @@
+{
+  "$id": "https://leosai.org/contracts/organization-common.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Organization Domain Common Definitions v1",
+  "description": "Reusable closed definitions for the Organization Domain. This schema is not an authority-bearing document.",
+  "$defs": {
+    "organizationStatus": {
+      "enum": ["DRAFT", "ACTIVE", "SUSPENDED", "ARCHIVED", "DELETED"]
+    },
+    "employeeStatus": {
+      "enum": ["DRAFT", "VALIDATED", "ACTIVE", "PAUSED", "DISABLED", "ARCHIVED"]
+    },
+    "membershipStatus": {
+      "enum": ["PENDING", "ACTIVE", "SUSPENDED", "EXPIRED", "REVOKED"]
+    },
+    "occupancyStatus": {
+      "enum": ["PENDING", "ACTIVE", "ENDED", "REVOKED"]
+    },
+    "organizationRef": {
+      "$ref": "#/$defs/typedOrganizationRef"
+    },
+    "typedOrganizationRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "ORGANIZATION"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "departmentRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "DEPARTMENT"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "teamRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "TEAM"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "employeeRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "EMPLOYEE"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "roleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "ROLE"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "positionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "POSITION"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "membershipRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "MEMBERSHIP"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "organizationContainerRef": {
+      "oneOf": [
+        {"$ref": "#/$defs/organizationRef"},
+        {"$ref": "#/$defs/teamRef"}
+      ]
+    },
+    "organizationalSubjectRef": {
+      "oneOf": [
+        {"$ref": "#/$defs/organizationRef"},
+        {"$ref": "#/$defs/departmentRef"},
+        {"$ref": "#/$defs/teamRef"},
+        {"$ref": "#/$defs/roleRef"},
+        {"$ref": "#/$defs/positionRef"},
+        {"$ref": "#/$defs/membershipRef"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "resource_type": {"const": "POSITION_OCCUPANCY"},
+            "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+            "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+          },
+          "required": ["resource_type", "resource_id", "revision"]
+        }
+      ]
+    },
+    "authorizationDecisionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "AUTHORIZATION_DECISION"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "approvalVerificationRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "APPROVAL_VERIFICATION"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "eventRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resource_type": {"const": "EVENT"},
+        "resource_id": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/identifier"},
+        "revision": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/revision"}
+      },
+      "required": ["resource_type", "resource_id", "revision"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "labels": {
+          "type": "object",
+          "propertyNames": {"pattern": "^[a-z][a-z0-9]*(?:[._:-][a-z0-9]+)*$"},
+          "additionalProperties": {"type": "string", "maxLength": 256}
+        },
+        "annotations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 512}
+        }
+      },
+      "required": ["labels", "annotations"]
+    },
+    "policyRefs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/evidenceRef"}
+    }
+  }
+}

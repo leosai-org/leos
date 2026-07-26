@@ -1,0 +1,28 @@
+{
+  "$id": "https://leosai.org/contracts/membership.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LEOS Organizational Membership v1",
+  "description": "Canonical membership relationship. Membership never independently authorizes capability use or execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "leos.membership.v1"},
+    "identity": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/managedIdentity"},
+    "organization_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationRef"},
+    "membership_kind": {"enum": ["USER_ORGANIZATION", "EMPLOYEE_ORGANIZATION", "USER_TEAM", "EMPLOYEE_TEAM"]},
+    "member": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/principalRef"},
+    "container_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/organizationContainerRef"},
+    "role_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/roleRef"}
+    },
+    "status": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/membershipStatus"},
+    "effective_from": {"type": "string", "format": "date-time"},
+    "effective_until": {"type": "string", "format": "date-time"},
+    "issuer": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/authorityRef"},
+    "issued_by_actor_ref": {"$ref": "https://leosai.org/contracts/trust-common.v1.schema.json#/$defs/actorContextEvidenceRef"},
+    "authorization_decision_ref": {"$ref": "https://leosai.org/contracts/organization-common.v1.schema.json#/$defs/authorizationDecisionRef"}
+  },
+  "required": ["contract_version", "identity", "organization_ref", "membership_kind", "member", "container_ref", "role_refs", "status", "effective_from", "issuer", "issued_by_actor_ref", "authorization_decision_ref"]
+}

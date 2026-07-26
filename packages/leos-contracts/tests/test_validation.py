@@ -173,6 +173,30 @@ class ValidationApiTests(unittest.TestCase):
         ):
             self.assertIsNone(validate_contract(contract, self.example(example)))
 
+    def test_organization_domain_contract_examples_validate(self):
+        for contract, example in (
+            ("leos.organization.v1", "organization.v1.json"),
+            ("leos.department.v1", "department.v1.json"),
+            ("leos.team.v1", "team.v1.json"),
+            ("leos.role.v1", "role.v1.json"),
+            ("leos.position.v1", "position.v1.json"),
+            (
+                "leos.employee-definition.v3",
+                "employee-definition.v3.json",
+            ),
+            ("leos.membership.v1", "membership.v1.json"),
+            (
+                "leos.position-occupancy.v1",
+                "position-occupancy.v1.json",
+            ),
+            (
+                "leos.organization-lifecycle-transition.v1",
+                "organization-lifecycle-transition.v1.json",
+            ),
+            ("leos.event-envelope.v1", "organization-event-envelope.v1.json"),
+        ):
+            self.assertIsNone(validate_contract(contract, self.example(example)))
+
     def test_undefined_effective_ranking_has_no_source_authority(self):
         value = {
             "contract_version": "leos.effective-ranking-result.v1",
@@ -307,6 +331,8 @@ class ValidationApiTests(unittest.TestCase):
     def test_common_definition_schema_is_not_a_document_contract(self):
         with self.assertRaises(KeyError):
             validate_contract("trust-common.v1.schema.json", {})
+        with self.assertRaises(KeyError):
+            validate_contract("organization-common.v1.schema.json", {})
 
 
 if __name__ == "__main__":

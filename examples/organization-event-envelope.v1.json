@@ -1,0 +1,74 @@
+{
+  "contract_version": "leos.event-envelope.v1",
+  "identity": {
+    "resource_type": "EVENT",
+    "resource_id": "event:organization:acme:activated:v1",
+    "display_name": "Organization activated",
+    "revision": "sha256:event-organization-acme-activated-v1",
+    "ownership": {
+      "owner": {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"},
+      "creator": {"principal_id": "principal:service:organization-domain-authority", "principal_type": "SERVICE"},
+      "steward": {"principal_id": "principal:service:organization-domain-authority", "principal_type": "SERVICE"},
+      "lifecycle_authority": {
+        "authority_id": "organization-domain-authority",
+        "principal": {"principal_id": "principal:service:organization-domain-authority", "principal_type": "SERVICE"},
+        "authority_revision": "sha256:organization-domain-authority-v1"
+      }
+    },
+    "creation_actor_context_ref": {
+      "resource_type": "ACTOR_CONTEXT",
+      "resource_id": "actor-context:organization-domain-authority:event",
+      "revision": "sha256:actor-context-organization-domain-event"
+    },
+    "creation_authority_evidence_ref": {
+      "authority_id": "organization-domain-authority",
+      "reference_id": "organization-transition:acme:activate:v1",
+      "revision": "sha256:organization-transition-acme-activate-v1"
+    },
+    "audit_id": "audit:event:organization:acme:activated:v1",
+    "created_at": "2026-07-25T16:00:00Z",
+    "updated_at": "2026-07-25T16:00:00Z"
+  },
+  "event_type": "organization.activated",
+  "event_revision": 1,
+  "source": {
+    "resource_type": "EVENT_SOURCE",
+    "resource_id": "event-source:organization-domain-authority",
+    "revision": "sha256:event-source-organization-domain-v1"
+  },
+  "producer": {
+    "principal_id": "principal:service:organization-domain-authority",
+    "principal_type": "SERVICE"
+  },
+  "actor": {
+    "principal_id": "principal:user:brett",
+    "principal_type": "HUMAN_USER"
+  },
+  "actor_context_ref": {
+    "evidence_type": "ACTOR_CONTEXT",
+    "authority": {
+      "authority_id": "identity-authority",
+      "principal": {"principal_id": "principal:service:identity-authority", "principal_type": "SERVICE"},
+      "authority_revision": "sha256:identity-authority-v1"
+    },
+    "reference_id": "actor-context:brett:organization-create",
+    "revision": "sha256:actor-context-brett-organization-create"
+  },
+  "subject": {
+    "resource_type": "ORGANIZATION",
+    "resource_id": "organization:acme",
+    "revision": "sha256:organization-acme-v1"
+  },
+  "correlation_id": "correlation:organization:acme:activation",
+  "causation": {
+    "kind": "ROOT_ACTION",
+    "reference_id": "authorization-decision:organization-activate"
+  },
+  "occurred_at": "2026-07-25T16:00:00Z",
+  "recorded_at": "2026-07-25T16:00:00Z",
+  "payload": {
+    "from_status": "DRAFT",
+    "to_status": "ACTIVE",
+    "resulting_revision": "sha256:organization-acme-v1"
+  }
+}

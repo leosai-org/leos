@@ -14,6 +14,7 @@ from referencing import Registry, Resource
 CONTRACT_ROOT_ENV = "LEOS_CONTRACT_ROOT"
 SCHEMA_RESOURCES = (
     "trust-common.v1.schema.json",
+    "organization-common.v1.schema.json",
 )
 SUPPORTED_CONTRACTS = (
     "resource-identity.v1.schema.json",
@@ -26,6 +27,15 @@ SUPPORTED_CONTRACTS = (
     "artifact-trust-evidence.v1.schema.json",
     "secret-reference.v1.schema.json",
     "event-envelope.v1.schema.json",
+    "organization.v1.schema.json",
+    "department.v1.schema.json",
+    "team.v1.schema.json",
+    "role.v1.schema.json",
+    "position.v1.schema.json",
+    "employee-definition.v3.schema.json",
+    "membership.v1.schema.json",
+    "position-occupancy.v1.schema.json",
+    "organization-lifecycle-transition.v1.schema.json",
     "execution-correlation.v1.schema.json",
     "execution.v1.schema.json",
     "capability-resolution-request.v1.schema.json",
@@ -48,6 +58,16 @@ CONTRACT_VERSIONS = {
         "artifact-trust-evidence.v1.schema.json",
     "leos.secret-reference.v1": "secret-reference.v1.schema.json",
     "leos.event-envelope.v1": "event-envelope.v1.schema.json",
+    "leos.organization.v1": "organization.v1.schema.json",
+    "leos.department.v1": "department.v1.schema.json",
+    "leos.team.v1": "team.v1.schema.json",
+    "leos.role.v1": "role.v1.schema.json",
+    "leos.position.v1": "position.v1.schema.json",
+    "leos.employee-definition.v3": "employee-definition.v3.schema.json",
+    "leos.membership.v1": "membership.v1.schema.json",
+    "leos.position-occupancy.v1": "position-occupancy.v1.schema.json",
+    "leos.organization-lifecycle-transition.v1":
+        "organization-lifecycle-transition.v1.schema.json",
     "leos.execution-correlation.v1": "execution-correlation.v1.schema.json",
     "leos.execution.v1": "execution.v1.schema.json",
     "leos.capability-resolution-request.v1":
@@ -287,6 +307,16 @@ def validate_semantics(
             "ARTIFACT_TRUST_EVIDENCE",
         "secret-reference.v1.schema.json": "SECRET_REFERENCE",
         "event-envelope.v1.schema.json": "EVENT",
+        "organization.v1.schema.json": "ORGANIZATION",
+        "department.v1.schema.json": "DEPARTMENT",
+        "team.v1.schema.json": "TEAM",
+        "role.v1.schema.json": "ROLE",
+        "position.v1.schema.json": "POSITION",
+        "employee-definition.v3.schema.json": "EMPLOYEE",
+        "membership.v1.schema.json": "MEMBERSHIP",
+        "position-occupancy.v1.schema.json": "POSITION_OCCUPANCY",
+        "organization-lifecycle-transition.v1.schema.json":
+            "ORGANIZATION_TRANSITION",
     }
     foundation_contracts = {
         "resource-identity.v1.schema.json",
@@ -653,6 +683,256 @@ def validate_semantics(
             "$.recorded_at",
             "recorded_at must not precede occurred_at",
         )
+
+    organization_domain_names = {
+        "organization.v1.schema.json",
+        "department.v1.schema.json",
+        "team.v1.schema.json",
+        "role.v1.schema.json",
+        "position.v1.schema.json",
+        "employee-definition.v3.schema.json",
+        "membership.v1.schema.json",
+        "position-occupancy.v1.schema.json",
+        "organization-lifecycle-transition.v1.schema.json",
+    }
+    if name in organization_domain_names:
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        organization_ref = document.get("organization_ref")
+        if (
+            name != "organization.v1.schema.json"
+            and name != "organization-lifecycle-transition.v1.schema.json"
+            and isinstance(organization_ref, dict)
+            and organization_ref.get("resource_type") != "ORGANIZATION"
+        ):
+            add(
+                "$.organization_ref.resource_type",
+                "must reference an ORGANIZATION",
+            )
+        if name == "organization.v1.schema.json":
+            organization_principal = document.get(
+                "organization_principal_ref"
+            )
+            if (
+                isinstance(organization_principal, dict)
+                and organization_principal.get("principal_type")
+                != "ORGANIZATION"
+            ):
+                add(
+                    "$.organization_principal_ref.principal_type",
+                    "must be an ORGANIZATION principal",
+                )
+            owner = (
+                ownership.get("owner")
+                if isinstance(ownership, dict)
+                else None
+            )
+            if (
+                isinstance(owner, dict)
+                and owner.get("principal_type") != "HUMAN_USER"
+            ):
+                add(
+                    "$.identity.ownership.owner.principal_type",
+                    "a v1 Organization must have one HUMAN_USER owner",
+                )
+
+    if name == "employee-definition.v3.schema.json":
+        employee_principal = document.get("employee_principal_ref")
+        if (
+            isinstance(employee_principal, dict)
+            and employee_principal.get("principal_type") != "EMPLOYEE"
+        ):
+            add(
+                "$.employee_principal_ref.principal_type",
+                "must be an EMPLOYEE principal",
+            )
+
+    if name == "team.v1.schema.json":
+        for field, expected in (
+            ("knowledge_refs", "KNOWLEDGE_OBJECT"),
+            ("memory_refs", "MEMORY_OBJECT"),
+        ):
+            refs = document.get(field)
+            if isinstance(refs, list):
+                for index, reference in enumerate(refs):
+                    if (
+                        isinstance(reference, dict)
+                        and reference.get("resource_type") != expected
+                    ):
+                        add(
+                            f"$.{field}[{index}].resource_type",
+                            f"must reference {expected}",
+                        )
+
+    if name in {
+        "membership.v1.schema.json",
+        "position-occupancy.v1.schema.json",
+    }:
+        identity = document.get("identity")
+        ownership = (
+            identity.get("ownership")
+            if isinstance(identity, dict)
+            else None
+        )
+        if isinstance(ownership, dict):
+            equal_when_present(
+                document.get("issuer"),
+                ownership.get("lifecycle_authority"),
+                "$.issuer",
+                "issuer and lifecycle authority",
+            )
+        for field in ("effective_from", "effective_until"):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        require_chronology(
+            document.get("effective_from"),
+            document.get("effective_until"),
+            "$.effective_until",
+            "effective_until must be later than effective_from",
+            allow_equal=False,
+        )
+
+    if name == "membership.v1.schema.json":
+        member = document.get("member")
+        container = document.get("container_ref")
+        kind = document.get("membership_kind")
+        expected = {
+            "USER_ORGANIZATION": ("HUMAN_USER", "ORGANIZATION"),
+            "EMPLOYEE_ORGANIZATION": ("EMPLOYEE", "ORGANIZATION"),
+            "USER_TEAM": ("HUMAN_USER", "TEAM"),
+            "EMPLOYEE_TEAM": ("EMPLOYEE", "TEAM"),
+        }.get(kind)
+        if expected and isinstance(member, dict) and isinstance(
+            container, dict
+        ):
+            if member.get("principal_type") != expected[0]:
+                add(
+                    "$.member.principal_type",
+                    f"{kind} requires a {expected[0]} member",
+                )
+            if container.get("resource_type") != expected[1]:
+                add(
+                    "$.container_ref.resource_type",
+                    f"{kind} requires a {expected[1]} container",
+                )
+        if (
+            document.get("status") == "EXPIRED"
+            and "effective_until" not in document
+        ):
+            add(
+                "$.effective_until",
+                "EXPIRED membership requires an effective end",
+            )
+
+    if (
+        name == "position-occupancy.v1.schema.json"
+        and document.get("status") == "ENDED"
+        and "effective_until" not in document
+    ):
+        add(
+            "$.effective_until",
+            "ENDED Position Occupancy requires an effective end",
+        )
+
+    if name == "organization-lifecycle-transition.v1.schema.json":
+        for field in ("transitioned_at",):
+            if field in document:
+                validate_timestamp(document[field], f"$.{field}")
+        subject = document.get("subject_ref")
+        subject_type = (
+            subject.get("resource_type")
+            if isinstance(subject, dict)
+            else None
+        )
+        transitions = {
+            "ORGANIZATION": {
+                "DRAFT": {"ACTIVE", "ARCHIVED"},
+                "ACTIVE": {"SUSPENDED", "ARCHIVED"},
+                "SUSPENDED": {"ACTIVE", "ARCHIVED"},
+                "ARCHIVED": {"DELETED"},
+                "DELETED": set(),
+            },
+            "DEPARTMENT": {
+                "DRAFT": {"ACTIVE", "ARCHIVED"},
+                "ACTIVE": {"SUSPENDED", "ARCHIVED"},
+                "SUSPENDED": {"ACTIVE", "ARCHIVED"},
+                "ARCHIVED": {"DELETED"},
+                "DELETED": set(),
+            },
+            "TEAM": {
+                "DRAFT": {"ACTIVE", "ARCHIVED"},
+                "ACTIVE": {"SUSPENDED", "ARCHIVED"},
+                "SUSPENDED": {"ACTIVE", "ARCHIVED"},
+                "ARCHIVED": {"DELETED"},
+                "DELETED": set(),
+            },
+            "ROLE": {
+                "DRAFT": {"ACTIVE", "ARCHIVED"},
+                "ACTIVE": {"SUSPENDED", "ARCHIVED"},
+                "SUSPENDED": {"ACTIVE", "ARCHIVED"},
+                "ARCHIVED": {"DELETED"},
+                "DELETED": set(),
+            },
+            "POSITION": {
+                "DRAFT": {"ACTIVE", "ARCHIVED"},
+                "ACTIVE": {"SUSPENDED", "ARCHIVED"},
+                "SUSPENDED": {"ACTIVE", "ARCHIVED"},
+                "ARCHIVED": {"DELETED"},
+                "DELETED": set(),
+            },
+            "MEMBERSHIP": {
+                "PENDING": {"ACTIVE", "REVOKED"},
+                "ACTIVE": {"SUSPENDED", "EXPIRED", "REVOKED"},
+                "SUSPENDED": {"ACTIVE", "EXPIRED", "REVOKED"},
+                "EXPIRED": set(),
+                "REVOKED": set(),
+            },
+            "POSITION_OCCUPANCY": {
+                "PENDING": {"ACTIVE", "REVOKED"},
+                "ACTIVE": {"ENDED", "REVOKED"},
+                "ENDED": set(),
+                "REVOKED": set(),
+            },
+        }
+        allowed = transitions.get(subject_type, {}).get(
+            document.get("from_status"),
+            set(),
+        )
+        if document.get("to_status") not in allowed:
+            add(
+                "$.to_status",
+                "is not an allowed lifecycle transition for the subject",
+            )
+        if (
+            isinstance(subject, dict)
+            and subject.get("revision") == document.get("resulting_revision")
+        ):
+            add(
+                "$.resulting_revision",
+                "must differ from the subject's expected revision",
+            )
+        if (
+            document.get("to_status") == "DELETED"
+            and document.get("rollback_behavior")
+            != "TERMINAL_NO_ROLLBACK"
+        ):
+            add(
+                "$.rollback_behavior",
+                "DELETED transitions are terminal",
+            )
+        if (
+            document.get("to_status") != "DELETED"
+            and document.get("rollback_behavior")
+            != "COMPENSATING_TRANSITION_REQUIRED"
+        ):
+            add(
+                "$.rollback_behavior",
+                "non-DELETED rollback requires a governed compensating transition",
+            )
 
     if name == "capability-resolution-request.v1.schema.json":
         if "requested_at" in document:

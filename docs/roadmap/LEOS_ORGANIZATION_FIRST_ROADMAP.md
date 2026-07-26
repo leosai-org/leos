@@ -239,7 +239,7 @@ The following boundaries apply while this roadmap is implemented:
 
 | Roadmap concept | Current authority or status | Required interpretation |
 |---|---|---|
-| Employee definition and lifecycle | Employee Registry and `leos.employee-definition.v2` | Existing `model_preferences` data is migration input; canonical provider/model order belongs to Ranking Policy Authority. |
+| Employee definition and lifecycle | Employee Registry; current v2 compatibility contract and organization-aware `leos.employee-definition.v3` target | Existing `model_preferences` data is migration input; canonical provider/model order belongs to Ranking Policy Authority. v3 adoption requires an explicit migration. |
 | Durable employee/assignment state | Persistent Employee Runtime | Team or organization services must not duplicate mailbox, working-state, or assignment authority. |
 | Employee reasoning | Employee Cognitive Service | Team Architect may propose work and configurations but does not become a second cognitive runtime. |
 | Capability/provider resolution | Capability Manager | A future Capability Store is publishing/discovery UX over canonical capability records and plugin declarations, not a peer runtime registry or resolver. |
@@ -254,7 +254,7 @@ The following boundaries apply while this roadmap is implemented:
 | Artifact trust | Artifact Trust Authority | Trust verification never publishes, installs, grants permissions for, or activates an artifact. |
 | Secrets | Secret Authority for opaque reference identity; backend and transient resolution remain **OPEN** | Roadmap objects carry opaque requirements or references only, never credential values. |
 | Workflow lifecycle | **OPEN** | `workflow-engine-service` is cataloged, and workflow correlation exists, but no canonical workflow definition/lifecycle authority is established in this repository. |
-| Team and Organization lifecycle | **OPEN** | No canonical Team or Organization contract or lifecycle authority exists yet. |
+| Organization, Department, Team, Role, Position, Membership, and Position Occupancy lifecycle | Logical Organization Domain Authority | Epic 5.0 accepts one logical authority and canonical contracts. Production service/module topology, persistence, ownership transfer, cross-organization collaboration, and child-transition protocol remain **OPEN**. |
 | Plugin and Tool lifecycle | **OPEN** | Repository licensing anticipates a public plugin SDK/manifest, but canonical package, install, grant, tool, and runtime contracts are not yet established. |
 | Team Template publishing | **OPEN** | Team Templates are mandatory first-class future publishing objects, but their package, install, instance, upgrade, rollback, and activation contracts remain to be defined. |
 
@@ -277,17 +277,17 @@ The repository already contains foundations that this roadmap must reuse:
 - execution, resolution, correlation, lifecycle, and ranking contracts and
   conformance tests.
 
-These are foundations, not proof that Team, Organization, Workflow, Plugin,
-Tool, Team Template, approval, secret, sandbox, memory/knowledge, or publishing
-lifecycles are complete.
+These are foundations, not proof that the Organization Domain production
+service, Workflow, Plugin, Tool, Team Template, approval, secret, sandbox,
+memory/knowledge, or publishing lifecycles are complete.
 
 ### Missing prerequisite architecture
 
 Before Team Architect can safely deploy organizations, LEOS needs explicit
 authority and contracts for:
 
-1. Team, Department, and Organization definitions, revisions, lifecycle, and
-   policy ownership;
+1. production deployment/persistence, ownership transfer, migration, and
+   child-transition protocol for the accepted Organization Domain contracts;
 2. organization/team policy interaction with the existing
    `job > employee > capability > global` ranking scopes and cumulative hard
    restrictions;
@@ -512,9 +512,37 @@ Every later epic must:
 - fail closed when trust evidence is absent, stale, revoked, mismatched, or
   unavailable.
 
-Organization, Department, Team, Workflow, Plugin, Tool, Runtime, Artifact,
-Knowledge, and Memory lifecycle owners that remain **OPEN** are not silently
-assigned by Phase 4.
+Workflow, Plugin, Tool, Runtime, Artifact, Knowledge, and Memory lifecycle
+owners that remain **OPEN** are not silently assigned by Phase 4. Organization
+Domain ownership is assigned only by the later accepted Epic 5.0 decisions.
+
+## Epic 5.0 — Organization, Team, and Employee Domain Foundation
+
+Epic 5.0 establishes one logical Organization Domain Authority for
+Organization, Department, Team, Role, Position, Membership, and Position
+Occupancy, while Employee Registry remains Employee definition/lifecycle
+authority.
+
+Canonical outputs are:
+
+- `../architecture/v2/ORGANIZATION_DOMAIN.md`;
+- `../architecture/v2/ORGANIZATION_DOMAIN_DECISIONS.md`;
+- organization-domain contracts and examples under `../../contracts/` and
+  `../../examples/`; and
+- deterministic, non-authoritative cross-record conformance validation.
+
+The epic separates Membership, Position Occupancy, and work Assignment;
+establishes Position hierarchy as canonical supervision; rejects cyclic,
+orphaned, stale-revision, and unauthorized cross-organization relationships;
+and preserves Team as collaboration only.
+
+It does not implement a production Organization service, persistence
+migration, policy engine, Team Architect, Assignment Service, runtime
+orchestration, authentication provider, billing, or UI. Production topology,
+organizational policy, ownership transfer/recovery, cross-organization
+collaboration, Employee v2-to-v3 migration, and employee-to-job selection
+remain **OPEN**. The Public Assignment Service remains
+**CONFLICTING / INVESTIGATE**.
 
 ## Phase 5.0 — Non-authoritative Intelligence Test Fixture
 
@@ -1207,11 +1235,14 @@ LEOS is evolving from an AI Employee Operating System into an **AI Organization 
 Employees remain fundamental, but they are one component of the larger system.
 
 This hierarchy is a product composition model, not a declaration that every
-node already has a canonical service or persistence owner. Organization,
-Department, Team, Workflow, and Automation authorities remain **OPEN** until
-their architecture and contracts are accepted. Organization or Team policy
-must not silently add ranking precedence ahead of the currently adopted
-independent `job > employee > capability > global` provider/model scopes.
+node already has a canonical service or persistence owner. Epic 5.0 accepts
+one logical Organization Domain Authority for Organization, Department, Team,
+Role, Position, Membership, and Position Occupancy, but its production
+topology and persistence remain **OPEN**. Workflow and Automation authorities
+remain **OPEN** until their architecture and contracts are accepted.
+Organization or Team policy must not silently add ranking precedence ahead of
+the currently adopted independent
+`job > employee > capability > global` provider/model scopes.
 Future organizational policy may add cumulative restrictions or new ranking
 scopes only through an explicit intelligence-plane decision and governed
 migration.

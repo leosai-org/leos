@@ -6,10 +6,12 @@ from .validation import (
     ValidationIssue,
     validate_contract,
 )
+from .organization import validate_organization_domain
 
 __all__ = [
     "ContractValidationError",
     "ContractRootError",
     "ValidationIssue",
     "validate_contract",
+    "validate_organization_domain",
 ]
