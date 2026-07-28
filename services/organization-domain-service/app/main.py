@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Query
 
 from .domain import (
     COLLECTION_TO_RESOURCE_TYPE,
+    HttpAuthorizationVerifier,
     RESOURCE_TYPE_TO_COLLECTION,
     SERVICE_CONTRACT,
     SERVICE_ID,
@@ -25,8 +26,21 @@ DATABASE = Path(
         DATA_DIR / "organization-domain.db",
     )
 )
+AUTHORIZATION_AUTHORITY_URL = os.getenv(
+    "LEOS_AUTHORIZATION_AUTHORITY_URL",
+    "http://authorization-authority:8000",
+)
+AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS = float(
+    os.getenv("LEOS_AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS", "5")
+)
 
-store = OrganizationDomainStore(DATABASE)
+store = OrganizationDomainStore(
+    DATABASE,
+    authorization_verifier=HttpAuthorizationVerifier(
+        AUTHORIZATION_AUTHORITY_URL,
+        timeout=AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS,
+    ),
+)
 logging.basicConfig(level=os.getenv("LEOS_LOG_LEVEL", "INFO"))
 logger = logging.getLogger(SERVICE_ID)
 

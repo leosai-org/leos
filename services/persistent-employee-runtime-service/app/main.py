@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
+from urllib.parse import quote
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
@@ -32,6 +33,8 @@ AUTHORITY_REF = {
     },
     "authority_revision": "sha256:persistent-employee-runtime-service-v2",
 }
+AUTHORIZATION_AUTHORITY_ID = "authorization-authority"
+AUTHORIZATION_BINDING_CONTRACT = "leos.authorization-evidence-binding.v1"
 RAW_SECRET_KEYS = {
     "api_key",
     "access_token",
@@ -96,6 +99,15 @@ SCHEDULER_URL = os.getenv(
     "EXECUTION_SCHEDULER_URL",
     "http://execution-scheduler-service:8000",
 ).rstrip("/")
+
+AUTHORIZATION_AUTHORITY_URL = os.getenv(
+    "LEOS_AUTHORIZATION_AUTHORITY_URL",
+    "http://authorization-authority:8000",
+).rstrip("/")
+
+AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS = float(
+    os.getenv("LEOS_AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS", "5")
+)
 
 POLL_INTERVAL_SECONDS = float(
     os.getenv(
@@ -269,6 +281,8 @@ def migrate() -> None:
             "scheduler_job_ref_json": "TEXT",
             "actor_context_ref_json": "TEXT",
             "authorization_decision_ref_json": "TEXT",
+            "authorization_binding_json": "TEXT",
+            "authorization_verification_json": "TEXT",
             "source_revision": "TEXT",
             "accepted_at": "TEXT",
             "resource_reservation_id": "TEXT",
@@ -371,6 +385,179 @@ def require_evidence_ref(value: Any, field: str) -> dict[str, Any]:
             f"{field} requires authority evidence.",
         )
     return ref
+
+
+def require_authorization_binding(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise HTTPException(
+            403,
+            {
+                "code": "missing_authorization_binding",
+                "message": "authorization_binding is required for canonical Runtime handoffs",
+            },
+        )
+    try:
+        validate_governed_contract(AUTHORIZATION_BINDING_CONTRACT, value)
+    except ContractValidationError as exc:
+        raise HTTPException(
+            403,
+            {
+                "code": "malformed_authorization_binding",
+                "message": "authorization_binding is malformed",
+                "details": str(exc),
+            },
+        ) from exc
+    actor_context_ref = value.get("actor_context_ref")
+    if not isinstance(actor_context_ref, dict) or actor_context_ref.get("evidence_type") != "ACTOR_CONTEXT":
+        raise HTTPException(
+            403,
+            {
+                "code": "malformed_authorization_binding",
+                "message": "authorization_binding must use canonical Actor Context evidence",
+            },
+        )
+    if not isinstance(actor_context_ref.get("authority"), dict) or not actor_context_ref.get("reference_id") or not actor_context_ref.get("revision"):
+        raise HTTPException(
+            403,
+            {
+                "code": "malformed_authorization_binding",
+                "message": "authorization_binding Actor Context evidence must be authority-issued and revision-pinned",
+            },
+        )
+    if value.get("expected_decision") != "ALLOW":
+        raise HTTPException(403, "authorization_binding must expect ALLOW.")
+    return value
+
+
+def actor_evidence_to_resource_ref(value: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "resource_type": "ACTOR_CONTEXT",
+        "resource_id": value["reference_id"],
+        "revision": value["revision"],
+    }
+
+
+def verify_authorization_response(
+    verification: Any,
+    binding: dict[str, Any],
+) -> None:
+    if not isinstance(verification, dict):
+        raise HTTPException(403, "authorization_verification_failed")
+    if verification.get("verification_status") != "VERIFIED":
+        raise HTTPException(
+            403,
+            {
+                "code": "authorization_verification_failed",
+                "reasons": verification.get("reasons", []),
+            },
+        )
+    if verification.get("authorization_decision_ref") != binding["authorization_decision_ref"]:
+        raise HTTPException(403, "authorization verification decision mismatch")
+    if verification.get("actor_context_ref") != binding["actor_context_ref"]:
+        raise HTTPException(403, "authorization verification actor mismatch")
+    if verification.get("decision") != binding["expected_decision"]:
+        raise HTTPException(403, "authorization verification outcome mismatch")
+    verified_by = verification.get("verified_by")
+    if not isinstance(verified_by, dict) or verified_by.get("authority_id") != AUTHORIZATION_AUTHORITY_ID:
+        raise HTTPException(403, "authorization verification authority mismatch")
+
+
+def verify_authorization_binding(binding: dict[str, Any]) -> dict[str, Any]:
+    decision_id = quote(str(binding["authorization_decision_ref"]["resource_id"]), safe="")
+    request = {
+        "actor_context_ref": binding["actor_context_ref"],
+        "organization_ref": binding["organization_ref"],
+        "scope": binding["expected_scope"],
+        "expected_decision": binding["expected_decision"],
+    }
+    try:
+        with httpx.Client(timeout=AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS) as client:
+            response = client.post(
+                f"{AUTHORIZATION_AUTHORITY_URL}/authorization-decisions/{decision_id}/verify",
+                json=request,
+            )
+    except Exception as exc:
+        raise HTTPException(
+            503,
+            {
+                "code": "authorization_authority_unavailable",
+                "message": "Authorization Authority verification unavailable",
+                "error": str(exc),
+            },
+        ) from exc
+    try:
+        body = response.json()
+    except Exception as exc:
+        raise HTTPException(403, "Authorization Authority returned malformed verification evidence") from exc
+    if response.status_code >= 500:
+        raise HTTPException(
+            503,
+            {
+                "code": "authorization_authority_unavailable",
+                "status_code": response.status_code,
+                "response": body,
+            },
+        )
+    if response.status_code >= 400:
+        raise HTTPException(
+            403,
+            {
+                "code": "authorization_verification_failed",
+                "status_code": response.status_code,
+                "response": body,
+            },
+        )
+    verify_authorization_response(body, binding)
+    return body
+
+
+def verified_authorization_for_operation(
+    *,
+    supplied_binding: dict[str, Any],
+    actor_context_ref: dict[str, Any],
+    authorization_decision_ref: dict[str, Any],
+    organization_ref: dict[str, Any],
+    action: str,
+    resource_ref: dict[str, Any],
+    context_type: str,
+    context_id: str,
+    context_revision: str,
+    context_digest_seed: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    binding = require_authorization_binding(supplied_binding)
+    if actor_evidence_to_resource_ref(binding["actor_context_ref"]) != actor_context_ref:
+        raise HTTPException(403, "authorization binding actor mismatch")
+    if binding["authorization_decision_ref"] != authorization_decision_ref:
+        raise HTTPException(403, "authorization binding decision mismatch")
+    expected_binding = {
+        "contract_version": AUTHORIZATION_BINDING_CONTRACT,
+        "authorization_decision_ref": authorization_decision_ref,
+        "actor_context_ref": binding["actor_context_ref"],
+        "organization_ref": organization_ref,
+        "expected_scope": {
+            "subject": binding["expected_scope"]["subject"],
+            "action": action,
+            "resource": resource_ref,
+            "context_type": context_type,
+            "context_id": context_id,
+            "context_revision": context_revision,
+            "context_digest": request_hash(context_digest_seed),
+        },
+        "expected_decision": "ALLOW",
+    }
+    if binding != expected_binding:
+        raise HTTPException(
+            403,
+            {
+                "code": "authorization_binding_mismatch",
+                "message": "authorization_binding does not match Runtime handoff operation",
+                "expected_action": action,
+                "expected_resource": resource_ref,
+            },
+        )
+    verification = verify_authorization_binding(expected_binding)
+    verify_authorization_response(verification, expected_binding)
+    return binding, verification
 
 
 def reject_raw_secret_values(value: Any, path: str = "$") -> None:
@@ -1715,6 +1902,10 @@ def accept_canonical_assignment_handoff(
         "authorization_decision_ref",
         "AUTHORIZATION_DECISION",
     )
+    supplied_authorization_binding = (
+        payload.get("authorization_binding")
+        or handoff.get("authorization_binding")
+    )
     organization_ref = require_ref(
         handoff.get("organization_ref"),
         "organization_ref",
@@ -1786,6 +1977,28 @@ def accept_canonical_assignment_handoff(
     ).strip()
     if not assignment_revision:
         raise HTTPException(422, "canonical Assignment revision is required.")
+    assignment_ref = {
+        "resource_type": "WORK_ASSIGNMENT",
+        "resource_id": assignment_id,
+        "revision": assignment_revision,
+    }
+    authorization_binding, authorization_verification = verified_authorization_for_operation(
+        supplied_binding=supplied_authorization_binding,
+        actor_context_ref=actor_context_ref,
+        authorization_decision_ref=authorization_decision_ref,
+        organization_ref=organization_ref,
+        action="runtime.assignment-handoff.accept",
+        resource_ref=assignment_ref,
+        context_type="runtime.assignment-handoff",
+        context_id=handoff_id,
+        context_revision=source_revision,
+        context_digest_seed={
+            "operation": "runtime.assignment-handoff.accept",
+            "organization_ref": organization_ref,
+            "resource_ref": assignment_ref,
+            "source_assignment_handoff_ref": source_handoff_ref,
+        },
+    )
 
     fingerprint = request_hash(payload)
     with connect() as db:
@@ -1823,11 +2036,7 @@ def accept_canonical_assignment_handoff(
         response = {
             "ok": True,
             "status": "ACCEPTED",
-            "assignment_ref": {
-                "resource_type": "WORK_ASSIGNMENT",
-                "resource_id": assignment_id,
-                "revision": assignment_revision,
-            },
+            "assignment_ref": assignment_ref,
             "runtime_assignment_id": assignment_id,
             "record_origin": "canonical_work_handoff",
             "handoff_id": handoff_id,
@@ -1847,12 +2056,13 @@ def accept_canonical_assignment_handoff(
                 assignment_decision_ref_json,
                 source_assignment_handoff_ref_json, scheduler_job_ref_json,
                 actor_context_ref_json, authorization_decision_ref_json,
+                authorization_binding_json, authorization_verification_json,
                 source_revision, accepted_at
             )
             VALUES (
                 ?, ?, ?, NULL, ?, NULL, NULL, 'assigned', ?, NULL, NULL,
                 ?, NULL, NULL, ?, NULL, NULL, NULL, NULL, '{}', NULL,
-                'canonical_work_handoff', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                'canonical_work_handoff', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
             """,
             (
@@ -1881,6 +2091,8 @@ def accept_canonical_assignment_handoff(
                 canonical_json(scheduler_job_ref),
                 canonical_json(actor_context_ref),
                 canonical_json(authorization_decision_ref),
+                canonical_json(authorization_binding),
+                canonical_json(authorization_verification),
                 source_revision,
                 timestamp,
             ),

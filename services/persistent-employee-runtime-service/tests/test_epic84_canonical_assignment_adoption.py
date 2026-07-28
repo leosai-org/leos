@@ -9,12 +9,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from fastapi import HTTPException
-from leos_contracts import validate_contract
-
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "services" / "persistent-employee-runtime-service"))
 sys.path.insert(0, str(ROOT / "packages" / "leos-contracts" / "src"))
+
+from fastapi import HTTPException
+from leos_contracts import validate_contract
 
 _TEST_ROOT = tempfile.TemporaryDirectory(prefix="leos-epic84-runtime-")
 os.environ["PERSISTENT_EMPLOYEE_RUNTIME_DATA_DIR"] = _TEST_ROOT.name
@@ -46,12 +46,62 @@ def auth_ref() -> dict:
     }
 
 
+def actor_evidence_ref() -> dict:
+    return {
+        "evidence_type": "ACTOR_CONTEXT",
+        "authority": {
+            "authority_id": "identity-authority",
+            "principal": {
+                "principal_id": "principal:service:identity-authority",
+                "principal_type": "SERVICE",
+            },
+            "authority_revision": "sha256:identity-authority-v1",
+        },
+        "reference_id": actor_ref()["resource_id"],
+        "revision": actor_ref()["revision"],
+    }
+
+
+def principal_ref() -> dict:
+    return {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"}
+
+
 def ref(document: dict) -> dict:
     identity = document["identity"]
     return {
         "resource_type": identity["resource_type"],
         "resource_id": identity["resource_id"],
         "revision": identity["revision"],
+    }
+
+
+def authorization_binding(
+    *,
+    organization_ref: dict,
+    assignment_ref: dict,
+    handoff_ref: dict,
+) -> dict:
+    seed = {
+        "operation": "runtime.assignment-handoff.accept",
+        "organization_ref": organization_ref,
+        "resource_ref": assignment_ref,
+        "source_assignment_handoff_ref": handoff_ref,
+    }
+    return {
+        "contract_version": "leos.authorization-evidence-binding.v1",
+        "authorization_decision_ref": auth_ref(),
+        "actor_context_ref": actor_evidence_ref(),
+        "organization_ref": organization_ref,
+        "expected_scope": {
+            "subject": principal_ref(),
+            "action": "runtime.assignment-handoff.accept",
+            "resource": assignment_ref,
+            "context_type": "runtime.assignment-handoff",
+            "context_id": handoff_ref["resource_id"],
+            "context_revision": handoff_ref["revision"],
+            "context_digest": runtime.request_hash(seed),
+        },
+        "expected_decision": "ALLOW",
     }
 
 
@@ -86,6 +136,15 @@ class RuntimeCanonicalAssignmentAdoptionTests(unittest.TestCase):
                 """,
                 (timestamp, timestamp),
             )
+        runtime.verify_authorization_binding = lambda binding: {
+            "verification_status": "VERIFIED",
+            "authorization_decision_ref": binding["authorization_decision_ref"],
+            "decision": binding["expected_decision"],
+            "verified_at": "2026-01-01T00:00:00Z",
+            "verified_by": {"authority_id": "authorization-authority"},
+            "actor_context_ref": binding["actor_context_ref"],
+            "reasons": [],
+        }
         self.assignment = example("work-assignment.v1.json")
         self.task = example("task-definition.v1.json")
         self.job = example("job-definition.v1.json")
@@ -112,9 +171,20 @@ class RuntimeCanonicalAssignmentAdoptionTests(unittest.TestCase):
             "assignment": copy.deepcopy(self.assignment),
         }
         handoff.update(overrides.pop("handoff_overrides", {}))
+        assignment = handoff["assignment"]
+        assignment_ref = {
+            "resource_type": "WORK_ASSIGNMENT",
+            "resource_id": assignment["identity"]["resource_id"],
+            "revision": assignment["identity"]["revision"],
+        }
         return {
             "actor_context_ref": actor_ref(),
             "authorization_decision_ref": auth_ref(),
+            "authorization_binding": authorization_binding(
+                organization_ref=handoff["organization_ref"],
+                assignment_ref=assignment_ref,
+                handoff_ref=handoff["source_assignment_handoff_ref"],
+            ),
             "idempotency_key": overrides.pop(
                 "idempotency_key", "idem:runtime-handoff"
             ),
@@ -184,22 +254,53 @@ class RuntimeCanonicalAssignmentAdoptionTests(unittest.TestCase):
             "scheduler_job_ref",
             "organization_ref",
         ):
-            handoff = self.payload()["handoff"]
+            request = self.payload(idempotency_key=f"idem:missing:{field}")
+            handoff = request["handoff"]
             handoff.pop(field)
             with self.assertRaises(HTTPException):
-                runtime.accept_canonical_assignment_handoff(
-                    {
-                        "actor_context_ref": actor_ref(),
-                        "authorization_decision_ref": auth_ref(),
-                        "idempotency_key": f"idem:missing:{field}",
-                        "handoff": handoff,
-                    }
-                )
-        for field in ("actor_context_ref", "authorization_decision_ref"):
+                runtime.accept_canonical_assignment_handoff(request)
+        for field in ("actor_context_ref", "authorization_decision_ref", "authorization_binding"):
             request = self.payload(idempotency_key=f"idem:missing:{field}")
             request.pop(field)
             with self.assertRaises(HTTPException):
                 runtime.accept_canonical_assignment_handoff(request)
+
+    def test_authorization_binding_mismatch_and_denial_fail_closed(self):
+        request = self.payload(idempotency_key="idem:wrong-binding")
+        request["authorization_binding"]["expected_scope"]["action"] = (
+            "runtime.assignment-handoff.update"
+        )
+        with self.assertRaises(HTTPException) as wrong:
+            runtime.accept_canonical_assignment_handoff(request)
+        self.assertEqual(403, wrong.exception.status_code)
+
+        runtime.verify_authorization_binding = lambda binding: {
+            "verification_status": "DENIED",
+            "authorization_decision_ref": binding["authorization_decision_ref"],
+            "decision": binding["expected_decision"],
+            "verified_at": "2026-01-01T00:00:00Z",
+            "verified_by": {"authority_id": "authorization-authority"},
+            "actor_context_ref": binding["actor_context_ref"],
+            "reasons": ["test_denial"],
+        }
+        with self.assertRaises(HTTPException) as denied:
+            runtime.accept_canonical_assignment_handoff(
+                self.payload(idempotency_key="idem:denied-binding")
+            )
+        self.assertEqual(403, denied.exception.status_code)
+
+    def test_authorization_binding_requires_canonical_actor_context_evidence(self):
+        request = self.payload(idempotency_key="idem:missing-actor-authority")
+        request["authorization_binding"]["actor_context_ref"].pop("authority")
+
+        with self.assertRaises(HTTPException) as raised:
+            runtime.accept_canonical_assignment_handoff(request)
+
+        self.assertEqual(403, raised.exception.status_code)
+        self.assertEqual(
+            "malformed_authorization_binding",
+            raised.exception.detail["code"],
+        )
 
     def test_cross_org_stale_revision_and_unknown_employee_are_rejected(self):
         assignment = copy.deepcopy(self.assignment)

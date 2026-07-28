@@ -11,8 +11,17 @@
   ],
   "dependencies": [
     "execution-scheduler-service",
-    "employee-resource-profile-service"
+    "employee-resource-profile-service",
+    "authorization-authority"
   ],
+  "authorization_verification": {
+    "authority": "authorization-authority",
+    "endpoint": "/authorization-decisions/{decision_id}/verify",
+    "required_for": [
+      "/v2/assignment-handoffs"
+    ],
+    "fail_closed": true
+  },
   "ownership": {
     "assignment_execution": true,
     "assignment_failure": true,

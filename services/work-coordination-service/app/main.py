@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Query
 
 from .domain import (
     COLLECTION_TO_RESOURCE_TYPE,
+    HttpAuthorizationVerifier,
     HttpRuntimeHandoffAdapter,
     HttpSchedulerProjectionAdapter,
     RESOURCE_TYPE_TO_COLLECTION,
@@ -30,9 +31,20 @@ PERSISTENT_RUNTIME_URL = os.getenv(
     "PERSISTENT_EMPLOYEE_RUNTIME_URL",
     "http://persistent-employee-runtime-service:8000",
 )
+AUTHORIZATION_AUTHORITY_URL = os.getenv(
+    "LEOS_AUTHORIZATION_AUTHORITY_URL",
+    "http://authorization-authority:8000",
+)
+AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS = float(
+    os.getenv("LEOS_AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS", "5")
+)
 
 store = WorkCoordinationStore(
     DATABASE,
+    authorization_verifier=HttpAuthorizationVerifier(
+        AUTHORIZATION_AUTHORITY_URL,
+        timeout=AUTHORIZATION_AUTHORITY_TIMEOUT_SECONDS,
+    ),
     scheduler_projection_adapter=HttpSchedulerProjectionAdapter(SCHEDULER_URL),
     runtime_handoff_adapter=HttpRuntimeHandoffAdapter(PERSISTENT_RUNTIME_URL),
 )

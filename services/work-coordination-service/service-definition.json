@@ -8,6 +8,25 @@
   "health_endpoint": "/health",
   "readiness_endpoint": "/ready",
   "description": "Canonical Dev Preview v2 owner for Work Requests, Workflow Definitions/Revisions, Tasks, Dependencies, assignment decisions, same-Organization Delegation, Work Results, verification, closure, retry intents, escalation intents, and producer-local outbox records.",
+  "dependencies": [
+    "organization-domain-service",
+    "employee-registry",
+    "execution-scheduler-service",
+    "persistent-employee-runtime-service",
+    "authorization-authority"
+  ],
+  "authorization_verification": {
+    "authority": "authorization-authority",
+    "endpoint": "/authorization-decisions/{decision_id}/verify",
+    "required_for": [
+      "authority-bearing Work Coordination mutations",
+      "assignment decision creation",
+      "scheduler projection request records",
+      "runtime handoff request records",
+      "verification and closure records"
+    ],
+    "fail_closed": true
+  },
   "authority_boundaries": {
     "does_not_own": [
       "scheduler_jobs",

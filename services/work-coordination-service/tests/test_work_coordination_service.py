@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import sqlite3
 import sys
 import tempfile
@@ -10,10 +11,16 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[3]
+TEST_DATA = tempfile.TemporaryDirectory(prefix="leos-work-coordination-")
+os.environ["LEOS_WORK_COORDINATION_DATA_DIR"] = TEST_DATA.name
+os.environ["LEOS_WORK_COORDINATION_DB"] = str(Path(TEST_DATA.name) / "work-coordination.db")
+os.environ["LEOS_CONTRACT_ROOT"] = str(ROOT / "contracts")
 sys.path.insert(0, str(ROOT / "services" / "work-coordination-service"))
 sys.path.insert(0, str(ROOT / "packages" / "leos-contracts" / "src"))
 
 from app.domain import (  # noqa: E402
+    AUTHORIZATION_AUTHORITY_ID,
+    AUTHORIZATION_BINDING_CONTRACT,
     AUTHORITY_REF,
     COLLECTION_TO_RESOURCE_TYPE,
     StaticReferenceAdapter,
@@ -21,6 +28,7 @@ from app.domain import (  # noqa: E402
     StaticSchedulerProjectionAdapter,
     WorkCoordinationError,
     WorkCoordinationStore,
+    evidence_revision_for,
 )
 
 try:  # noqa: E402
@@ -54,14 +62,210 @@ def auth_ref() -> dict[str, Any]:
     }
 
 
+def actor_evidence_ref() -> dict[str, Any]:
+    return {
+        "evidence_type": "ACTOR_CONTEXT",
+        "authority": {
+            "authority_id": "identity-authority",
+            "principal": {
+                "principal_id": "principal:service:identity-authority",
+                "principal_type": "SERVICE",
+            },
+            "authority_revision": "sha256:identity-authority-v1",
+        },
+        "reference_id": actor_ref()["resource_id"],
+        "revision": actor_ref()["revision"],
+    }
+
+
+def principal_ref() -> dict[str, Any]:
+    return {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"}
+
+
+def authorization_binding(
+    *,
+    action: str,
+    organization_ref: dict[str, Any],
+    resource_ref: dict[str, Any],
+    context_type: str,
+    context_id: str,
+    context_revision: str,
+    seed: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "contract_version": AUTHORIZATION_BINDING_CONTRACT,
+        "authorization_decision_ref": auth_ref(),
+        "actor_context_ref": actor_evidence_ref(),
+        "organization_ref": organization_ref,
+        "expected_scope": {
+            "subject": principal_ref(),
+            "action": action,
+            "resource": resource_ref,
+            "context_type": context_type,
+            "context_id": context_id,
+            "context_revision": context_revision,
+            "context_digest": evidence_revision_for(seed),
+        },
+        "expected_decision": "ALLOW",
+    }
+
+
+class StaticAuthorizationVerifier:
+    def __init__(self) -> None:
+        self.requests: list[dict[str, Any]] = []
+        self.status = "VERIFIED"
+
+    def verify_authorization_binding(self, binding: dict[str, Any]) -> dict[str, Any]:
+        self.requests.append(copy.deepcopy(binding))
+        return {
+            "verification_status": self.status,
+            "authorization_decision_ref": binding["authorization_decision_ref"],
+            "decision": binding["expected_decision"],
+            "verified_at": "2026-01-01T00:00:00Z",
+            "verified_by": {"authority_id": AUTHORIZATION_AUTHORITY_ID},
+            "actor_context_ref": binding["actor_context_ref"],
+            "reasons": [] if self.status == "VERIFIED" else ["test_denial"],
+        }
+
+
 def payload(**items: Any) -> dict[str, Any]:
+    body = dict(items)
+    idempotency_key = body.pop("idempotency_key", "idem:test")
+    correlation_id = body.pop("correlation_id", "corr:test")
+    if "authorization_binding" not in body:
+        if isinstance(body.get("record"), dict):
+            record = body["record"]
+            resource = ref(record)
+            operation = f"create:{resource['resource_type']}:{resource['resource_id']}"
+            body["authorization_binding"] = authorization_binding(
+                action="work-coordination.record.create",
+                organization_ref=record["organization_ref"],
+                resource_ref=resource,
+                context_type="work-coordination.mutation",
+                context_id=operation,
+                context_revision=resource["revision"],
+                seed={
+                    "operation": operation,
+                    "organization_ref": record["organization_ref"],
+                    "resource_ref": resource,
+                },
+            )
+        elif isinstance(body.get("records"), list):
+            records = body["records"]
+            organization_ref = records[0]["organization_ref"]
+            operation = "bundle-create:" + evidence_revision_for({"records": records})
+            body["authorization_binding"] = authorization_binding(
+                action="work-coordination.bundle.create",
+                organization_ref=organization_ref,
+                resource_ref=organization_ref,
+                context_type="work-coordination.mutation",
+                context_id=operation,
+                context_revision=organization_ref["revision"],
+                seed={
+                    "operation": operation,
+                    "organization_ref": organization_ref,
+                    "resource_refs": [ref(record) for record in records],
+                },
+            )
+        elif isinstance(body.get("decision"), dict):
+            decision = body["decision"]
+            operation = f"assignment-decision:{decision['decision_id']}"
+            body["authorization_binding"] = authorization_binding(
+                action="work-coordination.assignment-decision.create",
+                organization_ref=decision["organization_ref"],
+                resource_ref=decision["work_ref"],
+                context_type="work-coordination.assignment-decision",
+                context_id=operation,
+                context_revision=decision["work_ref"]["revision"],
+                seed={
+                    "operation": operation,
+                    "organization_ref": decision["organization_ref"],
+                    "resource_ref": decision["work_ref"],
+                },
+            )
+        elif isinstance(body.get("projection"), dict):
+            projection = body["projection"]
+            resource = projection.get("source_task_ref") or projection.get("source_work_request_ref")
+            operation = f"scheduler-projection:{projection['projection_id']}"
+            body["authorization_binding"] = authorization_binding(
+                action="work-coordination.scheduler-projection.request",
+                organization_ref=projection["organization_ref"],
+                resource_ref=resource,
+                context_type="work-coordination.scheduler-projection",
+                context_id=operation,
+                context_revision=resource["revision"],
+                seed={
+                    "operation": operation,
+                    "organization_ref": projection["organization_ref"],
+                    "resource_ref": resource,
+                },
+            )
+        elif isinstance(body.get("verification"), dict):
+            verification = body["verification"]
+            operation = f"verification:{verification['verification_id']}"
+            body["authorization_binding"] = authorization_binding(
+                action="work-coordination.verification.create",
+                organization_ref=verification["organization_ref"],
+                resource_ref=verification["result_ref"],
+                context_type="work-coordination.verification",
+                context_id=operation,
+                context_revision=verification["result_ref"]["revision"],
+                seed={
+                    "operation": operation,
+                    "organization_ref": verification["organization_ref"],
+                    "resource_ref": verification["result_ref"],
+                },
+            )
+        elif isinstance(body.get("closure"), dict):
+            closure = body["closure"]
+            operation = f"closure:{closure['closure_id']}"
+            body["authorization_binding"] = authorization_binding(
+                action="work-coordination.closure.create",
+                organization_ref=closure["organization_ref"],
+                resource_ref=closure["subject_ref"],
+                context_type="work-coordination.closure",
+                context_id=operation,
+                context_revision=closure["subject_ref"]["revision"],
+                seed={
+                    "operation": operation,
+                    "organization_ref": closure["organization_ref"],
+                    "resource_ref": closure["subject_ref"],
+                    "verification_ref": closure.get("verification_ref"),
+                },
+            )
     return {
         "actor_context_ref": actor_ref(),
         "authorization_decision_ref": auth_ref(),
-        "idempotency_key": items.pop("idempotency_key", "idem:test"),
-        "correlation_id": items.pop("correlation_id", "corr:test"),
-        **items,
+        "idempotency_key": idempotency_key,
+        "correlation_id": correlation_id,
+        **body,
     }
+
+
+def transition_payload(document: dict[str, Any], to_status: str, *, key: str) -> dict[str, Any]:
+    resource = ref(document)
+    operation = (
+        f"transition:{resource['resource_type']}:{resource['resource_id']}:"
+        f"{resource['revision']}:{to_status}"
+    )
+    return payload(
+        expected_revision=resource["revision"],
+        to_status=to_status,
+        idempotency_key=key,
+        authorization_binding=authorization_binding(
+            action="work-coordination.record.transition",
+            organization_ref=document["organization_ref"],
+            resource_ref=resource,
+            context_type="work-coordination.mutation",
+            context_id=operation,
+            context_revision=resource["revision"],
+            seed={
+                "operation": operation,
+                "organization_ref": document["organization_ref"],
+                "resource_ref": resource,
+            },
+        ),
+    )
 
 
 def adopt_work_authority(document: dict[str, Any]) -> dict[str, Any]:
@@ -170,6 +374,10 @@ class DirectClient:
 
 
 class WorkCoordinationServiceTests(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls) -> None:
+        TEST_DATA.cleanup()
+
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
         self.organization = example("organization.v1.json")
@@ -180,6 +388,7 @@ class WorkCoordinationServiceTests(unittest.TestCase):
         self.assignment = example("work-assignment.v1.json")
         self.scheduler_adapter = StaticSchedulerProjectionAdapter(job_ref=ref(self.job))
         self.runtime_adapter = StaticRuntimeHandoffAdapter(assignment_ref=ref(self.assignment))
+        self.authz = StaticAuthorizationVerifier()
         self.store = WorkCoordinationStore(
             Path(self.tmp.name) / "work.db",
             organization_adapter=StaticReferenceAdapter([self.organization, self.team, self.position]),
@@ -188,6 +397,7 @@ class WorkCoordinationServiceTests(unittest.TestCase):
             runtime_reference_adapter=StaticReferenceAdapter([self.assignment]),
             scheduler_projection_adapter=self.scheduler_adapter,
             runtime_handoff_adapter=self.runtime_adapter,
+            authorization_verifier=self.authz,
         )
         if TestClient is not None and main is not None:
             main.store = self.store
@@ -296,6 +506,43 @@ class WorkCoordinationServiceTests(unittest.TestCase):
                 response = self.client.post("/work-requests", json=body)
                 self.assertEqual(response.status_code, expected)
 
+        structural_only = payload(
+            record=request,
+            idempotency_key="idem:missing-binding",
+        )
+        structural_only.pop("authorization_binding")
+        response = self.client.post("/work-requests", json=structural_only)
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorization_binding_mismatch_and_denial_fail_closed(self):
+        request = adopt_work_authority(example("work-request.v1.json"))
+        wrong = payload(record=request, idempotency_key="idem:wrong-binding")
+        wrong["authorization_binding"]["expected_scope"]["action"] = (
+            "work-coordination.record.update"
+        )
+        response = self.client.post("/work-requests", json=wrong)
+        self.assertEqual(response.status_code, 403)
+
+        self.authz.status = "DENIED"
+        denied = payload(record=request, idempotency_key="idem:denied-binding")
+        response = self.client.post("/work-requests", json=denied)
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorization_binding_requires_canonical_actor_context_evidence(self):
+        request = payload(
+            record=adopt_work_authority(example("work-request.v1.json")),
+            idempotency_key="idem:missing-actor-authority",
+        )
+        request["authorization_binding"]["actor_context_ref"].pop("authority")
+
+        response = self.client.post("/work-requests", json=request)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            "malformed_authorization_binding",
+            response.json()["detail"]["code"],
+        )
+
     def test_caller_authority_booleans_and_secret_fields_are_rejected(self):
         request = adopt_work_authority(example("work-request.v1.json"))
         for field, value in (
@@ -348,7 +595,10 @@ class WorkCoordinationServiceTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 422)
 
-        closed_store = WorkCoordinationStore(Path(self.tmp.name) / "closed.db")
+        closed_store = WorkCoordinationStore(
+            Path(self.tmp.name) / "closed.db",
+            authorization_verifier=self.authz,
+        )
         if main is not None:
             main.store = closed_store
         else:
@@ -367,12 +617,30 @@ class WorkCoordinationServiceTests(unittest.TestCase):
         mutated = copy.deepcopy(revision)
         mutated["steps"][0]["title"] = "Changed after publication"
         mutated["identity"]["revision"] = "sha256:workflow-revision-mutated"
+        update_resource = ref(revision)
+        update_operation = (
+            f"update:WORKFLOW_REVISION:{revision['identity']['resource_id']}:"
+            f"{revision['identity']['revision']}"
+        )
         response = self.client.patch(
             f"/workflow-revisions/{revision['identity']['resource_id']}",
             json=payload(
                 record=mutated,
                 expected_revision=revision["identity"]["revision"],
                 idempotency_key="idem:immutable",
+                authorization_binding=authorization_binding(
+                    action="work-coordination.record.update",
+                    organization_ref=mutated["organization_ref"],
+                    resource_ref=update_resource,
+                    context_type="work-coordination.mutation",
+                    context_id=update_operation,
+                    context_revision=revision["identity"]["revision"],
+                    seed={
+                        "operation": update_operation,
+                        "organization_ref": mutated["organization_ref"],
+                        "resource_ref": update_resource,
+                    },
+                ),
             ),
         )
         self.assertEqual(response.status_code, 409)
@@ -415,21 +683,13 @@ class WorkCoordinationServiceTests(unittest.TestCase):
         task = self.create_task()
         active = self.client.post(
             f"/tasks/{task['identity']['resource_id']}/transition",
-            json=payload(
-                expected_revision=task["identity"]["revision"],
-                to_status="ACTIVE",
-                idempotency_key="idem:active",
-            ),
+            json=transition_payload(task, "ACTIVE", key="idem:active"),
         )
         self.assertEqual(active.status_code, 200, active.text)
         active_revision = active.json()["record"]["identity"]["revision"]
         response = self.client.post(
             f"/tasks/{task['identity']['resource_id']}/transition",
-            json=payload(
-                expected_revision=active_revision,
-                to_status="COMPLETED",
-                idempotency_key="idem:no-result",
-            ),
+            json=transition_payload(active.json()["record"], "COMPLETED", key="idem:no-result"),
         )
         self.assertEqual(response.status_code, 422)
 
@@ -508,9 +768,32 @@ class WorkCoordinationServiceTests(unittest.TestCase):
             "organization_ref": ref(self.organization),
             "assignment_decision_ref": decision_ref,
         }
+        handoff_resource = {
+            "resource_type": "TASK",
+            "resource_id": "task:acme:market-brief:research",
+            "revision": "sha256:task-acme-market-brief-research-v1",
+        }
+        handoff_operation = "assignment-handoff:assignment-handoff:acme:research:1"
         response = self.client.post(
             "/assignment-handoffs",
-            json=payload(handoff=handoff, idempotency_key="idem:handoff"),
+            json=payload(
+                handoff=handoff,
+                idempotency_key="idem:handoff",
+                authorization_binding=authorization_binding(
+                    action="work-coordination.assignment-handoff.request",
+                    organization_ref=handoff["organization_ref"],
+                    resource_ref=handoff_resource,
+                    context_type="work-coordination.assignment-handoff",
+                    context_id=handoff_operation,
+                    context_revision=decision_ref["revision"],
+                    seed={
+                        "operation": handoff_operation,
+                        "organization_ref": handoff["organization_ref"],
+                        "resource_ref": handoff_resource,
+                        "assignment_decision_ref": decision_ref,
+                    },
+                ),
+            ),
         )
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(len(self.runtime_adapter.requests), 1)

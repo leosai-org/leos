@@ -17,6 +17,16 @@
     "employee-registry",
     "event-delivery-service"
   ],
+  "authorization_verification": {
+    "authority": "authorization-authority",
+    "endpoint": "/authorization-decisions/{decision_id}/verify",
+    "required_for": [
+      "organization-domain create",
+      "organization-domain update",
+      "organization-domain lifecycle transition"
+    ],
+    "fail_closed": true
+  },
   "persistence": {
     "type": "sqlite",
     "path": "/data/organization-domain/organization-domain.db",

@@ -26,8 +26,11 @@ sys.path.insert(0, str(PACKAGE_SRC))
 
 from app import main  # noqa: E402
 from app.domain import (  # noqa: E402
+    AUTHORIZATION_AUTHORITY_ID,
+    AUTHORIZATION_BINDING_CONTRACT,
     OrganizationDomainStore,
     StaticEmployeeReferenceAdapter,
+    evidence_revision_for,
     revision_for,
 )
 
@@ -62,14 +65,102 @@ def actor_evidence_ref(record: dict) -> dict:
     }
 
 
-def envelope(record: dict, *, key: str | None = None) -> dict:
+def principal_ref() -> dict:
+    return {"principal_id": "principal:user:brett", "principal_type": "HUMAN_USER"}
+
+
+def organization_ref_for(record: dict) -> dict:
+    if isinstance(record.get("organization_ref"), dict):
+        return record["organization_ref"]
+    return record_ref(record)
+
+
+def expected_binding(
+    *,
+    record: dict,
+    action: str,
+    resource_ref: dict,
+    context_id: str,
+    context_revision: str,
+    seed: dict,
+) -> dict:
+    return {
+        "contract_version": AUTHORIZATION_BINDING_CONTRACT,
+        "authorization_decision_ref": auth_ref(record),
+        "actor_context_ref": actor_evidence_ref(record),
+        "organization_ref": organization_ref_for(record),
+        "expected_scope": {
+            "subject": principal_ref(),
+            "action": action,
+            "resource": resource_ref,
+            "context_type": "organization-domain.mutation",
+            "context_id": context_id,
+            "context_revision": context_revision,
+            "context_digest": evidence_revision_for(seed),
+        },
+        "expected_decision": "ALLOW",
+    }
+
+
+def record_ref(record: dict) -> dict:
+    identity = record["identity"]
+    return {
+        "resource_type": identity["resource_type"],
+        "resource_id": identity["resource_id"],
+        "revision": identity["revision"],
+    }
+
+
+def envelope(
+    record: dict,
+    *,
+    key: str | None = None,
+    action: str | None = None,
+    resource_ref: dict | None = None,
+    context_id: str | None = None,
+    context_revision: str | None = None,
+    seed: dict | None = None,
+) -> dict:
+    resource = resource_ref or record_ref(record)
+    operation = context_id or f"create:{record['identity']['resource_type']}:{record['identity']['resource_id']}"
+    binding = expected_binding(
+        record=record,
+        action=action or "organization-domain.record.create",
+        resource_ref=resource,
+        context_id=operation,
+        context_revision=context_revision or resource["revision"],
+        seed=seed or {
+            "operation": operation,
+            "organization_ref": organization_ref_for(record),
+            "resource_ref": resource,
+        },
+    )
     return {
         "record": record,
         "actor_context_ref": actor_evidence_ref(record),
         "authorization_decision_ref": auth_ref(record),
+        "authorization_binding": binding,
         "idempotency_key": key,
         "correlation_id": f"correlation:{record['identity']['resource_id']}",
     }
+
+
+class StaticAuthorizationVerifier:
+    def __init__(self) -> None:
+        self.requests: list[dict] = []
+        self.status = "VERIFIED"
+
+    def verify_authorization_binding(self, binding: dict) -> dict:
+        self.requests.append(copy.deepcopy(binding))
+        return {
+            "verification_status": self.status,
+            "authorization_decision_ref": binding["authorization_decision_ref"],
+            "decision": binding["expected_decision"],
+            "verified_at": "2026-01-01T00:00:00Z",
+            "verified_by": {"authority_id": AUTHORIZATION_AUTHORITY_ID},
+            "actor_context_ref": binding["actor_context_ref"],
+            "reasons": [] if self.status == "VERIFIED" else ["test_denial"],
+        }
 
 
 class OrganizationDomainServiceTests(unittest.TestCase):
@@ -81,9 +172,11 @@ class OrganizationDomainServiceTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.database = Path(self.temp.name) / "organization-domain.db"
         self.employee = example("employee-definition.v3.json")
+        self.authz = StaticAuthorizationVerifier()
         self.store = OrganizationDomainStore(
             self.database,
             employee_adapter=StaticEmployeeReferenceAdapter([self.employee]),
+            authorization_verifier=self.authz,
         )
         main.store = self.store
         self.client = TestClient(main.app)
@@ -185,8 +278,29 @@ class OrganizationDomainServiceTests(unittest.TestCase):
         after["description"] = "Updated through the Organization Domain Service."
         after["identity"]["updated_at"] = "2026-07-25T18:00:00Z"
         after["identity"]["revision"] = revision_for(after)
-        request = envelope(after, key="update-organization")
-        request["expected_revision"] = before["identity"]["revision"]
+        expected_revision = before["identity"]["revision"]
+        request = envelope(
+            after,
+            key="update-organization",
+            action="organization-domain.record.update",
+            resource_ref={
+                "resource_type": "ORGANIZATION",
+                "resource_id": before["identity"]["resource_id"],
+                "revision": expected_revision,
+            },
+            context_id=f"update:ORGANIZATION:{before['identity']['resource_id']}:{expected_revision}",
+            context_revision=expected_revision,
+            seed={
+                "operation": f"update:ORGANIZATION:{before['identity']['resource_id']}:{expected_revision}",
+                "organization_ref": organization_ref_for(after),
+                "resource_ref": {
+                    "resource_type": "ORGANIZATION",
+                    "resource_id": before["identity"]["resource_id"],
+                    "revision": expected_revision,
+                },
+            },
+        )
+        request["expected_revision"] = expected_revision
 
         response = self.client.patch(
             f"/organizations/{before['identity']['resource_id']}",
@@ -216,8 +330,28 @@ class OrganizationDomainServiceTests(unittest.TestCase):
         updated = copy.deepcopy(before)
         updated["status"] = "SUSPENDED"
         updated["identity"]["revision"] = "sha256:attempted-status-update"
-        request = envelope(updated)
-        request["expected_revision"] = before["identity"]["revision"]
+        expected_revision = before["identity"]["revision"]
+        request = envelope(
+            updated,
+            action="organization-domain.record.update",
+            resource_ref={
+                "resource_type": "ORGANIZATION",
+                "resource_id": before["identity"]["resource_id"],
+                "revision": expected_revision,
+            },
+            context_id=f"update:ORGANIZATION:{before['identity']['resource_id']}:{expected_revision}",
+            context_revision=expected_revision,
+            seed={
+                "operation": f"update:ORGANIZATION:{before['identity']['resource_id']}:{expected_revision}",
+                "organization_ref": organization_ref_for(updated),
+                "resource_ref": {
+                    "resource_type": "ORGANIZATION",
+                    "resource_id": before["identity"]["resource_id"],
+                    "revision": expected_revision,
+                },
+            },
+        )
+        request["expected_revision"] = expected_revision
         response = self.client.patch(
             f"/organizations/{before['identity']['resource_id']}",
             json=request,
@@ -227,11 +361,25 @@ class OrganizationDomainServiceTests(unittest.TestCase):
 
     def test_lifecycle_transition_updates_record_outbox_and_transition_log_atomically(self):
         before = self.create("organization.v1.json", "organizations")
+        operation = f"transition:ORGANIZATION:{before['identity']['resource_id']}:{before['identity']['revision']}:SUSPENDED"
+        resource = {
+            "resource_type": "ORGANIZATION",
+            "resource_id": before["identity"]["resource_id"],
+            "revision": before["identity"]["revision"],
+        }
         request = {
             "expected_revision": before["identity"]["revision"],
             "to_status": "SUSPENDED",
             "actor_context_ref": actor_evidence_ref(before),
             "authorization_decision_ref": auth_ref(before),
+            "authorization_binding": expected_binding(
+                record=before,
+                action="organization-domain.record.transition",
+                resource_ref=resource,
+                context_id=operation,
+                context_revision=before["identity"]["revision"],
+                seed={"operation": operation, "resource_ref": resource},
+            ),
             "idempotency_key": "transition-org-suspend",
             "correlation_id": "correlation:transition-org-suspend",
         }
@@ -252,6 +400,7 @@ class OrganizationDomainServiceTests(unittest.TestCase):
         reopened = OrganizationDomainStore(
             self.database,
             employee_adapter=StaticEmployeeReferenceAdapter([self.employee]),
+            authorization_verifier=self.authz,
         )
         self.assertEqual(
             "SUSPENDED",
@@ -260,6 +409,12 @@ class OrganizationDomainServiceTests(unittest.TestCase):
 
     def test_illegal_lifecycle_transition_is_rejected(self):
         before = self.create("organization.v1.json", "organizations")
+        operation = f"transition:ORGANIZATION:{before['identity']['resource_id']}:{before['identity']['revision']}:DELETED"
+        resource = {
+            "resource_type": "ORGANIZATION",
+            "resource_id": before["identity"]["resource_id"],
+            "revision": before["identity"]["revision"],
+        }
         response = self.client.post(
             f"/organizations/{before['identity']['resource_id']}/transition",
             json={
@@ -267,6 +422,14 @@ class OrganizationDomainServiceTests(unittest.TestCase):
                 "to_status": "DELETED",
                 "actor_context_ref": actor_evidence_ref(before),
                 "authorization_decision_ref": auth_ref(before),
+                "authorization_binding": expected_binding(
+                    record=before,
+                    action="organization-domain.record.transition",
+                    resource_ref=resource,
+                    context_id=operation,
+                    context_revision=before["identity"]["revision"],
+                    seed={"operation": operation, "resource_ref": resource},
+                ),
             },
         )
         self.assertEqual(409, response.status_code)
@@ -321,7 +484,10 @@ class OrganizationDomainServiceTests(unittest.TestCase):
         self.assertEqual(422, response.status_code)
 
     def test_employee_registry_unavailable_fails_closed_for_employee_relationships(self):
-        self.store = OrganizationDomainStore(self.database)
+        self.store = OrganizationDomainStore(
+            self.database,
+            authorization_verifier=self.authz,
+        )
         main.store = self.store
         self.client = TestClient(main.app)
         self.bootstrap_structure()
@@ -344,6 +510,40 @@ class OrganizationDomainServiceTests(unittest.TestCase):
                 response = self.client.post("/organizations", json=request)
                 self.assertIn(response.status_code, {401, 403})
                 self.assertEqual(expected_code, response.json()["detail"]["code"])
+
+        structural_only = envelope(record, key="idem:missing-binding")
+        structural_only.pop("authorization_binding")
+        response = self.client.post("/organizations", json=structural_only)
+        self.assertEqual(403, response.status_code)
+        self.assertEqual("missing_authorization_binding", response.json()["detail"]["code"])
+
+    def test_authorization_binding_mismatch_and_denial_fail_closed(self):
+        record = example("organization.v1.json")
+        wrong = envelope(record, key="idem:wrong-binding")
+        wrong["authorization_binding"]["expected_scope"]["action"] = (
+            "organization-domain.record.update"
+        )
+        response = self.client.post("/organizations", json=wrong)
+        self.assertEqual(403, response.status_code)
+        self.assertEqual("authorization_binding_mismatch", response.json()["detail"]["code"])
+
+        self.authz.status = "DENIED"
+        denied = envelope(record, key="idem:denied-binding")
+        response = self.client.post("/organizations", json=denied)
+        self.assertEqual(403, response.status_code)
+        self.assertEqual("authorization_verification_failed", response.json()["detail"]["code"])
+
+    def test_authorization_binding_requires_canonical_actor_context_evidence(self):
+        request = envelope(example("organization.v1.json"), key="idem:missing-actor-authority")
+        request["authorization_binding"]["actor_context_ref"].pop("authority")
+
+        response = self.client.post("/organizations", json=request)
+
+        self.assertEqual(403, response.status_code)
+        self.assertEqual(
+            "malformed_authorization_binding",
+            response.json()["detail"]["code"],
+        )
 
     def test_caller_authority_boolean_is_rejected(self):
         request = envelope(example("organization.v1.json"))

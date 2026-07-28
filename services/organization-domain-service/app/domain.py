@@ -6,11 +6,13 @@ import logging
 import sqlite3
 import uuid
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Protocol
+from urllib.parse import quote
 
+import httpx
 from leos_contracts import (
     ContractValidationError,
     validate_contract,
@@ -38,6 +40,8 @@ EVENT_SOURCE_REF = {
     "revision": "sha256:event-source-organization-domain-service-v1",
 }
 OBSERVED_AT_FALLBACK = "2099-01-01T00:00:00Z"
+AUTHORIZATION_AUTHORITY_ID = "authorization-authority"
+AUTHORIZATION_BINDING_CONTRACT = "leos.authorization-evidence-binding.v1"
 
 CONTRACT_BY_RESOURCE_TYPE = {
     "ORGANIZATION": "leos.organization.v1",
@@ -235,6 +239,13 @@ def organization_id_for(document: dict[str, Any]) -> str:
     return organization_id
 
 
+def organization_ref_for(document: dict[str, Any]) -> dict[str, Any]:
+    resource_type, _ = resource_key(document)
+    if resource_type == "ORGANIZATION":
+        return resource_ref(document)
+    return require_dict(document.get("organization_ref"), "organization_ref")
+
+
 def validate_canonical_document(document: dict[str, Any]) -> None:
     reject_raw_secret_values(document)
     resource_type, _ = resource_key(document)
@@ -318,6 +329,111 @@ def validate_authorization_decision_ref(value: Any) -> dict[str, Any]:
     return ref
 
 
+def validate_binding_actor_context_ref(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict) or value.get("evidence_type") != "ACTOR_CONTEXT":
+        raise OrganizationDomainError(
+            "authorization_binding must use canonical Actor Context evidence",
+            code="malformed_authorization_binding",
+            status_code=403,
+        )
+    if not isinstance(value.get("authority"), dict) or not value.get("reference_id") or not value.get("revision"):
+        raise OrganizationDomainError(
+            "authorization_binding Actor Context evidence must be authority-issued and revision-pinned",
+            code="malformed_authorization_binding",
+            status_code=403,
+        )
+    return value
+
+
+def validate_authorization_binding(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise OrganizationDomainError(
+            "authorization_binding is required for protected mutations",
+            code="missing_authorization_binding",
+            status_code=403,
+        )
+    try:
+        validate_contract(AUTHORIZATION_BINDING_CONTRACT, value)
+    except ContractValidationError as exc:
+        raise OrganizationDomainError(
+            "authorization_binding is malformed",
+            code="malformed_authorization_binding",
+            status_code=403,
+            details={"issues": [issue.__dict__ for issue in exc.issues]},
+        ) from exc
+    validate_binding_actor_context_ref(value.get("actor_context_ref"))
+    if value.get("expected_decision") != "ALLOW":
+        raise OrganizationDomainError(
+            "protected Organization mutations require an ALLOW authorization binding",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    return value
+
+
+class AuthorizationVerifier(Protocol):
+    def verify_authorization_binding(self, binding: dict[str, Any]) -> dict[str, Any]:
+        ...
+
+
+class HttpAuthorizationVerifier:
+    """Narrow client for the Authorization Authority verification endpoint."""
+
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        timeout: float = 5.0,
+        expected_authority_id: str = AUTHORIZATION_AUTHORITY_ID,
+    ) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+        self.expected_authority_id = expected_authority_id
+
+    def verify_authorization_binding(self, binding: dict[str, Any]) -> dict[str, Any]:
+        decision_ref = binding["authorization_decision_ref"]
+        decision_id = quote(str(decision_ref["resource_id"]), safe="")
+        request = {
+            "actor_context_ref": binding["actor_context_ref"],
+            "organization_ref": binding["organization_ref"],
+            "scope": binding["expected_scope"],
+            "expected_decision": binding["expected_decision"],
+        }
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(
+                    f"{self.base_url}/authorization-decisions/{decision_id}/verify",
+                    json=request,
+                )
+        except Exception as exc:
+            raise DependencyUnavailableError(
+                "Authorization Authority verification unavailable",
+                details={"error": str(exc)},
+            ) from exc
+        try:
+            body = response.json()
+        except Exception as exc:
+            raise OrganizationDomainError(
+                "Authorization Authority returned malformed verification evidence",
+                code="authorization_verification_failed",
+                status_code=403,
+                details={"status_code": response.status_code},
+            ) from exc
+        if response.status_code >= 500:
+            raise DependencyUnavailableError(
+                "Authorization Authority verification unavailable",
+                details={"status_code": response.status_code, "response": body},
+            )
+        if response.status_code >= 400:
+            raise OrganizationDomainError(
+                "Authorization Authority rejected verification",
+                code="authorization_verification_failed",
+                status_code=403,
+                details={"status_code": response.status_code, "response": body},
+            )
+        return body
+
+
 def reject_caller_authority_claims(payload: Any, path: str = "$") -> None:
     if isinstance(payload, dict):
         for key, child in payload.items():
@@ -346,6 +462,8 @@ def reject_caller_authority_claims(payload: Any, path: str = "$") -> None:
 class MutationContext:
     actor_context_ref: dict[str, Any]
     authorization_decision_ref: dict[str, Any]
+    authorization_binding: dict[str, Any]
+    authorization_verification: dict[str, Any] | None
     idempotency_key: str | None
     correlation_id: str
 
@@ -356,6 +474,19 @@ class MutationContext:
         authorization = validate_authorization_decision_ref(
             payload.get("authorization_decision_ref")
         )
+        binding = validate_authorization_binding(payload.get("authorization_binding"))
+        if binding["actor_context_ref"] != actor:
+            raise OrganizationDomainError(
+                "authorization_binding actor_context_ref must match request actor_context_ref",
+                code="authorization_binding_mismatch",
+                status_code=403,
+            )
+        if binding["authorization_decision_ref"] != authorization:
+            raise OrganizationDomainError(
+                "authorization_binding authorization_decision_ref must match request evidence",
+                code="authorization_binding_mismatch",
+                status_code=403,
+            )
         idempotency_key = payload.get("idempotency_key")
         if idempotency_key is not None and not str(idempotency_key).strip():
             raise ValidationFailure("idempotency_key must be non-empty when supplied")
@@ -363,8 +494,100 @@ class MutationContext:
         return cls(
             actor_context_ref=actor,
             authorization_decision_ref=authorization,
+            authorization_binding=binding,
+            authorization_verification=None,
             idempotency_key=str(idempotency_key) if idempotency_key else None,
             correlation_id=correlation_id,
+        )
+
+    def verify_authorization(
+        self,
+        verifier: AuthorizationVerifier,
+        *,
+        action: str,
+        organization_ref: dict[str, Any],
+        resource_ref: dict[str, Any],
+        context_type: str,
+        context_id: str,
+        context_revision: str,
+        context_digest_seed: dict[str, Any],
+    ) -> "MutationContext":
+        subject = self.authorization_binding["expected_scope"]["subject"]
+        expected_binding = {
+            "contract_version": AUTHORIZATION_BINDING_CONTRACT,
+            "authorization_decision_ref": self.authorization_decision_ref,
+            "actor_context_ref": self.actor_context_ref,
+            "organization_ref": organization_ref,
+            "expected_scope": {
+                "subject": subject,
+                "action": action,
+                "resource": resource_ref,
+                "context_type": context_type,
+                "context_id": context_id,
+                "context_revision": context_revision,
+                "context_digest": evidence_revision_for(context_digest_seed),
+            },
+            "expected_decision": "ALLOW",
+        }
+        if self.authorization_binding != expected_binding:
+            raise OrganizationDomainError(
+                "authorization_binding does not match the protected Organization operation",
+                code="authorization_binding_mismatch",
+                status_code=403,
+                details={
+                    "expected_action": action,
+                    "expected_resource": resource_ref,
+                    "expected_context_type": context_type,
+                    "expected_context_id": context_id,
+                    "expected_context_revision": context_revision,
+                },
+            )
+        verification = verifier.verify_authorization_binding(expected_binding)
+        verify_authorization_response(verification, expected_binding)
+        return replace(self, authorization_verification=verification)
+
+
+def verify_authorization_response(
+    verification: Any,
+    binding: dict[str, Any],
+) -> None:
+    if not isinstance(verification, dict):
+        raise OrganizationDomainError(
+            "Authorization Authority returned malformed verification evidence",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    if verification.get("verification_status") != "VERIFIED":
+        raise OrganizationDomainError(
+            "Authorization Authority did not verify the requested binding",
+            code="authorization_verification_failed",
+            status_code=403,
+            details={"reasons": verification.get("reasons", [])},
+        )
+    if verification.get("authorization_decision_ref") != binding["authorization_decision_ref"]:
+        raise OrganizationDomainError(
+            "Authorization verification decision reference mismatch",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    if verification.get("actor_context_ref") != binding["actor_context_ref"]:
+        raise OrganizationDomainError(
+            "Authorization verification actor context mismatch",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    if verification.get("decision") != binding["expected_decision"]:
+        raise OrganizationDomainError(
+            "Authorization verification decision outcome mismatch",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    verified_by = verification.get("verified_by")
+    if not isinstance(verified_by, dict) or verified_by.get("authority_id") != AUTHORIZATION_AUTHORITY_ID:
+        raise OrganizationDomainError(
+            "Authorization verification came from an unexpected authority",
+            code="authorization_verification_failed",
+            status_code=403,
         )
 
 
@@ -443,9 +666,13 @@ class OrganizationDomainStore:
         database: str | Path,
         *,
         employee_adapter: EmployeeReferenceAdapter | None = None,
+        authorization_verifier: AuthorizationVerifier | None = None,
     ) -> None:
         self.database = Path(database)
         self.employee_adapter = employee_adapter or NoEmployeeReferenceAdapter()
+        self.authorization_verifier = authorization_verifier or HttpAuthorizationVerifier(
+            "http://authorization-authority:8000"
+        )
         self.database.parent.mkdir(parents=True, exist_ok=True)
         self.migrate()
 
@@ -527,6 +754,18 @@ class OrganizationDomainStore:
                 );
                 """
             )
+            history_columns = {
+                row["name"]
+                for row in db.execute("PRAGMA table_info(organization_record_history)")
+            }
+            for column, definition in {
+                "authorization_binding_json": "TEXT",
+                "authorization_verification_json": "TEXT",
+            }.items():
+                if column not in history_columns:
+                    db.execute(
+                        f"ALTER TABLE organization_record_history ADD COLUMN {column} {definition}"
+                    )
 
     def health(self) -> dict[str, Any]:
         with self.connect() as db:
@@ -563,6 +802,20 @@ class OrganizationDomainStore:
         self._validate_creation_evidence(record, context)
         organization_id = organization_id_for(record)
         operation = f"create:{record['identity']['resource_type']}:{record['identity']['resource_id']}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="organization-domain.record.create",
+            organization_ref=organization_ref_for(record),
+            resource_ref=resource_ref(record),
+            context_type="organization-domain.mutation",
+            context_id=operation,
+            context_revision=record["identity"]["revision"],
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref_for(record),
+                "resource_ref": resource_ref(record),
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -636,6 +889,28 @@ class OrganizationDomainStore:
         self._validate_creation_evidence(record, context, allow_update=True)
         organization_id = organization_id_for(record)
         operation = f"update:{resource_type}:{resource_id}:{expected_revision}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="organization-domain.record.update",
+            organization_ref=organization_ref_for(record),
+            resource_ref={
+                "resource_type": resource_type,
+                "resource_id": resource_id,
+                "revision": expected_revision,
+            },
+            context_type="organization-domain.mutation",
+            context_id=operation,
+            context_revision=expected_revision,
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref_for(record),
+                "resource_ref": {
+                    "resource_type": resource_type,
+                    "resource_id": resource_id,
+                    "revision": expected_revision,
+                },
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -721,6 +996,27 @@ class OrganizationDomainStore:
         if not expected_revision or not to_status:
             raise ValidationFailure("expected_revision and to_status are required")
         operation = f"transition:{resource_type}:{resource_id}:{expected_revision}:{to_status}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="organization-domain.record.transition",
+            organization_ref=self._organization_ref_for_existing(resource_type, resource_id),
+            resource_ref={
+                "resource_type": resource_type,
+                "resource_id": resource_id,
+                "revision": expected_revision,
+            },
+            context_type="organization-domain.mutation",
+            context_id=operation,
+            context_revision=expected_revision,
+            context_digest_seed={
+                "operation": operation,
+                "resource_ref": {
+                    "resource_type": resource_type,
+                    "resource_id": resource_id,
+                    "revision": expected_revision,
+                },
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -855,6 +1151,8 @@ class OrganizationDomainStore:
                     "operation": row["operation"],
                     "actor_context_ref": parse_json(row["actor_context_ref_json"]),
                     "authorization_decision_ref": parse_json(row["authorization_decision_ref_json"]),
+                    "authorization_binding": parse_json(row["authorization_binding_json"] or "{}"),
+                    "authorization_verification": parse_json(row["authorization_verification_json"] or "{}"),
                     "idempotency_key": row["idempotency_key"],
                     "event_id": row["event_id"],
                     "recorded_at": row["recorded_at"],
@@ -976,6 +1274,12 @@ class OrganizationDomainStore:
             raise NotFoundError("record not found")
         return row
 
+    def _organization_ref_for_existing(self, resource_type: str, resource_id: str) -> dict[str, Any]:
+        with self.connect() as db:
+            row = self._require_record(db, resource_type, resource_id)
+            document = parse_json(row["document_json"])
+        return organization_ref_for(document)
+
     def _insert_record(self, db: sqlite3.Connection, document: dict[str, Any]) -> None:
         resource_type, resource_id = resource_key(document)
         db.execute(
@@ -1035,9 +1339,10 @@ class OrganizationDomainStore:
             INSERT INTO organization_record_history
             (resource_type, resource_id, organization_id, prior_revision,
              new_revision, operation, actor_context_ref_json,
-             authorization_decision_ref_json, idempotency_key, event_id,
+             authorization_decision_ref_json, authorization_binding_json,
+             authorization_verification_json, idempotency_key, event_id,
              recorded_at, document_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 resource_type,
@@ -1048,6 +1353,8 @@ class OrganizationDomainStore:
                 operation,
                 canonical_json(context.actor_context_ref),
                 canonical_json(context.authorization_decision_ref),
+                canonical_json(context.authorization_binding),
+                canonical_json(context.authorization_verification or {}),
                 context.idempotency_key,
                 event_id,
                 utc_now(),

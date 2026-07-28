@@ -507,7 +507,10 @@ Removal conditions for legacy paths:
 | 8.3 Work Coordination Service | Accept Work Requests, own Workflow/Task/Result projection, assignment decisions, verification, and closure | ADR-DPV2-002/003/008/010 | New work coordinator, Scheduler adapter, Persistent Runtime adapter | Maybe transition/event contracts if defects found | Service, persistence, API | New store | Intake, DAG, idempotent submit, assignment handoff, result, closure, restart | Work integration docs | Work Request to Job/Task/Assignment/Result/closure works without stealing authority | Migration rollback | 8.1, 8.2 | Strong coding | XL |
 | 8.4 Scheduler and Runtime target adoption | Map Scheduler and Runtime to v2 Job and Assignment target contracts | ADR-DPV2-002/003 | Scheduler, Persistent Runtime | Narrow adapter/example updates if needed | API adapters and storage migration | Existing store migration | Contract, terminal, resource, assignment, restart tests | Adoption guide | Existing spine emits/serves canonical Job and Assignment views | Reversible schema migration | 8.3 | Strong coding | L |
 | 8.5 Authorization Authority | Durable authorization decisions and capability permission grants | ADR-DPV2-004 | New Authorization service, Capability Manager, Dispatcher | Maybe no new schemas; use Epic 4 contracts if sufficient | Service and integration | New store | Grant/revoke/decision/default-deny/wrong-scope tests | Authorization docs | Capability use is default-deny and authorization never selects/invokes | Disable governed side-effect flows | 8.1, 8.2 | Strong coding/security | L |
-| 8.6 Approval Authority | Durable approval request/grant/verify/consume | ADR-DPV2-005 | New Approval service, Capability Manager, Dispatcher, Cognitive, Work Coordination | Maybe no new schemas; use Epic 4 contracts | Service and integration | New store | Expiry, revocation, wrong scope, replay, pending/resume | Approval flow docs | Approval-required work pauses and resumes only with verified grant | Disable approval-gated flows | 8.5 | Strong coding | L |
+| 8.6.0 Authorization Evidence Binding Contract | Canonical reusable binding input for live Authorization Authority verification | ADR-DPV2-004 | Contracts only | Adds `leos.authorization-evidence-binding.v1` | None | None | Binding contract tests/examples | Authorization binding conformance | Consumers have a non-decision binding shape for exact verification | Source rollback | 8.5 | Contract/security | S |
+| 8.6A Authorization Consumer Verification | Replace structural Authorization Decision reference acceptance with live Authorization Authority verification in Organization, Work Coordination, Scheduler, and Persistent Runtime | ADR-DPV2-004 | Organization Domain, Work Coordination, Scheduler, Persistent Runtime | No canonical contract changes expected | Narrow verification adapters and additive audit lineage | Additive local columns/tables only | Positive/negative verification, stale replay, fail-closed, Docker service suites | Consumer conformance updates | Authority-bearing mutations/handoffs fail closed unless Authorization Authority verifies the exact binding | Disable canonical protected paths; preserve legacy compatibility where already non-canonical | 8.6.0, 8.2, 8.3, 8.4 | Strong coding/security | L |
+| 8.6B Capability and Dispatcher Authorization Consumers | Integrate Authorization Authority verification into Capability Manager and Dispatcher without changing ranking, resolution, or invocation ownership | ADR-DPV2-004 | Capability Manager, Dispatcher | Request contract changes only if explicitly approved | Narrow verification adapters | Additive audit only | Resolution/invocation permission tests | Capability/Dispatcher conformance updates | Capability resolution and dispatch cannot rely on structural Authorization refs | Disable governed side-effect capability paths | 8.6A | Strong coding/security | L |
+| 8.7 Approval Authority | Durable approval request/grant/verify/consume | ADR-DPV2-005 | New Approval service, Capability Manager, Dispatcher, Cognitive, Work Coordination | Maybe no new schemas; use Epic 4 contracts | Service and integration | New store | Expiry, revocation, wrong scope, replay, pending/resume | Approval flow docs | Approval-required work pauses and resumes only with verified grant | Disable approval-gated flows | 8.6B | Strong coding | L |
 | 8.7 Secret Authority | Local secret backend and transient use | ADR-DPV2-006 | New Secret service, Dispatcher, Runtime Activation, Plugin/Tool | Likely secret-use lease contract if needed | Service and integration | New secure store | Redaction, no secret persistence, rotation, revocation, restart | Secret docs | One local and optional cloud path uses explicit secret permission | Disable cloud/tool side effects | 8.5 | Strong coding/security | L |
 | 8.8 Event Delivery and outbox hardening | Producer outboxes and delivery/replay service | ADR-DPV2-007 | All release-path authorities | Event envelope/adoption docs if needed | Service and per-authority outbox hardening | Existing event migration | Replay, duplicate delivery, dead-letter, retention, restart | Event docs | Events are reliable without becoming state authority | Disable subscriptions; keep direct reads | 8.2-8.7 | Strong coding | XL |
 | 8.9 Runtime Activation Authority | Desired/observed local runtime activation | ADR-DPV2-011 | Runtime Activation, First Run, Model Registry, Capability Manager, Secret | Runtime activation record shape may be needed | Service and integration | New store | Activate/deactivate/rollback/health/restart/no-ranking tests | Runtime activation docs | Local runtime activation feeds Model Registry/Capability Manager correctly | Disable activation; preserve setup evidence | 8.7 | Strong coding | L |
@@ -526,15 +529,20 @@ Shortest correct path:
 3. Epic 8.4: Scheduler/Persistent Runtime target-contract adoption
    through additive canonical projection and handoff adapters.
 4. Epic 8.5: Authorization Authority.
-5. Epic 8.6: Approval Authority.
-6. Epic 8.7: Secret Authority.
-7. Epic 8.8: Event Delivery and outbox hardening.
-8. Epic 8.9: Runtime Activation Authority.
-9. Epic 8.10: Artifact Authority.
-10. Epic 8.11: Sandbox Authority.
-11. Epic 8.12: Plugin and Tool Lifecycle Authority.
-12. Epic 8.13: Team Template and Team Architect.
-13. Epic 8.14: UI/operator/clean-install release path.
+5. Epic 8.6.0: Authorization Evidence Binding Contract.
+6. Epic 8.6A: Authorization Consumer Verification for Organization, Work,
+   Scheduler, and Runtime.
+7. Epic 8.6B: Authorization Consumer Verification for Capability Manager and
+   Dispatcher.
+8. Epic 8.7: Approval Authority.
+9. Epic 8.8: Secret Authority.
+10. Epic 8.9: Event Delivery and outbox hardening.
+11. Epic 8.10: Runtime Activation Authority.
+12. Epic 8.11: Artifact Authority.
+13. Epic 8.12: Sandbox Authority.
+14. Epic 8.13: Plugin and Tool Lifecycle Authority.
+15. Epic 8.14: Team Template and Team Architect.
+16. Epic 8.15: UI/operator/clean-install release path.
 
 Parallelizable work:
 

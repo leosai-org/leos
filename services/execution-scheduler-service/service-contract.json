@@ -20,8 +20,17 @@
   "dependencies": [
     "employee-resource-profile-service",
     "leos-kernel-service",
-    "employee-registry"
+    "employee-registry",
+    "authorization-authority"
   ],
+  "authorization_verification": {
+    "authority": "authorization-authority",
+    "endpoint": "/authorization-decisions/{decision_id}/verify",
+    "required_for": [
+      "/v2/job-projections"
+    ],
+    "fail_closed": true
+  },
   "employee_lifecycle": {
     "authority": "employee-registry",
     "eligibility_contract": "leos.employee-execution-eligibility.v1",

@@ -27,6 +27,7 @@ Required evidence:
 - Organization reference;
 - Actor Context reference;
 - Authorization Decision reference;
+- verified `leos.authorization-evidence-binding.v1`;
 - idempotency key; and
 - canonical Assignment contract version.
 
@@ -56,6 +57,31 @@ Work Coordination owns assignment decisions and handoff records. Persistent
 Runtime owns runtime Assignment acceptance, projection, lifecycle, and
 terminal transitions after accepted handoff. Scheduler owns Job, lease,
 resource, and retry timing state. Approval and Authorization remain separate.
+
+## Authorization verification
+
+Epic 8.6A requires `POST /v2/assignment-handoffs` to verify the supplied
+Authorization Evidence Binding before accepting a canonical Assignment
+handoff. The protected operation mapping is:
+
+- action: `runtime.assignment-handoff.accept`;
+- resource: canonical `WORK_ASSIGNMENT` identity and revision;
+- context type: `runtime.assignment-handoff`;
+- context id: handoff id;
+- context revision: source handoff revision; and
+- context digest: deterministic digest over the operation, Organization ref,
+  Runtime Assignment ref, and source assignment-handoff ref.
+
+The existing generic `ACTOR_CONTEXT` resource reference is compatibility
+lineage only. The binding must contain canonical Actor Context evidence whose
+`reference_id` and `revision` match that lineage reference.
+
+Authorization Authority unavailability, timeout, denial, expiry, revocation,
+wrong issuer, wrong Actor Context evidence, wrong action/resource/revision,
+wrong Organization, wrong context, malformed response, or mismatched
+verification evidence fails closed. Runtime does not issue decisions,
+reinterpret assignment decisions, implement Approval, mutate Scheduler state,
+or change Assignment lifecycle authority.
 
 ## Compatibility and rollback
 

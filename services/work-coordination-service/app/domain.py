@@ -6,10 +6,11 @@ import logging
 import sqlite3
 import uuid
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Protocol
+from urllib.parse import quote
 
 import httpx
 from leos_contracts import ContractValidationError, validate_contract, validate_work_domain
@@ -35,6 +36,8 @@ EVENT_SOURCE_REF = {
     "resource_id": "event-source:work-coordination-service",
     "revision": "sha256:event-source-work-coordination-service-v1",
 }
+AUTHORIZATION_AUTHORITY_ID = "authorization-authority"
+AUTHORIZATION_BINDING_CONTRACT = "leos.authorization-evidence-binding.v1"
 
 CONTRACT_BY_RESOURCE_TYPE = {
     "WORK_REQUEST": "leos.work-request.v1",
@@ -298,6 +301,118 @@ def validate_authorization_decision_ref(value: Any) -> dict[str, Any]:
     return value
 
 
+def validate_actor_context_evidence_ref(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict) or value.get("evidence_type") != "ACTOR_CONTEXT":
+        raise WorkCoordinationError(
+            "authorization_binding must use canonical Actor Context evidence",
+            code="malformed_authorization_binding",
+            status_code=403,
+        )
+    if not isinstance(value.get("authority"), dict) or not value.get("reference_id") or not value.get("revision"):
+        raise WorkCoordinationError(
+            "authorization_binding Actor Context evidence must be authority-issued and revision-pinned",
+            code="malformed_authorization_binding",
+            status_code=403,
+        )
+    return value
+
+
+def actor_evidence_to_resource_ref(value: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "resource_type": "ACTOR_CONTEXT",
+        "resource_id": value["reference_id"],
+        "revision": value["revision"],
+    }
+
+
+def validate_authorization_binding(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise WorkCoordinationError(
+            "authorization_binding is required for protected mutations",
+            code="missing_authorization_binding",
+            status_code=403,
+        )
+    try:
+        validate_contract(AUTHORIZATION_BINDING_CONTRACT, value)
+    except ContractValidationError as exc:
+        raise WorkCoordinationError(
+            "authorization_binding is malformed",
+            code="malformed_authorization_binding",
+            status_code=403,
+            details={"issues": [issue.__dict__ for issue in exc.issues]},
+        ) from exc
+    validate_actor_context_evidence_ref(value.get("actor_context_ref"))
+    if value.get("expected_decision") != "ALLOW":
+        raise WorkCoordinationError(
+            "protected Work Coordination mutations require an ALLOW authorization binding",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    return value
+
+
+class AuthorizationVerifier(Protocol):
+    def verify_authorization_binding(self, binding: dict[str, Any]) -> dict[str, Any]:
+        ...
+
+
+class HttpAuthorizationVerifier:
+    """Narrow client for the Authorization Authority verification endpoint."""
+
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        timeout: float = 5.0,
+        expected_authority_id: str = AUTHORIZATION_AUTHORITY_ID,
+    ) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+        self.expected_authority_id = expected_authority_id
+
+    def verify_authorization_binding(self, binding: dict[str, Any]) -> dict[str, Any]:
+        decision_id = quote(str(binding["authorization_decision_ref"]["resource_id"]), safe="")
+        request = {
+            "actor_context_ref": binding["actor_context_ref"],
+            "organization_ref": binding["organization_ref"],
+            "scope": binding["expected_scope"],
+            "expected_decision": binding["expected_decision"],
+        }
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(
+                    f"{self.base_url}/authorization-decisions/{decision_id}/verify",
+                    json=request,
+                )
+        except Exception as exc:
+            raise DependencyUnavailableError(
+                "Authorization Authority verification unavailable",
+                details={"error": str(exc)},
+            ) from exc
+        try:
+            body = response.json()
+        except Exception as exc:
+            raise WorkCoordinationError(
+                "Authorization Authority returned malformed verification evidence",
+                code="authorization_verification_failed",
+                status_code=403,
+                details={"status_code": response.status_code},
+            ) from exc
+        if response.status_code >= 500:
+            raise DependencyUnavailableError(
+                "Authorization Authority verification unavailable",
+                details={"status_code": response.status_code, "response": body},
+            )
+        if response.status_code >= 400:
+            raise WorkCoordinationError(
+                "Authorization Authority rejected verification",
+                code="authorization_verification_failed",
+                status_code=403,
+                details={"status_code": response.status_code, "response": body},
+            )
+        return body
+
+
 def collect_refs(value: Any, refs: set[tuple[str, str, str]]) -> None:
     if isinstance(value, dict):
         resource_type = value.get("resource_type")
@@ -329,6 +444,8 @@ def target_key(target: dict[str, Any]) -> tuple[str, str] | None:
 class MutationContext:
     actor_context_ref: dict[str, Any]
     authorization_decision_ref: dict[str, Any]
+    authorization_binding: dict[str, Any]
+    authorization_verification: dict[str, Any] | None
     idempotency_key: str | None
     correlation_id: str
 
@@ -338,14 +455,116 @@ class MutationContext:
         reject_caller_authority_claims(payload)
         actor = validate_actor_context_ref(payload.get("actor_context_ref"))
         authorization = validate_authorization_decision_ref(payload.get("authorization_decision_ref"))
+        binding = validate_authorization_binding(payload.get("authorization_binding"))
+        if actor_evidence_to_resource_ref(binding["actor_context_ref"]) != actor:
+            raise WorkCoordinationError(
+                "authorization_binding Actor Context evidence does not match compatibility actor_context_ref",
+                code="authorization_binding_mismatch",
+                status_code=403,
+            )
+        if binding["authorization_decision_ref"] != authorization:
+            raise WorkCoordinationError(
+                "authorization_binding authorization_decision_ref must match request evidence",
+                code="authorization_binding_mismatch",
+                status_code=403,
+            )
         idempotency_key = payload.get("idempotency_key")
         if idempotency_key is not None and not str(idempotency_key).strip():
             raise ValidationFailure("idempotency_key must be non-empty when supplied")
         return cls(
             actor_context_ref=actor,
             authorization_decision_ref=authorization,
+            authorization_binding=binding,
+            authorization_verification=None,
             idempotency_key=str(idempotency_key) if idempotency_key else None,
             correlation_id=str(payload.get("correlation_id") or idempotency_key or uuid.uuid4()),
+        )
+
+    def verify_authorization(
+        self,
+        verifier: AuthorizationVerifier,
+        *,
+        action: str,
+        organization_ref: dict[str, Any],
+        resource_ref: dict[str, Any],
+        context_type: str,
+        context_id: str,
+        context_revision: str,
+        context_digest_seed: dict[str, Any],
+    ) -> "MutationContext":
+        subject = self.authorization_binding["expected_scope"]["subject"]
+        expected_binding = {
+            "contract_version": AUTHORIZATION_BINDING_CONTRACT,
+            "authorization_decision_ref": self.authorization_decision_ref,
+            "actor_context_ref": self.authorization_binding["actor_context_ref"],
+            "organization_ref": organization_ref,
+            "expected_scope": {
+                "subject": subject,
+                "action": action,
+                "resource": resource_ref,
+                "context_type": context_type,
+                "context_id": context_id,
+                "context_revision": context_revision,
+                "context_digest": evidence_revision_for(context_digest_seed),
+            },
+            "expected_decision": "ALLOW",
+        }
+        if self.authorization_binding != expected_binding:
+            raise WorkCoordinationError(
+                "authorization_binding does not match the protected Work Coordination operation",
+                code="authorization_binding_mismatch",
+                status_code=403,
+                details={
+                    "expected_action": action,
+                    "expected_resource": resource_ref,
+                    "expected_context_type": context_type,
+                    "expected_context_id": context_id,
+                    "expected_context_revision": context_revision,
+                },
+            )
+        verification = verifier.verify_authorization_binding(expected_binding)
+        verify_authorization_response(verification, expected_binding)
+        return replace(self, authorization_verification=verification)
+
+
+def verify_authorization_response(verification: Any, binding: dict[str, Any]) -> None:
+    if not isinstance(verification, dict):
+        raise WorkCoordinationError(
+            "Authorization Authority returned malformed verification evidence",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    if verification.get("verification_status") != "VERIFIED":
+        raise WorkCoordinationError(
+            "Authorization Authority did not verify the requested binding",
+            code="authorization_verification_failed",
+            status_code=403,
+            details={"reasons": verification.get("reasons", [])},
+        )
+    if verification.get("authorization_decision_ref") != binding["authorization_decision_ref"]:
+        raise WorkCoordinationError(
+            "Authorization verification decision reference mismatch",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    if verification.get("actor_context_ref") != binding["actor_context_ref"]:
+        raise WorkCoordinationError(
+            "Authorization verification actor context mismatch",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    if verification.get("decision") != binding["expected_decision"]:
+        raise WorkCoordinationError(
+            "Authorization verification decision outcome mismatch",
+            code="authorization_verification_failed",
+            status_code=403,
+        )
+    verified_by = verification.get("verified_by")
+    if not isinstance(verified_by, dict) or verified_by.get("authority_id") != AUTHORIZATION_AUTHORITY_ID:
+        raise WorkCoordinationError(
+            "Authorization verification came from an unexpected authority",
+            code="authorization_verification_failed",
+            status_code=403,
         )
 
 
@@ -434,6 +653,7 @@ class HttpSchedulerProjectionAdapter:
         payload = {
             "actor_context_ref": projection.get("actor_context_ref"),
             "authorization_decision_ref": projection.get("authorization_decision_ref"),
+            "authorization_binding": projection.get("authorization_binding"),
             "idempotency_key": f"work-coordination:scheduler-projection:{projection_id}",
             "projection": projection,
         }
@@ -479,6 +699,7 @@ class HttpRuntimeHandoffAdapter:
         payload = {
             "actor_context_ref": handoff.get("actor_context_ref"),
             "authorization_decision_ref": handoff.get("authorization_decision_ref"),
+            "authorization_binding": handoff.get("authorization_binding"),
             "idempotency_key": f"work-coordination:assignment-handoff:{handoff_id}",
             "handoff": handoff,
         }
@@ -570,6 +791,7 @@ class WorkCoordinationStore:
         runtime_reference_adapter: ReferenceAdapter | None = None,
         scheduler_projection_adapter: SchedulerProjectionAdapter | None = None,
         runtime_handoff_adapter: RuntimeHandoffAdapter | None = None,
+        authorization_verifier: AuthorizationVerifier | None = None,
     ) -> None:
         self.database = Path(database)
         self.organization_adapter = organization_adapter or NoReferenceAdapter("Organization Domain")
@@ -578,6 +800,9 @@ class WorkCoordinationStore:
         self.runtime_reference_adapter = runtime_reference_adapter or NoReferenceAdapter("Persistent Runtime")
         self.scheduler_projection_adapter = scheduler_projection_adapter or UnavailableSchedulerProjectionAdapter()
         self.runtime_handoff_adapter = runtime_handoff_adapter or UnavailableRuntimeHandoffAdapter()
+        self.authorization_verifier = authorization_verifier or HttpAuthorizationVerifier(
+            "http://authorization-authority:8000"
+        )
         self.database.parent.mkdir(parents=True, exist_ok=True)
         self.migrate()
 
@@ -704,8 +929,30 @@ class WorkCoordinationStore:
                     revision TEXT NOT NULL,
                     created_at TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS work_authorization_verifications (
+                    verification_audit_id TEXT PRIMARY KEY,
+                    organization_id TEXT NOT NULL,
+                    operation TEXT NOT NULL,
+                    protected_resource_ref_json TEXT NOT NULL,
+                    actor_context_ref_json TEXT NOT NULL,
+                    authorization_decision_ref_json TEXT NOT NULL,
+                    authorization_binding_json TEXT NOT NULL,
+                    authorization_verification_json TEXT NOT NULL,
+                    idempotency_key TEXT,
+                    correlation_id TEXT NOT NULL,
+                    recorded_at TEXT NOT NULL
+                );
                 """
             )
+            history_columns = {
+                row["name"] for row in db.execute("PRAGMA table_info(work_record_history)")
+            }
+            for column, definition in {
+                "authorization_binding_json": "TEXT",
+                "authorization_verification_json": "TEXT",
+            }.items():
+                if column not in history_columns:
+                    db.execute(f"ALTER TABLE work_record_history ADD COLUMN {column} {definition}")
 
     def health(self) -> dict[str, Any]:
         with self.connect() as db:
@@ -731,6 +978,20 @@ class WorkCoordinationStore:
         context = MutationContext.from_payload(payload)
         self._validate_canonical_record(record)
         operation = f"create:{record['identity']['resource_type']}:{record['identity']['resource_id']}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.record.create",
+            organization_ref=record["organization_ref"],
+            resource_ref=resource_ref(record),
+            context_type="work-coordination.mutation",
+            context_id=operation,
+            context_revision=record["identity"]["revision"],
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": record["organization_ref"],
+                "resource_ref": resource_ref(record),
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -759,6 +1020,7 @@ class WorkCoordinationStore:
             self._insert_record(db, record)
             self._append_event(db, organization_id, record, event)
             self._append_history(db, record, None, "CREATE", context, event["identity"]["resource_id"])
+            self._append_authorization_audit(db, organization_id, operation, resource_ref(record), context)
             response = {"ok": True, "changed": True, "record": record, "outbox_event": resource_ref(event)}
             self._store_idempotent_response(db, context, operation, payload, response)
             return response
@@ -778,6 +1040,21 @@ class WorkCoordinationStore:
             raise ValidationFailure("bundle cannot cross Organization boundaries")
         organization_id = next(iter(organization_ids))
         operation = "bundle-create:" + evidence_revision_for({"records": records})
+        organization_ref = next(record["organization_ref"] for record in records)
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.bundle.create",
+            organization_ref=organization_ref,
+            resource_ref=organization_ref,
+            context_type="work-coordination.mutation",
+            context_id=operation,
+            context_revision=organization_ref["revision"],
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref,
+                "resource_refs": [resource_ref(record) for record in records],
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -803,6 +1080,7 @@ class WorkCoordinationStore:
                 self._insert_record(db, record)
                 self._append_event(db, organization_id, record, event)
                 self._append_history(db, record, None, "CREATE", context, event["identity"]["resource_id"])
+                self._append_authorization_audit(db, organization_id, operation, resource_ref(record), context)
                 created.append(record)
                 events.append(resource_ref(event))
             response = {"ok": True, "changed": True, "records": created, "outbox_events": events}
@@ -820,6 +1098,28 @@ class WorkCoordinationStore:
         if actual_type != resource_type or actual_id != resource_id:
             raise ValidationFailure("record identity must match request path")
         operation = f"update:{resource_type}:{resource_id}:{expected_revision}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.record.update",
+            organization_ref=record["organization_ref"],
+            resource_ref={
+                "resource_type": resource_type,
+                "resource_id": resource_id,
+                "revision": expected_revision,
+            },
+            context_type="work-coordination.mutation",
+            context_id=operation,
+            context_revision=expected_revision,
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": record["organization_ref"],
+                "resource_ref": {
+                    "resource_type": resource_type,
+                    "resource_id": resource_id,
+                    "revision": expected_revision,
+                },
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -857,6 +1157,13 @@ class WorkCoordinationStore:
             self._upsert_record(db, record)
             self._append_event(db, organization_id, record, event)
             self._append_history(db, record, expected_revision, "UPDATE", context, event["identity"]["resource_id"])
+            self._append_authorization_audit(
+                db,
+                organization_id,
+                operation,
+                {"resource_type": resource_type, "resource_id": resource_id, "revision": expected_revision},
+                context,
+            )
             response = {"ok": True, "changed": True, "record": record, "outbox_event": resource_ref(event)}
             self._store_idempotent_response(db, context, operation, payload, response)
             return response
@@ -868,6 +1175,29 @@ class WorkCoordinationStore:
         if not expected_revision or not to_status:
             raise ValidationFailure("expected_revision and to_status are required")
         operation = f"transition:{resource_type}:{resource_id}:{expected_revision}:{to_status}"
+        organization_ref = self._organization_ref_for_existing(resource_type, resource_id)
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.record.transition",
+            organization_ref=organization_ref,
+            resource_ref={
+                "resource_type": resource_type,
+                "resource_id": resource_id,
+                "revision": expected_revision,
+            },
+            context_type="work-coordination.mutation",
+            context_id=operation,
+            context_revision=expected_revision,
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref,
+                "resource_ref": {
+                    "resource_type": resource_type,
+                    "resource_id": resource_id,
+                    "revision": expected_revision,
+                },
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -950,6 +1280,13 @@ class WorkCoordinationStore:
             self._append_transition(db, transition_doc, organization_id, prior, next_doc)
             self._append_event(db, organization_id, next_doc, event)
             self._append_history(db, next_doc, expected_revision, "TRANSITION", context, event["identity"]["resource_id"])
+            self._append_authorization_audit(
+                db,
+                organization_id,
+                operation,
+                {"resource_type": resource_type, "resource_id": resource_id, "revision": expected_revision},
+                context,
+            )
             response = {
                 "ok": True,
                 "changed": True,
@@ -984,6 +1321,20 @@ class WorkCoordinationStore:
         decision = {**decision, "authority": AUTHORITY_REF, "status": decision.get("status", "DECIDED")}
         decision_revision = evidence_revision_for(decision)
         operation = f"assignment-decision:{decision_id}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.assignment-decision.create",
+            organization_ref=organization_ref,
+            resource_ref=work_ref,
+            context_type="work-coordination.assignment-decision",
+            context_id=operation,
+            context_revision=work_ref["revision"],
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref,
+                "resource_ref": work_ref,
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -1017,6 +1368,7 @@ class WorkCoordinationStore:
                 ),
             )
             self._append_internal_event(db, organization_id, event)
+            self._append_authorization_audit(db, organization_id, operation, work_ref, context)
             response = {
                 "ok": True,
                 "decision": decision,
@@ -1044,18 +1396,35 @@ class WorkCoordinationStore:
         organization_ref = require_dict(handoff.get("organization_ref"), "organization_ref")
         organization_id = self._organization_id_from_ref(organization_ref)
         operation = f"assignment-handoff:{handoff_id}"
-        cached = self._idempotent_response(context, operation, payload)
-        if cached is not None:
-            return cached
         with self.connect() as db:
             decision = self._require_assignment_decision(db, decision_ref)
             if decision["organization_id"] != organization_id:
                 raise ValidationFailure("assignment handoff crosses Organization boundary")
+            work_ref = parse_json(decision["work_ref_json"])
+            context = context.verify_authorization(
+                self.authorization_verifier,
+                action="work-coordination.assignment-handoff.request",
+                organization_ref=organization_ref,
+                resource_ref=work_ref,
+                context_type="work-coordination.assignment-handoff",
+                context_id=operation,
+                context_revision=decision_ref["revision"],
+                context_digest_seed={
+                    "operation": operation,
+                    "organization_ref": organization_ref,
+                    "resource_ref": work_ref,
+                    "assignment_decision_ref": decision_ref,
+                },
+            )
+            cached = self._idempotent_response(context, operation, payload)
+            if cached is not None:
+                return cached
             outbound = {
                 **handoff,
                 "authority": AUTHORITY_REF,
                 "actor_context_ref": context.actor_context_ref,
                 "authorization_decision_ref": context.authorization_decision_ref,
+                "authorization_binding": context.authorization_binding,
                 "correlation_id": context.correlation_id,
             }
             runtime_response = self.runtime_handoff_adapter.request_assignment_handoff(outbound)
@@ -1089,6 +1458,7 @@ class WorkCoordinationStore:
                 ),
             )
             self._append_internal_event(db, organization_id, event)
+            self._append_authorization_audit(db, organization_id, operation, work_ref, context)
             response = {
                 "ok": True,
                 "handoff": outbound,
@@ -1119,6 +1489,24 @@ class WorkCoordinationStore:
                 refs.append(projection[name])
         self._validate_references_for_internal_record(organization_id, refs)
         operation = f"scheduler-projection:{projection_id}"
+        resource_for_authorization = require_dict(
+            projection.get("source_task_ref") or projection.get("source_work_request_ref"),
+            "projection source work reference",
+        )
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.scheduler-projection.request",
+            organization_ref=organization_ref,
+            resource_ref=resource_for_authorization,
+            context_type="work-coordination.scheduler-projection",
+            context_id=operation,
+            context_revision=resource_for_authorization["revision"],
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref,
+                "resource_ref": resource_for_authorization,
+            },
+        )
         cached = self._idempotent_response(context, operation, payload)
         if cached is not None:
             return cached
@@ -1130,6 +1518,7 @@ class WorkCoordinationStore:
                 "authority": AUTHORITY_REF,
                 "actor_context_ref": context.actor_context_ref,
                 "authorization_decision_ref": context.authorization_decision_ref,
+                "authorization_binding": context.authorization_binding,
                 "correlation_id": context.correlation_id,
             }
             scheduler_response = self.scheduler_projection_adapter.request_job_projection(outbound)
@@ -1162,6 +1551,7 @@ class WorkCoordinationStore:
                 ),
             )
             self._append_internal_event(db, organization_id, event)
+            self._append_authorization_audit(db, organization_id, operation, resource_for_authorization, context)
             response = {
                 "ok": True,
                 "projection": outbound,
@@ -1193,6 +1583,21 @@ class WorkCoordinationStore:
         if not isinstance(evidence_refs, list) or not evidence_refs:
             raise ValidationFailure("verification requires external evidence refs")
         self._validate_references_for_internal_record(organization_id, [organization_ref, result_ref])
+        operation = f"verification:{verification_id}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.verification.create",
+            organization_ref=organization_ref,
+            resource_ref=result_ref,
+            context_type="work-coordination.verification",
+            context_id=operation,
+            context_revision=result_ref["revision"],
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref,
+                "resource_ref": result_ref,
+            },
+        )
         verification = {**verification, "authority": AUTHORITY_REF, "status": verification.get("status", "VERIFIED")}
         return self._insert_internal_record(
             table="verification_records",
@@ -1208,6 +1613,7 @@ class WorkCoordinationStore:
             ref_type="WORK_VERIFICATION",
             operation_prefix="verification",
             payload=payload,
+            authorization_resource_ref=result_ref,
         )
 
     def create_closure(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -1225,6 +1631,22 @@ class WorkCoordinationStore:
         if verification_ref.get("resource_type") != "WORK_VERIFICATION":
             raise ValidationFailure("closure requires a Work Coordination verification record")
         self._validate_references_for_internal_record(organization_id, [organization_ref, subject_ref])
+        operation = f"closure:{closure_id}"
+        context = context.verify_authorization(
+            self.authorization_verifier,
+            action="work-coordination.closure.create",
+            organization_ref=organization_ref,
+            resource_ref=subject_ref,
+            context_type="work-coordination.closure",
+            context_id=operation,
+            context_revision=subject_ref["revision"],
+            context_digest_seed={
+                "operation": operation,
+                "organization_ref": organization_ref,
+                "resource_ref": subject_ref,
+                "verification_ref": verification_ref,
+            },
+        )
         closure = {**closure, "authority": AUTHORITY_REF, "status": closure.get("status", "CLOSED")}
         return self._insert_internal_record(
             table="closure_records",
@@ -1240,6 +1662,7 @@ class WorkCoordinationStore:
             ref_type="WORK_CLOSURE",
             operation_prefix="closure",
             payload=payload,
+            authorization_resource_ref=subject_ref,
         )
 
     def list_records(self, resource_type: str, organization_id: str | None = None) -> dict[str, Any]:
@@ -1270,7 +1693,8 @@ class WorkCoordinationStore:
             rows = db.execute(
                 """
                 SELECT prior_revision, new_revision, operation, actor_context_ref_json,
-                       authorization_decision_ref_json, idempotency_key, event_id, recorded_at
+                       authorization_decision_ref_json, authorization_binding_json,
+                       authorization_verification_json, idempotency_key, event_id, recorded_at
                 FROM work_record_history
                 WHERE resource_type = ? AND resource_id = ?
                 ORDER BY history_id
@@ -1599,6 +2023,7 @@ class WorkCoordinationStore:
         ref_type: str,
         operation_prefix: str,
         payload: dict[str, Any],
+        authorization_resource_ref: dict[str, Any],
     ) -> dict[str, Any]:
         operation = f"{operation_prefix}:{id_value}"
         cached = self._idempotent_response(context, operation, payload)
@@ -1616,6 +2041,13 @@ class WorkCoordinationStore:
                 [id_value, organization_id, status, revision, utc_now(), *extra_columns.values()],
             )
             self._append_internal_event(db, organization_id, event)
+            self._append_authorization_audit(
+                db,
+                organization_id,
+                operation,
+                authorization_resource_ref,
+                context,
+            )
             response = {
                 "ok": True,
                 response_key: document,
@@ -1683,8 +2115,9 @@ class WorkCoordinationStore:
             INSERT INTO work_record_history
             (resource_type, resource_id, organization_id, prior_revision, new_revision,
              operation, actor_context_ref_json, authorization_decision_ref_json,
+             authorization_binding_json, authorization_verification_json,
              idempotency_key, event_id, recorded_at, document_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record["identity"]["resource_type"],
@@ -1695,10 +2128,45 @@ class WorkCoordinationStore:
                 operation,
                 canonical_json(context.actor_context_ref),
                 canonical_json(context.authorization_decision_ref),
+                canonical_json(context.authorization_binding),
+                canonical_json(context.authorization_verification or {}),
                 context.idempotency_key,
                 event_id,
                 utc_now(),
                 canonical_json(record),
+            ),
+        )
+
+    def _append_authorization_audit(
+        self,
+        db: sqlite3.Connection,
+        organization_id: str,
+        operation: str,
+        protected_resource_ref: dict[str, Any],
+        context: MutationContext,
+    ) -> None:
+        db.execute(
+            """
+            INSERT INTO work_authorization_verifications
+            (verification_audit_id, organization_id, operation,
+             protected_resource_ref_json, actor_context_ref_json,
+             authorization_decision_ref_json, authorization_binding_json,
+             authorization_verification_json, idempotency_key, correlation_id,
+             recorded_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                f"authorization-verification:{uuid.uuid4()}",
+                organization_id,
+                operation,
+                canonical_json(protected_resource_ref),
+                canonical_json(context.actor_context_ref),
+                canonical_json(context.authorization_decision_ref),
+                canonical_json(context.authorization_binding),
+                canonical_json(context.authorization_verification or {}),
+                context.idempotency_key,
+                context.correlation_id,
+                utc_now(),
             ),
         )
 
@@ -1777,6 +2245,12 @@ class WorkCoordinationStore:
         if row is None:
             raise NotFoundError("record not found")
         return row
+
+    def _organization_ref_for_existing(self, resource_type: str, resource_id: str) -> dict[str, Any]:
+        with self.connect() as db:
+            row = self._require_record(db, resource_type, resource_id)
+            document = parse_json(row["document_json"])
+        return document["organization_ref"]
 
     def _exists(self, db: sqlite3.Connection, table: str, column: str, value: str) -> bool:
         return db.execute(f"SELECT 1 FROM {table} WHERE {column} = ?", (value,)).fetchone() is not None
